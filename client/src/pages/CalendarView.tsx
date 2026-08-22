@@ -16,6 +16,7 @@ import {
   CheckCircle2,
   Move,
   CalendarRange,
+  RotateCcw,
 } from 'lucide-react';
 
 export const CalendarView: React.FC = () => {
@@ -56,8 +57,29 @@ export const CalendarView: React.FC = () => {
     setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1));
   };
 
+  const handleMonthChange = (monthIdx: number) => {
+    setCurrentMonth(new Date(currentMonth.getFullYear(), monthIdx, 1));
+  };
+
+  const handleYearChange = (yearNum: number) => {
+    setCurrentMonth(new Date(yearNum, currentMonth.getMonth(), 1));
+  };
+
+  const handleJumpToToday = () => {
+    const today = new Date();
+    setCurrentMonth(new Date(today.getFullYear(), today.getMonth(), 1));
+  };
+
   const year = currentMonth.getFullYear();
+  const monthIdx = currentMonth.getMonth();
   const monthName = currentMonth.toLocaleString('default', { month: 'long' });
+
+  const monthsList = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ];
+
+  const yearsList = [2024, 2025, 2026, 2027, 2028, 2029, 2030];
 
   const daysInMonth = new Date(year, currentMonth.getMonth() + 1, 0).getDate();
   const firstDayIndex = new Date(year, currentMonth.getMonth(), 1).getDay();
@@ -153,9 +175,17 @@ export const CalendarView: React.FC = () => {
             <span>Interactive Calendar & Timeline View</span>
           </h1>
           <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mt-1">
-            Screen 11: High-legibility calendar grid with prominent date numbers and drag-and-drop rescheduling
+            Screen 11: Easily select month & year, expand single dates, and drag to reschedule activities
           </p>
         </div>
+
+        <button
+          onClick={handleJumpToToday}
+          className="px-4 py-2 bg-emerald-50 dark:bg-emerald-950/60 hover:bg-emerald-100 text-emerald-600 dark:text-emerald-400 rounded-xl text-xs font-extrabold border border-emerald-200 dark:border-emerald-800 transition flex items-center space-x-1.5"
+        >
+          <RotateCcw className="w-3.5 h-3.5" />
+          <span>Jump to Today</span>
+        </button>
       </div>
 
       {rescheduleSuccess && (
@@ -165,31 +195,62 @@ export const CalendarView: React.FC = () => {
         </div>
       )}
 
-      {/* Month Navigation & Grid */}
+      {/* Month & Year Navigation Control Bar */}
       <div className="bg-white dark:bg-[#111E2E] p-6 sm:p-8 rounded-3xl shadow-sm border border-slate-200 dark:border-[#1E2D42] space-y-6">
-        <div className="flex items-center justify-between border-b border-slate-100 dark:border-[#1E2D42] pb-4">
-          <button
-            onClick={prevMonth}
-            aria-label="Previous Month"
-            className="p-3 bg-slate-100 dark:bg-[#162235] hover:bg-slate-200 dark:hover:bg-[#1E2D42] rounded-2xl text-slate-900 dark:text-white transition"
-          >
-            <ChevronLeft className="w-6 h-6" />
-          </button>
+        <div className="flex flex-col md:flex-row items-center justify-between border-b border-slate-100 dark:border-[#1E2D42] pb-5 gap-4">
+          
+          <div className="flex items-center space-x-2 w-full md:w-auto">
+            <button
+              onClick={prevMonth}
+              aria-label="Previous Month"
+              className="p-2.5 bg-slate-100 dark:bg-[#162235] hover:bg-slate-200 dark:hover:bg-[#1E2D42] rounded-xl text-slate-900 dark:text-white transition"
+              title="Previous Month"
+            >
+              <ChevronLeft className="w-5 h-5" />
+            </button>
 
-          <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
-            {monthName} {year}
-          </h2>
+            {/* Easy Month Selector Dropdown */}
+            <select
+              value={monthIdx}
+              onChange={(e) => handleMonthChange(parseInt(e.target.value))}
+              className="px-4 py-2 bg-slate-100 dark:bg-[#162235] border border-slate-200 dark:border-[#1E2D42] rounded-xl text-sm sm:text-base font-black text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
+            >
+              {monthsList.map((mName, idx) => (
+                <option key={mName} value={idx}>
+                  {mName}
+                </option>
+              ))}
+            </select>
 
-          <button
-            onClick={nextMonth}
-            aria-label="Next Month"
-            className="p-3 bg-slate-100 dark:bg-[#162235] hover:bg-slate-200 dark:hover:bg-[#1E2D42] rounded-2xl text-slate-900 dark:text-white transition"
-          >
-            <ChevronRight className="w-6 h-6" />
-          </button>
+            {/* Easy Year Selector Dropdown */}
+            <select
+              value={year}
+              onChange={(e) => handleYearChange(parseInt(e.target.value))}
+              className="px-4 py-2 bg-slate-100 dark:bg-[#162235] border border-slate-200 dark:border-[#1E2D42] rounded-xl text-sm sm:text-base font-black text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
+            >
+              {yearsList.map((yNum) => (
+                <option key={yNum} value={yNum}>
+                  {yNum}
+                </option>
+              ))}
+            </select>
+
+            <button
+              onClick={nextMonth}
+              aria-label="Next Month"
+              className="p-2.5 bg-slate-100 dark:bg-[#162235] hover:bg-slate-200 dark:hover:bg-[#1E2D42] rounded-xl text-slate-900 dark:text-white transition"
+              title="Next Month"
+            >
+              <ChevronRight className="w-5 h-5" />
+            </button>
+          </div>
+
+          <div className="text-xs font-bold text-slate-500 dark:text-slate-400">
+            Active Period: <span className="font-black text-slate-900 dark:text-white text-sm">{monthName} {year}</span>
+          </div>
         </div>
 
-        {/* Days of Week Headers (Increased Font Size) */}
+        {/* Days of Week Headers */}
         <div className="grid grid-cols-7 text-center font-black text-xs sm:text-sm text-slate-800 dark:text-slate-200 tracking-wider py-3 uppercase border-b border-slate-100 dark:border-[#1E2D42]">
           <div>SUN</div>
           <div>MON</div>
@@ -229,7 +290,6 @@ export const CalendarView: React.FC = () => {
                 }`}
               >
                 <div className="flex items-center justify-between">
-                  {/* Significantly Increased Date Number Font Size (text-base sm:text-xl) */}
                   <span className="text-base sm:text-xl font-black text-slate-900 dark:text-white">
                     {dayNum}
                   </span>
@@ -263,7 +323,7 @@ export const CalendarView: React.FC = () => {
         </div>
       </div>
 
-      {/* Expanded Date Inspection Drawer / Modal (PS Requirement) */}
+      {/* Expanded Date Inspection Drawer */}
       {selectedDateStr && (
         <div className="bg-white dark:bg-[#111E2E] p-6 sm:p-8 rounded-3xl shadow-xl border border-slate-200 dark:border-[#1E2D42] space-y-5 animate-in fade-in duration-300">
           <div className="flex items-center justify-between border-b border-slate-100 dark:border-[#1E2D42] pb-3">
