@@ -22,7 +22,6 @@ import {
   Car,
   Tag,
   Flame,
-  Bot,
   Map,
   DollarSign,
 } from 'lucide-react';
@@ -39,10 +38,7 @@ export const Dashboard: React.FC = () => {
   const [selectedVibe, setSelectedVibe] = useState('ALL');
   const [loading, setLoading] = useState(true);
 
-  // AI Quick Planner Input State (Hero Request)
-  const [aiPrompt, setAiPrompt] = useState('');
-
-  // Currency Switcher State (INR / USD Request)
+  // Currency Switcher State (INR / USD)
   const [currencyMode, setCurrencyMode] = useState<'INR' | 'USD'>('INR');
 
   // Dynamic Metrics & Countdown States
@@ -117,7 +113,7 @@ export const Dashboard: React.FC = () => {
         }
       } catch (err) {
         console.error('Error loading dashboard data:', err);
-      } fontally: {
+      } finally {
         setLoading(false);
       }
     };
@@ -135,12 +131,6 @@ export const Dashboard: React.FC = () => {
     const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
 
     setCountdownText({ days, hours, mins });
-  };
-
-  const handleAiQuickPlan = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!aiPrompt.trim()) return;
-    navigate(`/create-trip?prompt=${encodeURIComponent(aiPrompt.trim())}`);
   };
 
   // Format monetary values according to active currency switcher (INR / USD)
@@ -196,7 +186,7 @@ export const Dashboard: React.FC = () => {
 
   return (
     <div className="space-y-8 pb-12">
-      {/* Hero Banner with AI Quick Planner Bar & Mini-Metrics */}
+      {/* Hero Banner with Action Buttons & Mini-Metrics */}
       <div className="relative rounded-3xl overflow-hidden shadow-2xl bg-gradient-to-r from-[#0B1320] via-[#111E2E] to-[#0B1320] border border-slate-200 dark:border-[#1E2D42]">
         <img
           src="https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=1600&q=80"
@@ -217,29 +207,24 @@ export const Dashboard: React.FC = () => {
               Track active trip countdowns, discover destinations by travel vibe, and manage multi-city budgets.
             </p>
 
-            {/* AI Quick Planner Input Bar inside Hero Banner */}
-            <form onSubmit={handleAiQuickPlan} className="pt-2">
-              <div className="relative w-full max-w-xl">
-                <Bot className="w-4 h-4 text-emerald-400 absolute left-4 top-3.5" />
-                <input
-                  type="text"
-                  value={aiPrompt}
-                  onChange={(e) => setAiPrompt(e.target.value)}
-                  placeholder="AI Quick Planner e.g., 5-day romantic trip to Italy under ₹2 Lakhs..."
-                  className="w-full pl-11 pr-28 py-3 bg-black/40 hover:bg-black/50 focus:bg-black/60 border border-white/20 rounded-2xl text-xs font-semibold text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 backdrop-blur-md transition"
-                />
-                <button
-                  type="submit"
-                  className="absolute right-1.5 top-1.5 px-3.5 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-xs font-bold shadow-md transition flex items-center space-x-1"
-                >
-                  <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-                  <span>AI Plan</span>
-                </button>
-              </div>
-            </form>
+            <div className="pt-2 flex flex-wrap gap-3">
+              <Link
+                to="/create-trip"
+                className="px-5 py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-2xl font-bold text-xs shadow-lg shadow-emerald-500/30 flex items-center space-x-2 transition hover:-translate-y-0.5"
+              >
+                <Plus className="w-4 h-4" />
+                <span>Plan New Trip</span>
+              </Link>
+              <Link
+                to="/community"
+                className="px-5 py-3 bg-white/10 hover:bg-white/20 text-white border border-white/20 rounded-2xl font-bold text-xs backdrop-blur-md transition"
+              >
+                Browse Public Trips
+              </Link>
+            </div>
 
             {/* Mini-Metrics Badges (Hero Empty Space Balance) */}
-            <div className="pt-1 flex flex-wrap gap-4 text-xs font-bold text-slate-300 border-t border-white/10 pt-3">
+            <div className="pt-2 flex flex-wrap gap-4 text-xs font-bold text-slate-300 border-t border-white/10 pt-4">
               <div className="flex items-center space-x-1.5 bg-white/5 px-3 py-1.5 rounded-xl border border-white/10">
                 <Map className="w-4 h-4 text-emerald-400" />
                 <span><strong className="text-white">12</strong> Cities Explored</span>
