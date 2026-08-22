@@ -41,15 +41,15 @@ async function main() {
       phone: '+91 91234 56789',
       city: 'Ahmedabad',
       country: 'India',
-      bio: 'Avid traveler exploring India, Europe and Asia',
+      bio: 'Avid traveler exploring India, Europe, Asia, and global continents',
       profilePic: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=400&q=80',
       language: 'English',
     },
   });
 
-  console.log('Seeding All Popular Cities in India & International Destinations...');
+  console.log('Seeding Destinations across ALL Continents (Asia, Europe, North America, South America, Africa, Oceania)...');
 
-  // --- POPULAR INDIAN CITIES ---
+  // --- 1. ASIA (INDIA & INTERNATIONAL ASIA) ---
   const agra = await prisma.city.create({
     data: {
       name: 'Agra',
@@ -158,66 +158,6 @@ async function main() {
     },
   });
 
-  const bangalore = await prisma.city.create({
-    data: {
-      name: 'Bangalore (Bengaluru)',
-      country: 'India',
-      region: 'Asia',
-      imageUrl: 'https://images.unsplash.com/photo-1596176530529-78163a4f7af2?auto=format&fit=crop&w=800&q=80',
-      description: 'The Garden City and tech hub of India, famous for Cubbon Park, Bangalore Palace, craft breweries, and pleasant weather.',
-      costIndex: 'MEDIUM',
-      popularityScore: 93,
-    },
-  });
-
-  const chennai = await prisma.city.create({
-    data: {
-      name: 'Chennai',
-      country: 'India',
-      region: 'Asia',
-      imageUrl: 'https://images.unsplash.com/photo-1582510003544-4d00b7f74220?auto=format&fit=crop&w=800&q=80',
-      description: 'The gateway to South India, renowned for Marina Beach, Dravidian Kapaleeshwarar Temple, and classical music & dance heritage.',
-      costIndex: 'LOW',
-      popularityScore: 92,
-    },
-  });
-
-  const kolkata = await prisma.city.create({
-    data: {
-      name: 'Kolkata',
-      country: 'India',
-      region: 'Asia',
-      imageUrl: 'https://images.unsplash.com/photo-1558431382-27e303142255?auto=format&fit=crop&w=800&q=80',
-      description: 'The City of Joy, famous for Victoria Memorial, Howrah Bridge, iconic yellow taxis, colonial charm, and sweets.',
-      costIndex: 'LOW',
-      popularityScore: 93,
-    },
-  });
-
-  const hyderabad = await prisma.city.create({
-    data: {
-      name: 'Hyderabad',
-      country: 'India',
-      region: 'Asia',
-      imageUrl: 'https://images.unsplash.com/photo-1605379399642-870262d3d051?auto=format&fit=crop&w=800&q=80',
-      description: 'The City of Pearls, renowned for Charminar, Golconda Fort, Ramoji Film City, and world-famous Hyderabadi Biryani.',
-      costIndex: 'MEDIUM',
-      popularityScore: 94,
-    },
-  });
-
-  const shimla = await prisma.city.create({
-    data: {
-      name: 'Shimla',
-      country: 'India',
-      region: 'Asia',
-      imageUrl: 'https://images.unsplash.com/photo-1562670652-e5947bddb335?auto=format&fit=crop&w=800&q=80',
-      description: 'The Queen of Hill Stations in Himachal Pradesh, famous for snow-capped Himalayan peaks, colonial Ridge, and Mall Road walks.',
-      costIndex: 'MEDIUM',
-      popularityScore: 95,
-    },
-  });
-
   const manali = await prisma.city.create({
     data: {
       name: 'Manali',
@@ -230,39 +170,15 @@ async function main() {
     },
   });
 
-  const rishikesh = await prisma.city.create({
+  const shimla = await prisma.city.create({
     data: {
-      name: 'Rishikesh',
+      name: 'Shimla',
       country: 'India',
       region: 'Asia',
-      imageUrl: 'https://images.unsplash.com/photo-1544735716-392fe2489ffa?auto=format&fit=crop&w=800&q=80',
-      description: 'The Yoga Capital of the World along the Ganges in Uttarakhand, famous for white-water river rafting, Lakshman Jhula, and Beatles Ashram.',
-      costIndex: 'LOW',
-      popularityScore: 96,
-    },
-  });
-
-  const amritsar = await prisma.city.create({
-    data: {
-      name: 'Amritsar',
-      country: 'India',
-      region: 'Asia',
-      imageUrl: 'https://images.unsplash.com/photo-1609946779435-0ef41680d283?auto=format&fit=crop&w=800&q=80',
-      description: 'Spiritual hub of Sikhism in Punjab, home to the shimmering Golden Temple (Harmandir Sahib), Wagah Border ceremony, and Kulchas.',
-      costIndex: 'LOW',
-      popularityScore: 96,
-    },
-  });
-
-  const darjeeling = await prisma.city.create({
-    data: {
-      name: 'Darjeeling',
-      country: 'India',
-      region: 'Asia',
-      imageUrl: 'https://images.unsplash.com/photo-1544644181-1484b3fdfc62?auto=format&fit=crop&w=800&q=80',
-      description: 'The Queen of Hills in West Bengal, famous for Kanchenjunga sunrise views from Tiger Hill, UNESCO Himalayan Toy Train, and tea estates.',
-      costIndex: 'LOW',
-      popularityScore: 94,
+      imageUrl: 'https://images.unsplash.com/photo-1562670652-e5947bddb335?auto=format&fit=crop&w=800&q=80',
+      description: 'The Queen of Hill Stations in Himachal Pradesh, famous for snow-capped Himalayan peaks, colonial Ridge, and Mall Road walks.',
+      costIndex: 'MEDIUM',
+      popularityScore: 95,
     },
   });
 
@@ -290,151 +206,6 @@ async function main() {
     },
   });
 
-  const jodhpur = await prisma.city.create({
-    data: {
-      name: 'Jodhpur',
-      country: 'India',
-      region: 'Asia',
-      imageUrl: 'https://images.unsplash.com/photo-1568849676085-51415703900f?auto=format&fit=crop&w=800&q=80',
-      description: 'The Sun City & Blue City of Rajasthan, guarded by the towering Mehrangarh Fort, Jaswant Thada, and Umaid Bhawan Palace.',
-      costIndex: 'MEDIUM',
-      popularityScore: 94,
-    },
-  });
-
-  const jaisalmer = await prisma.city.create({
-    data: {
-      name: 'Jaisalmer',
-      country: 'India',
-      region: 'Asia',
-      imageUrl: 'https://images.unsplash.com/photo-1577083552431-6e5fd01aa342?auto=format&fit=crop&w=800&q=80',
-      description: 'The Golden City in the heart of Thar Desert, famous for living Jaisalmer Fort, Sam Sand Dunes desert safari, and overnight luxury camps.',
-      costIndex: 'MEDIUM',
-      popularityScore: 95,
-    },
-  });
-
-  const mysore = await prisma.city.create({
-    data: {
-      name: 'Mysore (Mysuru)',
-      country: 'India',
-      region: 'Asia',
-      imageUrl: 'https://images.unsplash.com/photo-1600100397608-f010e423b971?auto=format&fit=crop&w=800&q=80',
-      description: 'The Heritage City of Karnataka, famous for the opulent Mysore Palace, Chamundeshwari Temple, silk saris, and Dasara celebrations.',
-      costIndex: 'LOW',
-      popularityScore: 93,
-    },
-  });
-
-  const ooty = await prisma.city.create({
-    data: {
-      name: 'Ooty',
-      country: 'India',
-      region: 'Asia',
-      imageUrl: 'https://images.unsplash.com/photo-1589182373726-e4f658ab50f0?auto=format&fit=crop&w=800&q=80',
-      description: 'Queen of Hill Stations in the Nilgiri Hills of Tamil Nadu, famous for botanical gardens, Ooty Lake, and tea plantation walks.',
-      costIndex: 'LOW',
-      popularityScore: 93,
-    },
-  });
-
-  const coorg = await prisma.city.create({
-    data: {
-      name: 'Coorg (Kodagu)',
-      country: 'India',
-      region: 'Asia',
-      imageUrl: 'https://images.unsplash.com/photo-1590050752117-238cb0fb12b1?auto=format&fit=crop&w=800&q=80',
-      description: 'The Scotland of India in Karnataka, famous for rolling coffee plantations, mist-covered Western Ghats, Abbey Falls, and spice estates.',
-      costIndex: 'MEDIUM',
-      popularityScore: 94,
-    },
-  });
-
-  const pondicherry = await prisma.city.create({
-    data: {
-      name: 'Pondicherry (Puducherry)',
-      country: 'India',
-      region: 'Asia',
-      imageUrl: 'https://images.unsplash.com/photo-1589793463357-5fb813435467?auto=format&fit=crop&w=800&q=80',
-      description: 'The French Riviera of the East, famous for mustard-yellow French Quarter villas, Auroville experimental township, and Promenade Beach.',
-      costIndex: 'LOW',
-      popularityScore: 95,
-    },
-  });
-
-  const mahabalipuram = await prisma.city.create({
-    data: {
-      name: 'Mahabalipuram',
-      country: 'India',
-      region: 'Asia',
-      imageUrl: 'https://images.unsplash.com/photo-1621847468516-1ed5d0df56fe?auto=format&fit=crop&w=800&q=80',
-      description: 'UNESCO World Heritage coastal town in Tamil Nadu, renowned for 7th-century Pallava Shore Temple, Pancha Rathas, and rock relief carvings.',
-      costIndex: 'LOW',
-      popularityScore: 91,
-    },
-  });
-
-  const madurai = await prisma.city.create({
-    data: {
-      name: 'Madurai',
-      country: 'India',
-      region: 'Asia',
-      imageUrl: 'https://images.unsplash.com/photo-1600100397608-f010e423b971?auto=format&fit=crop&w=800&q=80',
-      description: 'Ancient temple city of Tamil Nadu, famous for the towering colorful gopurams of Meenakshi Amman Temple and Thirumalai Nayakkar Palace.',
-      costIndex: 'LOW',
-      popularityScore: 92,
-    },
-  });
-
-  const kanyakumari = await prisma.city.create({
-    data: {
-      name: 'Kanyakumari',
-      country: 'India',
-      region: 'Asia',
-      imageUrl: 'https://images.unsplash.com/photo-1582510003544-4d00b7f74220?auto=format&fit=crop&w=800&q=80',
-      description: 'The southernmost tip of mainland India where the Arabian Sea, Bay of Bengal, and Indian Ocean meet; famous for Vivekananda Rock Memorial.',
-      costIndex: 'LOW',
-      popularityScore: 92,
-    },
-  });
-
-  const shillong = await prisma.city.create({
-    data: {
-      name: 'Shillong',
-      country: 'India',
-      region: 'Asia',
-      imageUrl: 'https://images.unsplash.com/photo-1572949645841-094f3a9c4c94?auto=format&fit=crop&w=800&q=80',
-      description: 'The Scotland of the East in Meghalaya, famous for Elephant Falls, Shillong Peak, pine-covered hills, and nearby Cherrapunji root bridges.',
-      costIndex: 'LOW',
-      popularityScore: 93,
-    },
-  });
-
-  const gangtok = await prisma.city.create({
-    data: {
-      name: 'Gangtok',
-      country: 'India',
-      region: 'Asia',
-      imageUrl: 'https://images.unsplash.com/photo-1573059224625-99e80479d20f?auto=format&fit=crop&w=800&q=80',
-      description: 'Capital of Sikkim nestled in the Eastern Himalayas, famous for Rumtek Monastery, Nathula Pass border, and Tsomgo Lake.',
-      costIndex: 'MEDIUM',
-      popularityScore: 94,
-    },
-  });
-
-  // --- INTERNATIONAL CITIES ---
-  const paris = await prisma.city.create({
-    data: {
-      name: 'Paris',
-      country: 'France',
-      region: 'Europe',
-      imageUrl: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=800&q=80',
-      description: 'The City of Light, famous for Eiffel Tower, Louvre Museum, world-class gastronomy and romantic boulevards.',
-      costIndex: 'HIGH',
-      popularityScore: 98,
-    },
-  });
-
   const tokyo = await prisma.city.create({
     data: {
       name: 'Tokyo',
@@ -447,167 +218,383 @@ async function main() {
     },
   });
 
-  const rome = await prisma.city.create({
-    data: {
-      name: 'Rome',
-      country: 'Italy',
-      region: 'Europe',
-      imageUrl: 'https://images.unsplash.com/photo-1552832230-c0197dd311b5?auto=format&fit=crop&w=800&q=80',
-      description: 'The Eternal City with thousands of years of history, Colosseum, Vatican City, gelato, and cobblestone plazas.',
-      costIndex: 'MEDIUM',
-      popularityScore: 94,
-    },
-  });
-
   const bali = await prisma.city.create({
     data: {
       name: 'Bali',
       country: 'Indonesia',
       region: 'Asia',
       imageUrl: 'https://images.unsplash.com/photo-1537996194471-e657df975ab4?auto=format&fit=crop&w=800&q=80',
-      description: 'Tropical paradise known for lush rice terraces, sacred Hindu temples, surfing beaches, and wellness retreats.',
+      description: 'Tropical island paradise known for lush rice terraces, sacred sea temples, surfing beaches, and luxury wellness resorts.',
       costIndex: 'LOW',
-      popularityScore: 92,
+      popularityScore: 95,
     },
   });
 
-  console.log('Seeding Activities...');
-
-  // Indian Activities
-  const tajMahal = await prisma.activity.create({
+  const dubai = await prisma.city.create({
     data: {
-      cityId: agra.id,
-      title: 'Taj Mahal Sunrise VIP Guided Tour',
-      description: 'Witness the breathtaking marble monument of love bathed in golden dawn light with expert storytelling.',
-      category: 'Sightseeing',
-      estimatedCost: 2500,
-      durationHours: 3.0,
-      imageUrl: 'https://images.unsplash.com/photo-1564507592333-c60657eea523?auto=format&fit=crop&w=600&q=80',
+      name: 'Dubai',
+      country: 'United Arab Emirates',
+      region: 'Asia',
+      imageUrl: 'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&w=800&q=80',
+      description: 'Futuristic desert oasis famous for Burj Khalifa, palm-shaped islands, mega shopping malls, and dune bashing safaris.',
+      costIndex: 'HIGH',
+      popularityScore: 97,
     },
   });
 
-  const amerFort = await prisma.activity.create({
+  const bangkok = await prisma.city.create({
     data: {
-      cityId: jaipur.id,
-      title: 'Amer Fort Hilltop Tour & Sheesh Mahal',
-      description: 'Explore the grand 16th-century fortress, mirror palace (Sheesh Mahal), and breathtaking Maota Lake views.',
-      category: 'Culture',
-      estimatedCost: 1500,
-      durationHours: 3.5,
-      imageUrl: 'https://images.unsplash.com/photo-1477587458883-47145ed94245?auto=format&fit=crop&w=600&q=80',
+      name: 'Bangkok',
+      country: 'Thailand',
+      region: 'Asia',
+      imageUrl: 'https://images.unsplash.com/photo-1508009603885-50cf7c579365?auto=format&fit=crop&w=800&q=80',
+      description: 'Vibrant capital of Thailand famous for ornate Grand Palace, floating street markets, tuk-tuks, and world-class street food.',
+      costIndex: 'LOW',
+      popularityScore: 94,
     },
   });
 
-  const hawaMahal = await prisma.activity.create({
+  const singapore = await prisma.city.create({
     data: {
-      cityId: jaipur.id,
-      title: 'Hawa Mahal Palace of Winds & Johari Bazaar Walk',
-      description: 'Iconic 953 honeycomb window facade tour followed by traditional Rajasthani jewelry and textile shopping.',
-      category: 'Culture',
-      estimatedCost: 1000,
-      durationHours: 2.5,
-      imageUrl: 'https://images.unsplash.com/photo-1599661046827-dacff0c0f09a?auto=format&fit=crop&w=600&q=80',
+      name: 'Singapore',
+      country: 'Singapore',
+      region: 'Asia',
+      imageUrl: 'https://images.unsplash.com/photo-1525625293386-3f8f99389edd?auto=format&fit=crop&w=800&q=80',
+      description: 'Global financial hub and island city-state, famous for Marina Bay Sands, Gardens by the Bay Supertrees, and hawker centres.',
+      costIndex: 'HIGH',
+      popularityScore: 96,
     },
   });
 
-  const gatewayMumbai = await prisma.activity.create({
+  // --- 2. EUROPE ---
+  const paris = await prisma.city.create({
     data: {
-      cityId: mumbai.id,
-      title: 'Gateway of India & Elephanta Caves Speedboat Tour',
-      description: 'Iconic arch monument photo session followed by a scenic bay boat ride to 5th-century rock-cut cave temples.',
-      category: 'Sightseeing',
-      estimatedCost: 2000,
-      durationHours: 4.0,
-      imageUrl: 'https://images.unsplash.com/photo-1570168007204-dfb528c6958f?auto=format&fit=crop&w=600&q=80',
+      name: 'Paris',
+      country: 'France',
+      region: 'Europe',
+      imageUrl: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=800&q=80',
+      description: 'The City of Light, famous for Eiffel Tower, Louvre Museum, world-class gastronomy and romantic Seine river cruises.',
+      costIndex: 'HIGH',
+      popularityScore: 99,
     },
   });
 
-  const marineDrive = await prisma.activity.create({
+  const rome = await prisma.city.create({
     data: {
-      cityId: mumbai.id,
-      title: 'Marine Drive Queen’s Necklace Sunset & Street Food Trail',
-      description: 'Stroll along the Arabian Sea promenade and savor authentic Vada Pav, Pav Bhaji, and Kulfi.',
-      category: 'Food',
-      estimatedCost: 1200,
-      durationHours: 2.5,
-      imageUrl: 'https://images.unsplash.com/photo-1566552881560-0be862a7c445?auto=format&fit=crop&w=600&q=80',
+      name: 'Rome',
+      country: 'Italy',
+      region: 'Europe',
+      imageUrl: 'https://images.unsplash.com/photo-1552832230-c0197dd311b5?auto=format&fit=crop&w=800&q=80',
+      description: 'The Eternal City with thousands of years of history, Colosseum, Vatican City, Trevi Fountain, and authentic pasta & gelato.',
+      costIndex: 'MEDIUM',
+      popularityScore: 97,
     },
   });
 
-  const gangaAarti = await prisma.activity.create({
+  const london = await prisma.city.create({
     data: {
-      cityId: varanasi.id,
-      title: 'Sacred Dashashwamedh Ghat Evening Ganga Aarti Ceremony',
-      description: 'Experience the mesmeric spiritual ritual of brass lamps, chants, and incense aboard a sunset river boat.',
-      category: 'Culture',
-      estimatedCost: 1200,
-      durationHours: 2.5,
-      imageUrl: 'https://images.unsplash.com/photo-1561361513-2d000a50f0dc?auto=format&fit=crop&w=600&q=80',
+      name: 'London',
+      country: 'United Kingdom',
+      region: 'Europe',
+      imageUrl: 'https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?auto=format&fit=crop&w=800&q=80',
+      description: 'Historic royal capital featuring Big Ben, Tower Bridge, British Museum, West End theatre shows, and red double-decker buses.',
+      costIndex: 'HIGH',
+      popularityScore: 98,
     },
   });
 
-  const houseboatKerala = await prisma.activity.create({
+  const barcelona = await prisma.city.create({
     data: {
-      cityId: kerala.id,
-      title: 'Alleppey Backwaters Luxury Kettuvallam Houseboat Cruise',
-      description: 'Glide through tranquil palm-fringed canals, village lagoons, and enjoy fresh Karimeen fish curry meals.',
-      category: 'Relaxation',
-      estimatedCost: 8500,
-      durationHours: 6.0,
-      imageUrl: 'https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?auto=format&fit=crop&w=600&q=80',
+      name: 'Barcelona',
+      country: 'Spain',
+      region: 'Europe',
+      imageUrl: 'https://images.unsplash.com/photo-1539037116277-4db20889f2d4?auto=format&fit=crop&w=800&q=80',
+      description: 'Cosmopolitan Mediterranean capital famous for Gaudí Sagrada Família, Park Güell, Gothic Quarter, and sunny beaches.',
+      costIndex: 'MEDIUM',
+      popularityScore: 96,
     },
   });
 
-  const goaWatersports = await prisma.activity.create({
+  const amsterdam = await prisma.city.create({
     data: {
-      cityId: goa.id,
-      title: 'Calangute Beach Parasailing, Jet Ski & Fort Aguada',
-      description: 'Thrill-seeking ocean sports at North Goa beaches followed by 17th-century Portuguese lighthouse fort views.',
-      category: 'Adventure',
-      estimatedCost: 3000,
-      durationHours: 4.0,
-      imageUrl: 'https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?auto=format&fit=crop&w=600&q=80',
+      name: 'Amsterdam',
+      country: 'Netherlands',
+      region: 'Europe',
+      imageUrl: 'https://images.unsplash.com/photo-1512470876302-972faa2aa9a4?auto=format&fit=crop&w=800&q=80',
+      description: 'Picturesque canal city known for historic gabled houses, Van Gogh Museum, bicycle culture, and tulip gardens.',
+      costIndex: 'HIGH',
+      popularityScore: 95,
     },
   });
 
-  const udaipurCruise = await prisma.activity.create({
+  const venice = await prisma.city.create({
     data: {
-      cityId: udaipur.id,
-      title: 'Lake Pichola Sunset Boat Cruise & City Palace Museum',
-      description: 'Sail past Taj Lake Palace and Jag Mandir island, followed by Rajasthan largest royal palace complex.',
-      category: 'Sightseeing',
-      estimatedCost: 2200,
-      durationHours: 3.5,
-      imageUrl: 'https://images.unsplash.com/photo-1615836245337-f5b9b2303f10?auto=format&fit=crop&w=600&q=80',
+      name: 'Venice',
+      country: 'Italy',
+      region: 'Europe',
+      imageUrl: 'https://images.unsplash.com/photo-1514890547357-a9ee288728e0?auto=format&fit=crop&w=800&q=80',
+      description: 'Floating city built on 118 islands, famous for romantic gondola rides along Grand Canal, St. Mark Square, and Rialto Bridge.',
+      costIndex: 'HIGH',
+      popularityScore: 97,
     },
   });
 
-  const delhiFood = await prisma.activity.create({
+  const zurich = await prisma.city.create({
     data: {
-      cityId: delhi.id,
-      title: 'Old Delhi Chandni Chowk Tuk-Tuk Food Trail & Red Fort',
-      description: 'Navigate sensory spice markets, Paranthe Wali Gali delicacies, and UNESCO Red Fort heritage.',
-      category: 'Food',
-      estimatedCost: 1500,
-      durationHours: 3.0,
-      imageUrl: 'https://images.unsplash.com/photo-1587474260584-136574528ed5?auto=format&fit=crop&w=600&q=80',
+      name: 'Zurich (Swiss Alps)',
+      country: 'Switzerland',
+      region: 'Europe',
+      imageUrl: 'https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?auto=format&fit=crop&w=800&q=80',
+      description: 'Gateway to snow-capped Swiss Alps, pristine Lake Zurich, luxury watchmaking, and Swiss chocolate boutiques.',
+      costIndex: 'HIGH',
+      popularityScore: 96,
     },
   });
 
-  // International Activities
-  const eiffel = await prisma.activity.create({
+  const santorini = await prisma.city.create({
     data: {
-      cityId: paris.id,
-      title: 'Eiffel Tower Summit Access & Champagne',
-      description: 'Ascend to the top of Paris for breathtaking panoramic views and a celebratory glass of champagne.',
-      category: 'Sightseeing',
-      estimatedCost: 5500,
-      durationHours: 3.0,
-      imageUrl: 'https://images.unsplash.com/photo-1511739001486-6bfe10ce785f?auto=format&fit=crop&w=600&q=80',
+      name: 'Santorini (Oia)',
+      country: 'Greece',
+      region: 'Europe',
+      imageUrl: 'https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?auto=format&fit=crop&w=800&q=80',
+      description: 'Romantic Cycladic island famous for whitewashed cliffside villages, blue-domed churches, volcanic beaches, and sunsets.',
+      costIndex: 'HIGH',
+      popularityScore: 98,
     },
   });
 
-  console.log('Seeding Sample Trips for Jiyan Mansuri...');
+  // --- 3. NORTH AMERICA ---
+  const newyork = await prisma.city.create({
+    data: {
+      name: 'New York City',
+      country: 'United States',
+      region: 'North America',
+      imageUrl: 'https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?auto=format&fit=crop&w=800&q=80',
+      description: 'The Big Apple, famous for Times Square, Statue of Liberty, Central Park, Broadway shows, and iconic skyline skyscrapers.',
+      costIndex: 'HIGH',
+      popularityScore: 99,
+    },
+  });
+
+  const losangeles = await prisma.city.create({
+    data: {
+      name: 'Los Angeles (Hollywood)',
+      country: 'United States',
+      region: 'North America',
+      imageUrl: 'https://images.unsplash.com/photo-1580655653885-65763b2597d0?auto=format&fit=crop&w=800&q=80',
+      description: 'Entertainment capital of the world, home to Hollywood Walk of Fame, Santa Monica Pier, Beverly Hills, and Pacific beaches.',
+      costIndex: 'HIGH',
+      popularityScore: 96,
+    },
+  });
+
+  const vancouver = await prisma.city.create({
+    data: {
+      name: 'Vancouver',
+      country: 'Canada',
+      region: 'North America',
+      imageUrl: 'https://images.unsplash.com/photo-1559511260-66a654ae982a?auto=format&fit=crop&w=800&q=80',
+      description: 'Coastal Canadian seaport surrounded by snow-peaked mountains, Stanley Park seawall, Capilano Suspension Bridge, and ocean vistas.',
+      costIndex: 'MEDIUM',
+      popularityScore: 94,
+    },
+  });
+
+  const cancun = await prisma.city.create({
+    data: {
+      name: 'Cancún',
+      country: 'Mexico',
+      region: 'North America',
+      imageUrl: 'https://images.unsplash.com/photo-1510097467424-192d713be8b2?auto=format&fit=crop&w=800&q=80',
+      description: 'Mexican Caribbean resort city famous for turquoise waters, white sand beaches, luxury beachfront resorts, and nearby Mayan ruins.',
+      costIndex: 'MEDIUM',
+      popularityScore: 95,
+    },
+  });
+
+  // --- 4. SOUTH AMERICA ---
+  const riodejaneiro = await prisma.city.create({
+    data: {
+      name: 'Rio de Janeiro',
+      country: 'Brazil',
+      region: 'South America',
+      imageUrl: 'https://images.unsplash.com/photo-1483729558449-99ef09a8c325?auto=format&fit=crop&w=800&q=80',
+      description: 'Marvelous City famous for Christ the Redeemer statue on Corcovado mountain, Sugarloaf mountain, Copacabana beach, and Carnival.',
+      costIndex: 'MEDIUM',
+      popularityScore: 97,
+    },
+  });
+
+  const cusco = await prisma.city.create({
+    data: {
+      name: 'Cusco (Machu Picchu)',
+      country: 'Peru',
+      region: 'South America',
+      imageUrl: 'https://images.unsplash.com/photo-1526392060635-9d6019884377?auto=format&fit=crop&w=800&q=80',
+      description: 'Historic Inca Empire capital and gateway to the ancient mountain citadel of Machu Picchu in the Andes mountains.',
+      costIndex: 'LOW',
+      popularityScore: 98,
+    },
+  });
+
+  const buenosaires = await prisma.city.create({
+    data: {
+      name: 'Buenos Aires',
+      country: 'Argentina',
+      region: 'South America',
+      imageUrl: 'https://images.unsplash.com/photo-1589909202802-8f4aadce1849?auto=format&fit=crop&w=800&q=80',
+      description: 'Paris of South America, famous for passionate Tango dancing, colorful La Boca district, steakhouses, and European architecture.',
+      costIndex: 'LOW',
+      popularityScore: 94,
+    },
+  });
+
+  // --- 5. AFRICA ---
+  const cairo = await prisma.city.create({
+    data: {
+      name: 'Cairo (Giza Pyramids)',
+      country: 'Egypt',
+      region: 'Africa',
+      imageUrl: 'https://images.unsplash.com/photo-1503177119275-0aa32b3a9368?auto=format&fit=crop&w=800&q=80',
+      description: 'Sprawling capital along the Nile river, famous for Great Pyramids of Giza, Sphinx monument, Egyptian Museum, and Khan el-Khalili bazaar.',
+      costIndex: 'LOW',
+      popularityScore: 98,
+    },
+  });
+
+  const capetown = await prisma.city.create({
+    data: {
+      name: 'Cape Town',
+      country: 'South Africa',
+      region: 'Africa',
+      imageUrl: 'https://images.unsplash.com/photo-1580618672591-eb180b1a973f?auto=format&fit=crop&w=800&q=80',
+      description: 'South Africa coastal jewel dominated by flat-topped Table Mountain, Cape of Good Hope, penguin colonies, and Stellenbosch vineyards.',
+      costIndex: 'MEDIUM',
+      popularityScore: 97,
+    },
+  });
+
+  const marrakech = await prisma.city.create({
+    data: {
+      name: 'Marrakech',
+      country: 'Morocco',
+      region: 'Africa',
+      imageUrl: 'https://images.unsplash.com/photo-1597212618440-806262de4f6b?auto=format&fit=crop&w=800&q=80',
+      description: 'The Red City of Morocco, famous for maze-like Medina souks, Jemaa el-Fnaa square, Arabian palaces, and camel desert safaris.',
+      costIndex: 'LOW',
+      popularityScore: 95,
+    },
+  });
+
+  // --- 6. OCEANIA ---
+  const sydney = await prisma.city.create({
+    data: {
+      name: 'Sydney',
+      country: 'Australia',
+      region: 'Oceania',
+      imageUrl: 'https://images.unsplash.com/photo-1506973035872-a4ec16b8e8d9?auto=format&fit=crop&w=800&q=80',
+      description: 'Harbourfront metropolis famous for Sydney Opera House, Harbour Bridge, golden Bondi Beach, and vibrant coastal lifestyle.',
+      costIndex: 'HIGH',
+      popularityScore: 98,
+    },
+  });
+
+  const melbourne = await prisma.city.create({
+    data: {
+      name: 'Melbourne',
+      country: 'Australia',
+      region: 'Oceania',
+      imageUrl: 'https://images.unsplash.com/photo-1545044846-351ba102b6d5?auto=format&fit=crop&w=800&q=80',
+      description: 'Cultural capital of Australia, famous for hidden laneway street art, world-renowned coffee culture, and Great Ocean Road drives.',
+      costIndex: 'HIGH',
+      popularityScore: 95,
+    },
+  });
+
+  const auckland = await prisma.city.create({
+    data: {
+      name: 'Auckland',
+      country: 'New Zealand',
+      region: 'Oceania',
+      imageUrl: 'https://images.unsplash.com/photo-1507699622108-4be3abd695ad?auto=format&fit=crop&w=800&q=80',
+      description: 'City of Sails surrounded by two harbors, Sky Tower views, volcanic cones, and gateway to Hobbiton movie set landscapes.',
+      costIndex: 'HIGH',
+      popularityScore: 96,
+    },
+  });
+
+  console.log('Seeding Activities for Global Continents...');
+
+  // Activities
+  await prisma.activity.createMany({
+    data: [
+      {
+        cityId: agra.id,
+        title: 'Taj Mahal Sunrise VIP Guided Tour',
+        description: 'Witness the breathtaking marble monument of love bathed in golden dawn light.',
+        category: 'Sightseeing',
+        estimatedCost: 2500,
+        durationHours: 3.0,
+        imageUrl: 'https://images.unsplash.com/photo-1564507592333-c60657eea523?auto=format&fit=crop&w=600&q=80',
+      },
+      {
+        cityId: jaipur.id,
+        title: 'Amer Fort Hilltop Tour & Sheesh Mahal',
+        description: 'Explore the grand 16th-century fortress and mirror palace (Sheesh Mahal).',
+        category: 'Culture',
+        estimatedCost: 1500,
+        durationHours: 3.5,
+        imageUrl: 'https://images.unsplash.com/photo-1477587458883-47145ed94245?auto=format&fit=crop&w=600&q=80',
+      },
+      {
+        cityId: paris.id,
+        title: 'Eiffel Tower Summit Access & Champagne',
+        description: 'Ascend to the top of Paris for breathtaking panoramic views.',
+        category: 'Sightseeing',
+        estimatedCost: 5500,
+        durationHours: 3.0,
+        imageUrl: 'https://images.unsplash.com/photo-1511739001486-6bfe10ce785f?auto=format&fit=crop&w=600&q=80',
+      },
+      {
+        cityId: newyork.id,
+        title: 'Statue of Liberty & Ellis Island Ferry Tour',
+        description: 'Cruise past Manhattan skyline to touch Lady Liberty and explore American immigration history.',
+        category: 'Sightseeing',
+        estimatedCost: 3500,
+        durationHours: 4.0,
+        imageUrl: 'https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?auto=format&fit=crop&w=600&q=80',
+      },
+      {
+        cityId: cusco.id,
+        title: 'Machu Picchu Inca Citadel Express Tour',
+        description: 'Explore the mystical stone ruins of Machu Picchu nestled high in the Andean cloud forest.',
+        category: 'Adventure',
+        estimatedCost: 12000,
+        durationHours: 6.0,
+        imageUrl: 'https://images.unsplash.com/photo-1526392060635-9d6019884377?auto=format&fit=crop&w=600&q=80',
+      },
+      {
+        cityId: cairo.id,
+        title: 'Giza Pyramids & Great Sphinx Camel Safari',
+        description: 'Guided tour around Khufu Pyramid followed by a camel ride across desert dunes.',
+        category: 'Culture',
+        estimatedCost: 4000,
+        durationHours: 4.0,
+        imageUrl: 'https://images.unsplash.com/photo-1503177119275-0aa32b3a9368?auto=format&fit=crop&w=600&q=80',
+      },
+      {
+        cityId: sydney.id,
+        title: 'Sydney Opera House Behind-the-Scenes Tour',
+        description: 'Step inside the world-famous sails of Sydney Opera House with an architectural expert.',
+        category: 'Culture',
+        estimatedCost: 3000,
+        durationHours: 2.5,
+        imageUrl: 'https://images.unsplash.com/photo-1506973035872-a4ec16b8e8d9?auto=format&fit=crop&w=600&q=80',
+      },
+    ],
+  });
+
+  console.log('Seeding Sample Multi-Continent Trips for Jiyan Mansuri...');
 
   // Indian Golden Triangle Trip
   const indiaTrip = await prisma.trip.create({
@@ -658,51 +645,6 @@ async function main() {
       endDate: new Date('2026-10-14'),
       budget: 80000,
     },
-  });
-
-  await prisma.itineraryItem.createMany({
-    data: [
-      {
-        stopId: stopDelhi.id,
-        activityId: delhiFood.id,
-        title: 'Old Delhi Chandni Chowk Food Trail',
-        dayNumber: 1,
-        timeSlot: '04:00 PM - 07:00 PM',
-        cost: 1500,
-        type: 'MEAL',
-        itemOrder: 1,
-      },
-      {
-        stopId: stopAgra.id,
-        activityId: tajMahal.id,
-        title: 'Taj Mahal Sunrise Guided Tour',
-        dayNumber: 1,
-        timeSlot: '05:45 AM - 09:00 AM',
-        cost: 2500,
-        type: 'ACTIVITY',
-        itemOrder: 1,
-      },
-      {
-        stopId: stopJaipur.id,
-        activityId: amerFort.id,
-        title: 'Amer Fort Hilltop Tour & Sheesh Mahal',
-        dayNumber: 1,
-        timeSlot: '09:30 AM - 01:00 PM',
-        cost: 1500,
-        type: 'ACTIVITY',
-        itemOrder: 1,
-      },
-      {
-        stopId: stopJaipur.id,
-        activityId: hawaMahal.id,
-        title: 'Hawa Mahal Palace & Johari Bazaar Walk',
-        dayNumber: 2,
-        timeSlot: '03:00 PM - 06:00 PM',
-        cost: 1000,
-        type: 'ACTIVITY',
-        itemOrder: 2,
-      },
-    ],
   });
 
   await prisma.tripExpense.createMany({
@@ -758,19 +700,6 @@ async function main() {
     },
   });
 
-  await prisma.itineraryItem.create({
-    data: {
-      stopId: stopParis.id,
-      activityId: eiffel.id,
-      title: 'Eiffel Tower Summit Access & Champagne',
-      dayNumber: 1,
-      timeSlot: '10:00 AM - 01:00 PM',
-      cost: 5500,
-      type: 'ACTIVITY',
-      itemOrder: 1,
-    },
-  });
-
   console.log('Seeding Community Posts...');
   await prisma.communityPost.create({
     data: {
@@ -794,7 +723,7 @@ async function main() {
     },
   });
 
-  console.log('Database seeding finished successfully with 31 popular Indian cities!');
+  console.log('Database seeding finished successfully across ALL Continents (Asia, Europe, North America, South America, Africa, Oceania)!');
 }
 
 main()
