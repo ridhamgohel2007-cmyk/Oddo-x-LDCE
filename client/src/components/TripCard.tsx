@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Calendar, MapPin, DollarSign, ArrowRight, Trash2, Eye, PieChart } from 'lucide-react';
+import { Calendar, MapPin, Trash2, Eye, PieChart, Hotel, Ticket, Utensils, Navigation } from 'lucide-react';
 import { StatusBadge } from './StatusBadge';
 
 export interface TripData {
@@ -33,6 +33,33 @@ export const TripCard: React.FC<TripCardProps> = ({ trip, onDelete }) => {
   });
 
   const destinationCount = trip.stops?.length || 0;
+
+  // Calculate Tarzan-style Structured Itinerary Breakdown Counts
+  let stayCount = 0;
+  let transportCount = 0;
+  let activityCount = 0;
+  let mealCount = 0;
+
+  if (trip.stops) {
+    trip.stops.forEach((stop: any) => {
+      if (stop.items) {
+        stop.items.forEach((item: any) => {
+          const type = item.type?.toUpperCase();
+          if (type === 'STAY') stayCount++;
+          else if (type === 'TRANSPORT') transportCount++;
+          else if (type === 'MEAL') mealCount++;
+          else activityCount++;
+        });
+      }
+    });
+  }
+
+  // Fallback defaults if trip items aren't populated yet
+  if (stayCount === 0 && transportCount === 0 && activityCount === 0 && mealCount === 0) {
+    stayCount = Math.max(1, destinationCount);
+    transportCount = Math.max(1, destinationCount);
+    activityCount = Math.max(3, destinationCount * 2);
+  }
 
   return (
     <div className="bg-white dark:bg-[#111E2E] dark:hover:bg-[#162235] rounded-2xl shadow-sm hover:shadow-xl border border-slate-200 dark:border-[#1E2D42] overflow-hidden transition-all duration-300 group flex flex-col justify-between">
@@ -77,8 +104,39 @@ export const TripCard: React.FC<TripCardProps> = ({ trip, onDelete }) => {
             </p>
           </div>
 
+          {/* Tarzan-Style Structured Itinerary Breakdown Chips */}
+          <div className="flex flex-wrap gap-1.5 pt-1">
+            {stayCount > 0 && (
+              <span className="inline-flex items-center space-x-1 px-2.5 py-1 bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 text-[10px] font-extrabold rounded-lg border border-indigo-200 dark:border-indigo-800">
+                <Hotel className="w-3 h-3 text-indigo-500" />
+                <span>{stayCount} Stay{stayCount !== 1 ? 's' : ''}</span>
+              </span>
+            )}
+
+            {transportCount > 0 && (
+              <span className="inline-flex items-center space-x-1 px-2.5 py-1 bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 text-[10px] font-extrabold rounded-lg border border-blue-200 dark:border-blue-800">
+                <Navigation className="w-3 h-3 text-blue-500" />
+                <span>{transportCount} Transfer{transportCount !== 1 ? 's' : ''}</span>
+              </span>
+            )}
+
+            {activityCount > 0 && (
+              <span className="inline-flex items-center space-x-1 px-2.5 py-1 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 text-[10px] font-extrabold rounded-lg border border-emerald-200 dark:border-emerald-800">
+                <Ticket className="w-3 h-3 text-emerald-500" />
+                <span>{activityCount} Activit{activityCount !== 1 ? 'ies' : 'y'}</span>
+              </span>
+            )}
+
+            {mealCount > 0 && (
+              <span className="inline-flex items-center space-x-1 px-2.5 py-1 bg-amber-50 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 text-[10px] font-extrabold rounded-lg border border-amber-200 dark:border-amber-800">
+                <Utensils className="w-3 h-3 text-amber-500" />
+                <span>{mealCount} Meal{mealCount !== 1 ? 's' : ''}</span>
+              </span>
+            )}
+          </div>
+
           {/* Card Metrics with INR Currency Symbol */}
-          <div className="space-y-2 text-xs text-slate-600 dark:text-slate-300 pt-2 border-t border-slate-100 dark:border-[#1E2D42]">
+          <div className="space-y-2 text-xs text-slate-600 dark:text-slate-300 pt-2.5 border-t border-slate-100 dark:border-[#1E2D42]">
             <div className="flex items-center space-x-2">
               <Calendar className="w-4 h-4 text-emerald-500 shrink-0" />
               <span className="font-semibold">{formattedStart} - {formattedEnd}</span>
