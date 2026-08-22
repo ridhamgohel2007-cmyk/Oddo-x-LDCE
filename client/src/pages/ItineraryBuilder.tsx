@@ -19,7 +19,9 @@ import {
   Hotel,
   Ticket,
   Utensils,
-  GripVertical,
+  ListFilter,
+  CalendarDays,
+  PieChart,
 } from 'lucide-react';
 
 export const ItineraryBuilder: React.FC = () => {
@@ -28,6 +30,9 @@ export const ItineraryBuilder: React.FC = () => {
   const [trip, setTrip] = useState<any>(null);
   const [cities, setCities] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // View Switcher: TIMELINE (Flowchart) vs DAY_BY_DAY (Grouped Calendar Days)
+  const [viewMode, setViewMode] = useState<'TIMELINE' | 'DAY_BY_DAY'>('TIMELINE');
 
   // Modals & Forms
   const [showAddStopModal, setShowAddStopModal] = useState(false);
@@ -225,9 +230,43 @@ export const ItineraryBuilder: React.FC = () => {
             to={`/trips/${trip.id}/budget`}
             className="px-4 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-xs font-bold shadow-md transition flex items-center space-x-1.5"
           >
-            <DollarSign className="w-4 h-4" />
-            <span>View Budget Breakdown</span>
+            <PieChart className="w-4 h-4" />
+            <span>View Financial Breakdown (Screen 9)</span>
           </Link>
+        </div>
+      </div>
+
+      {/* View Switcher: Timeline / Flowchart View vs. Day-by-Day View (PS Requirement) */}
+      <div className="bg-white dark:bg-[#111E2E] p-4 rounded-2xl shadow-sm border border-slate-200 dark:border-[#1E2D42] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+        <div className="flex items-center space-x-2">
+          <Layers className="w-5 h-5 text-emerald-500" />
+          <span className="text-sm font-extrabold text-slate-900 dark:text-white">Itinerary Layout View Switcher:</span>
+        </div>
+
+        <div className="flex bg-slate-100 dark:bg-[#162235] p-1.5 rounded-2xl border border-slate-200 dark:border-[#1E2D42]">
+          <button
+            onClick={() => setViewMode('TIMELINE')}
+            className={`flex items-center space-x-1.5 px-4 py-2 rounded-xl text-xs font-bold transition ${
+              viewMode === 'TIMELINE'
+                ? 'bg-white dark:bg-[#111E2E] text-emerald-600 dark:text-emerald-400 shadow-sm border border-slate-200 dark:border-[#1E2D42]'
+                : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
+            }`}
+          >
+            <ListFilter className="w-4 h-4 text-emerald-500" />
+            <span>Timeline / Flowchart View</span>
+          </button>
+
+          <button
+            onClick={() => setViewMode('DAY_BY_DAY')}
+            className={`flex items-center space-x-1.5 px-4 py-2 rounded-xl text-xs font-bold transition ${
+              viewMode === 'DAY_BY_DAY'
+                ? 'bg-white dark:bg-[#111E2E] text-emerald-600 dark:text-emerald-400 shadow-sm border border-slate-200 dark:border-[#1E2D42]'
+                : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
+            }`}
+          >
+            <CalendarDays className="w-4 h-4 text-emerald-500" />
+            <span>Day-by-Day View</span>
+          </button>
         </div>
       </div>
 
@@ -237,9 +276,9 @@ export const ItineraryBuilder: React.FC = () => {
           <div>
             <h2 className="text-xl font-black text-slate-900 dark:text-white flex items-center space-x-2">
               <Layers className="w-5 h-5 text-emerald-500" />
-              <span>Multi-City Sections & Reorderable Destination Stops</span>
+              <span>Multi-City Destination Stops & Line Items</span>
             </h2>
-            <p className="text-xs text-slate-500 dark:text-slate-400">Use up/down controls to reorder city stops or activity line items</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400">Manage reorderable sections, day slots, and categorized items</p>
           </div>
 
           <button
@@ -269,16 +308,15 @@ export const ItineraryBuilder: React.FC = () => {
 
               return (
                 <div key={stop.id} className="bg-white dark:bg-[#111E2E] rounded-3xl p-6 shadow-sm border border-slate-200 dark:border-[#1E2D42] space-y-5">
-                  {/* Stop Header with Reorder Up / Down Controls */}
+                  {/* Stop Header */}
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 dark:border-[#1E2D42] gap-3">
                     <div className="flex items-center space-x-3">
-                      {/* Reorder Stop Up/Down Controls */}
+                      {/* Reorder Up/Down Controls */}
                       <div className="flex flex-col space-y-1">
                         <button
                           onClick={() => handleReorderStop(stop.id, 'up')}
                           disabled={index === 0}
-                          aria-label={`Move stop ${stop.title} up`}
-                          className="p-1 rounded bg-slate-100 dark:bg-[#162235] hover:bg-slate-200 dark:hover:bg-[#1E2D42] text-slate-600 dark:text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed"
+                          className="p-1 rounded bg-slate-100 dark:bg-[#162235] hover:bg-slate-200 dark:hover:bg-[#1E2D42] text-slate-600 dark:text-slate-300 disabled:opacity-30"
                           title="Move Stop Up"
                         >
                           <ArrowUp className="w-3.5 h-3.5" />
@@ -286,8 +324,7 @@ export const ItineraryBuilder: React.FC = () => {
                         <button
                           onClick={() => handleReorderStop(stop.id, 'down')}
                           disabled={index === trip.stops.length - 1}
-                          aria-label={`Move stop ${stop.title} down`}
-                          className="p-1 rounded bg-slate-100 dark:bg-[#162235] hover:bg-slate-200 dark:hover:bg-[#1E2D42] text-slate-600 dark:text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed"
+                          className="p-1 rounded bg-slate-100 dark:bg-[#162235] hover:bg-slate-200 dark:hover:bg-[#1E2D42] text-slate-600 dark:text-slate-300 disabled:opacity-30"
                           title="Move Stop Down"
                         >
                           <ArrowDown className="w-3.5 h-3.5" />
@@ -341,84 +378,121 @@ export const ItineraryBuilder: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* Granular Categorized Line Items Sequence */}
-                  <div className="space-y-4">
-                    <h4 className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider">
-                      Categorized Line Items (Transport, Stay, Activity, Meal)
-                    </h4>
+                  {/* Render based on View Mode (Timeline vs. Day-by-Day) */}
+                  {viewMode === 'TIMELINE' ? (
+                    <div className="space-y-4">
+                      <h4 className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider">
+                        Flowchart Physical Sequence
+                      </h4>
 
-                    {stop.items?.length === 0 ? (
-                      <p className="text-xs text-slate-400 italic py-2">No categorized line items added to this stop yet.</p>
-                    ) : (
-                      <div className="space-y-3 relative pl-4 border-l-2 border-emerald-500/30">
-                        {stop.items.map((item: any, i: number) => (
-                          <div key={item.id} className="relative group">
-                            {/* Timeline Node */}
-                            <div className="absolute -left-[25px] top-4 w-3.5 h-3.5 rounded-full bg-emerald-500 border-2 border-white dark:border-[#111E2E]" />
+                      {stop.items?.length === 0 ? (
+                        <p className="text-xs text-slate-400 italic py-2">No line items added yet.</p>
+                      ) : (
+                        <div className="space-y-3 relative pl-4 border-l-2 border-emerald-500/30">
+                          {stop.items.map((item: any, i: number) => (
+                            <div key={item.id} className="relative group">
+                              <div className="absolute -left-[25px] top-4 w-3.5 h-3.5 rounded-full bg-emerald-500 border-2 border-white dark:border-[#111E2E]" />
 
-                            <div className="bg-slate-50 dark:bg-[#162235] hover:bg-white dark:hover:bg-[#1C2C42] p-4 rounded-2xl border border-slate-200 dark:border-[#1E2D42] shadow-xs transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                              
-                              <div className="flex items-center space-x-3">
-                                {/* Item Reorder Up / Down Controls */}
-                                <div className="flex flex-col space-y-0.5">
-                                  <button
-                                    onClick={() => handleReorderItem(item.id, 'up')}
-                                    disabled={i === 0}
-                                    className="p-1 text-slate-400 hover:text-emerald-500 disabled:opacity-20"
-                                    title="Move Item Up"
-                                  >
-                                    <ArrowUp className="w-3 h-3" />
-                                  </button>
-                                  <button
-                                    onClick={() => handleReorderItem(item.id, 'down')}
-                                    disabled={i === stop.items.length - 1}
-                                    className="p-1 text-slate-400 hover:text-emerald-500 disabled:opacity-20"
-                                    title="Move Item Down"
-                                  >
-                                    <ArrowDown className="w-3 h-3" />
-                                  </button>
-                                </div>
-
-                                <div className="space-y-1">
-                                  <div className="flex items-center space-x-2">
-                                    <span className="px-2 py-0.5 bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-[10px] font-bold rounded">
-                                      Day {item.dayNumber}
-                                    </span>
-                                    {getCategoryBadge(item.type)}
-                                    <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 flex items-center space-x-1">
-                                      <Clock className="w-3 h-3 text-emerald-500" />
-                                      <span>{item.timeSlot || 'Scheduled'}</span>
-                                    </span>
+                              <div className="bg-slate-50 dark:bg-[#162235] hover:bg-white dark:hover:bg-[#1C2C42] p-4 rounded-2xl border border-slate-200 dark:border-[#1E2D42] shadow-xs transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                                <div className="flex items-center space-x-3">
+                                  <div className="flex flex-col space-y-0.5">
+                                    <button
+                                      onClick={() => handleReorderItem(item.id, 'up')}
+                                      disabled={i === 0}
+                                      className="p-1 text-slate-400 hover:text-emerald-500 disabled:opacity-20"
+                                    >
+                                      <ArrowUp className="w-3 h-3" />
+                                    </button>
+                                    <button
+                                      onClick={() => handleReorderItem(item.id, 'down')}
+                                      disabled={i === stop.items.length - 1}
+                                      className="p-1 text-slate-400 hover:text-emerald-500 disabled:opacity-20"
+                                    >
+                                      <ArrowDown className="w-3 h-3" />
+                                    </button>
                                   </div>
 
-                                  <h5 className="text-xs font-bold text-slate-900 dark:text-white">{item.title}</h5>
-                                  {item.activity && (
-                                    <p className="text-xs text-slate-500 dark:text-slate-400">{item.activity.description}</p>
-                                  )}
+                                  <div className="space-y-1">
+                                    <div className="flex items-center space-x-2">
+                                      <span className="px-2 py-0.5 bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-[10px] font-bold rounded">
+                                        Day {item.dayNumber}
+                                      </span>
+                                      {getCategoryBadge(item.type)}
+                                      <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 flex items-center space-x-1">
+                                        <Clock className="w-3 h-3 text-emerald-500" />
+                                        <span>{item.timeSlot || 'Scheduled'}</span>
+                                      </span>
+                                    </div>
+
+                                    <h5 className="text-xs font-bold text-slate-900 dark:text-white">{item.title}</h5>
+                                    {item.activity && (
+                                      <p className="text-xs text-slate-500 dark:text-slate-400">{item.activity.description}</p>
+                                    )}
+                                  </div>
+                                </div>
+
+                                <div className="flex items-center space-x-4">
+                                  <div className="text-right">
+                                    <span className="text-[10px] uppercase font-bold text-slate-400 block">Est. Cost</span>
+                                    <span className="text-xs font-black text-emerald-600 dark:text-emerald-400">${item.cost}</span>
+                                  </div>
+
+                                  <button
+                                    onClick={() => handleDeleteItem(item.id)}
+                                    className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/60 rounded-lg transition"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </button>
                                 </div>
                               </div>
-
-                              <div className="flex items-center space-x-4">
-                                <div className="text-right">
-                                  <span className="text-[10px] uppercase font-bold text-slate-400 block">Est. Cost</span>
-                                  <span className="text-xs font-black text-emerald-600 dark:text-emerald-400">${item.cost}</span>
-                                </div>
-
-                                <button
-                                  onClick={() => handleDeleteItem(item.id)}
-                                  className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/60 rounded-lg transition"
-                                  title="Remove item"
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                </button>
-                              </div>
-
                             </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    /* DAY-BY-DAY GROUPED VIEW (PS Requirement) */
+                    <div className="space-y-4">
+                      <h4 className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider">
+                        Day-by-Day Categorized Schedule
+                      </h4>
+
+                      {[1, 2, 3, 4, 5].map((dayNum) => {
+                        const dayItems = stop.items?.filter((i: any) => i.dayNumber === dayNum) || [];
+                        if (dayItems.length === 0 && dayNum > 2) return null;
+
+                        return (
+                          <div key={dayNum} className="p-4 rounded-2xl bg-slate-50 dark:bg-[#162235] border border-slate-200 dark:border-[#1E2D42] space-y-3">
+                            <div className="flex items-center justify-between border-b border-slate-200 dark:border-[#1E2D42] pb-2">
+                              <span className="text-xs font-extrabold text-emerald-600 dark:text-emerald-400">
+                                Day {dayNum} Schedule
+                              </span>
+                              <span className="text-[10px] font-bold text-slate-400">{dayItems.length} Planned Items</span>
+                            </div>
+
+                            {dayItems.length === 0 ? (
+                              <p className="text-xs text-slate-400 italic">No items scheduled for Day {dayNum}.</p>
+                            ) : (
+                              <div className="space-y-2">
+                                {dayItems.map((item: any) => (
+                                  <div key={item.id} className="p-3 bg-white dark:bg-[#111E2E] rounded-xl border border-slate-200 dark:border-[#1E2D42] flex items-center justify-between">
+                                    <div className="space-y-0.5">
+                                      <div className="flex items-center space-x-2">
+                                        {getCategoryBadge(item.type)}
+                                        <span className="text-[11px] text-slate-500 font-semibold">{item.timeSlot}</span>
+                                      </div>
+                                      <h5 className="text-xs font-bold text-slate-900 dark:text-white">{item.title}</h5>
+                                    </div>
+                                    <span className="text-xs font-black text-emerald-600 dark:text-emerald-400">${item.cost}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
                           </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
               );
             })}
@@ -488,7 +562,7 @@ export const ItineraryBuilder: React.FC = () => {
         </div>
       )}
 
-      {/* Add Item Modal with Granular Categories */}
+      {/* Add Item Modal */}
       {showAddItemModal && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white dark:bg-[#111E2E] max-w-md w-full p-6 rounded-3xl shadow-2xl border border-slate-200 dark:border-[#1E2D42] space-y-4">
