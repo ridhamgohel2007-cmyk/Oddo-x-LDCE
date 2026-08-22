@@ -54,6 +54,8 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
     navigate(`/search?q=${encodeURIComponent(globalSearch.trim())}`);
   };
 
+  const isCreateTripActive = location.pathname === '/create-trip';
+
   return (
     <div className="min-h-screen flex flex-col bg-[#F8FAFC] dark:bg-[#0F172A] text-slate-900 dark:text-slate-100 transition-colors duration-300 antialiased font-sans">
       {/* Top Header Navigation Bar */}
@@ -61,7 +63,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
         <div className="max-w-[1500px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 gap-3 sm:gap-6">
             
-            {/* 1. Brand Logo (Shifted left with clean spacing) */}
+            {/* 1. Brand Logo */}
             <Link to="/dashboard" className="flex items-center space-x-3 group shrink-0">
               <div className="w-10 h-10 rounded-2xl overflow-hidden ring-2 ring-[#7C3AED]/50 shadow-md shadow-purple-500/20 group-hover:scale-105 transition-all duration-300 bg-white shrink-0">
                 <img
@@ -80,7 +82,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
               </div>
             </Link>
 
-            {/* 2. Desktop Navigation Pill (Centered in a straight horizontal line) */}
+            {/* 2. Desktop Navigation Pill with Active Highlighting (Request Item 2) */}
             {user && (
               <div className="hidden lg:flex flex-1 items-center justify-center px-2">
                 <nav className="flex items-center space-x-1 bg-slate-100/90 dark:bg-[#1E293B] p-1.5 rounded-2xl border border-slate-200 dark:border-white/10 shrink-0 shadow-xs">
@@ -92,7 +94,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                         to={link.path}
                         className={`whitespace-nowrap px-3.5 py-1.5 rounded-xl text-xs font-black tracking-wide transition-all duration-200 inline-block ${
                           isActive
-                            ? 'bg-[#714B67] dark:bg-[#7C3AED] text-white shadow-md shadow-purple-500/25 border border-purple-400/50'
+                            ? 'bg-[#714B67] dark:bg-[#7C3AED] text-white shadow-md shadow-purple-500/25 border border-purple-400/50 scale-105'
                             : 'text-slate-700 dark:text-slate-300 hover:text-[#7C3AED] dark:hover:text-[#38BDF8] hover:bg-slate-200/60 dark:hover:bg-[#0F172A]'
                         }`}
                       >
@@ -104,7 +106,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
               </div>
             )}
 
-            {/* 3. Right Side User Controls & Actions */}
+            {/* 3. Right Side User Controls & Active CTA Highlight (Request Item 2) */}
             {user ? (
               <div className="flex items-center space-x-2.5 sm:space-x-3 shrink-0">
                 
@@ -121,13 +123,17 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                   />
                 </form>
 
-                {/* Plan New Trip CTA Button */}
+                {/* Plan New Trip CTA Button with Active Location State */}
                 <Link
                   to="/create-trip"
-                  className="hidden sm:flex items-center space-x-1.5 px-3.5 py-2 bg-[#714B67] hover:bg-[#613E57] dark:bg-[#7C3AED] dark:hover:bg-[#6D28D9] text-white text-xs font-black rounded-xl shadow-md shadow-purple-500/20 transition hover:-translate-y-0.5 whitespace-nowrap shrink-0"
+                  className={`hidden sm:flex items-center space-x-1.5 px-3.5 py-2 text-white text-xs font-black rounded-xl shadow-md transition whitespace-nowrap shrink-0 ${
+                    isCreateTripActive
+                      ? 'bg-[#10B981] ring-2 ring-emerald-400 shadow-emerald-500/30 scale-105'
+                      : 'bg-[#714B67] hover:bg-[#613E57] dark:bg-[#7C3AED] dark:hover:bg-[#6D28D9] shadow-purple-500/20 hover:-translate-y-0.5'
+                  }`}
                 >
                   <Plus className="w-4 h-4 shrink-0" />
-                  <span className="whitespace-nowrap">Plan New Trip</span>
+                  <span className="whitespace-nowrap">{isCreateTripActive ? 'Planning New Trip...' : 'Plan New Trip'}</span>
                 </Link>
 
                 {/* User Profile Pill */}
