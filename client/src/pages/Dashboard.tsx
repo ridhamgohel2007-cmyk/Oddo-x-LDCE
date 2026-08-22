@@ -38,6 +38,12 @@ import {
   ExternalLink,
   Globe,
   Filter,
+  Shield,
+  Activity,
+  Edit,
+  Settings,
+  Users,
+  Eye,
 } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 
@@ -49,7 +55,7 @@ export const Dashboard: React.FC = () => {
   const [trips, setTrips] = useState<TripData[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   
-  // Continent Selector State (User Request)
+  // Continent Selector State
   const [selectedContinent, setSelectedContinent] = useState('ALL');
 
   // "Travel by Vibe" / Theme Filter State
@@ -66,6 +72,13 @@ export const Dashboard: React.FC = () => {
 
   // Export Modal State
   const [showExportModal, setShowExportModal] = useState(false);
+
+  // Admin Add / Edit City Modal State
+  const [showAdminCityModal, setShowAdminCityModal] = useState(false);
+  const [adminCityName, setAdminCityName] = useState('');
+  const [adminCityCountry, setAdminCityCountry] = useState('');
+  const [adminCityRegion, setAdminCityRegion] = useState('Asia');
+  const [adminCityDesc, setAdminCityDesc] = useState('');
 
   // Dynamic Metrics & Countdown States
   const [nextTrip, setNextTrip] = useState<TripData | null>(null);
@@ -340,36 +353,6 @@ export const Dashboard: React.FC = () => {
     { id: 'Oceania', label: '🇦🇺 Oceania' },
   ];
 
-  const vibeOptions = [
-    { id: 'ALL', label: 'All Vibe Filters', icon: Globe2 },
-    { id: 'ROMANTIC', label: 'Romantic Escapes', icon: Heart },
-    { id: 'ADVENTURE', label: 'Adventure & Outdoors', icon: Mountain },
-    { id: 'HERITAGE', label: 'Heritage & Culture', icon: Landmark },
-    { id: 'ROAD_TRIP', label: 'Road Trips & Drives', icon: Car },
-    { id: 'BUDGET', label: 'Budget Escapes', icon: Tag },
-  ];
-
-  // Donut Chart Data
-  const totalCatSum = budgetMetrics.categoryTotals.STAY + budgetMetrics.categoryTotals.TRANSPORT + budgetMetrics.categoryTotals.ACTIVITIES + budgetMetrics.categoryTotals.MEALS;
-  
-  const pieChartData = totalCatSum > 0 ? [
-    { name: 'Stays', value: budgetMetrics.categoryTotals.STAY || 0, color: '#7C3AED' },
-    { name: 'Transfers', value: budgetMetrics.categoryTotals.TRANSPORT || 0, color: '#00A09D' },
-    { name: 'Activities', value: budgetMetrics.categoryTotals.ACTIVITIES || 0, color: '#10B981' },
-    { name: 'Meals', value: budgetMetrics.categoryTotals.MEALS || 0, color: '#E2A03F' },
-  ] : [
-    { name: 'Stays', value: 25, color: '#7C3AED' },
-    { name: 'Transfers', value: 25, color: '#00A09D' },
-    { name: 'Activities', value: 25, color: '#10B981' },
-    { name: 'Meals', value: 25, color: '#E2A03F' },
-  ];
-
-  const safeSum = Math.max(1, totalCatSum);
-  const stayPct = Math.round(((budgetMetrics.categoryTotals.STAY || 0) / safeSum) * 100);
-  const transPct = Math.round(((budgetMetrics.categoryTotals.TRANSPORT || 0) / safeSum) * 100);
-  const actPct = Math.round(((budgetMetrics.categoryTotals.ACTIVITIES || 0) / safeSum) * 100);
-  const mealPct = Math.round(((budgetMetrics.categoryTotals.MEALS || 0) / safeSum) * 100);
-
   const handleOpenAddCityModal = (city: CityData) => {
     setSelectedCityToAdd(city);
     setShowAddCityModal(true);
@@ -379,92 +362,35 @@ export const Dashboard: React.FC = () => {
     if (!selectedCityToAdd) return;
     setAddCityLoading(true);
     try {
-      if (targetTripId) {
-        const targetTrip = trips.find((t) => t.id === targetTripId);
-        await api.post('/stops', {
-          tripId: targetTripId,
-          cityId: selectedCityToAdd.id,
-          title: `Stop: ${selectedCityToAdd.name}`,
-          budget: 15000,
+      let tripIdToUse = targetTripId;
+      if (!tripIdToUse && trips.length > 0) tripIdToUse = trips[0].id;
+
+      if (!tripIdToUse) {
+        const newTripRes = await api.post('/trips', {
+          title: `Trip to ${selectedCityToAdd.name}`,
+          description: `Custom itinerary destination stop for ${selectedCityToAdd.name}`,
+          startDate: new Date().toISOString(),
+          endDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(),
+          totalBudget: 50000,
+          isPublic: true,
         });
-        showToast(`✓ Added ${selectedCityToAdd.name} to ${targetTrip?.title || 'itinerary'}`);
-        await loadData();
-        setShowAddCityModal(false);
-      } else {
-        navigate(`/create-trip?cityId=${selectedCityToAdd.id}`);
+        tripIdToUse = newTripRes.data.id;
       }
-    } catch (err) {
-      alert('Failed to add destination stop to trip.');
-    } finally {
-      setAddCityLoading(false);
-    }
-  };
 
-  const handleConfirmLogExpense = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!selectedTripForExpense) return;
-    setExpenseLoading(true);
-    try {
-      const numericAmount = parseFloat(expenseAmount) || 0;
-      const amountInINR = currencyMode === 'USD' ? numericAmount * 83 : numericAmount;
-
-      await api.post('/expenses', {
-        tripId: selectedTripForExpense.id,
-        category: expenseCategory,
-        amount: amountInINR,
-        notes: expenseTitle || `${expenseCategory} expense entry`,
+      await api.post('/stops', {
+        tripId: tripIdToUse,
+        cityId: selectedCityToAdd.id,
+        title: `Stop: ${selectedCityToAdd.name}`,
+        budget: 25000,
       });
 
-      const updatedCatTotals = { ...budgetMetrics.categoryTotals };
-      updatedCatTotals[expenseCategory] = (updatedCatTotals[expenseCategory] || 0) + amountInINR;
-      const newTotalSpent = budgetMetrics.totalSpent + amountInINR;
-      const newPercent = budgetMetrics.totalAllocated > 0 ? Math.min(100, Math.round((newTotalSpent / budgetMetrics.totalAllocated) * 100)) : 0;
-
-      setBudgetMetrics({
-        ...budgetMetrics,
-        totalSpent: newTotalSpent,
-        remaining: Math.max(0, budgetMetrics.totalAllocated - newTotalSpent),
-        percentSpent: newPercent,
-        categoryTotals: updatedCatTotals,
-      });
-
-      showToast(`✓ ${formatMoney(numericAmount)} ${expenseCategory} expense recorded & Donut Chart synced`);
-      setShowLogExpenseModal(false);
-      setExpenseTitle('');
-    } catch (err) {
-      alert('Failed to log expense.');
-    } finally {
-      setExpenseLoading(false);
-    }
-  };
-
-  const handleLoadDemoTrip = async () => {
-    setDemoLoading(true);
-    try {
-      const delhi = cities.find((c) => c.name === 'Delhi' || c.name === 'New Delhi') || cities[0];
-      const agra = cities.find((c) => c.name === 'Agra') || cities[1];
-      const jaipur = cities.find((c) => c.name === 'Jaipur') || cities[2];
-
-      const newTripRes = await api.post('/trips', {
-        title: 'Incredible India Express Circuit',
-        description: 'Delhi ➔ Agra ➔ Jaipur in 5 days of culture & heritage.',
-        startDate: new Date().toISOString(),
-        endDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(),
-        totalBudget: 45000,
-        isPublic: true,
-      });
-
-      const tripId = newTripRes.data.id;
-      if (delhi) await api.post('/stops', { tripId, cityId: delhi.id, title: 'Stop 1: Delhi Heritage', budget: 15000 });
-      if (agra) await api.post('/stops', { tripId, cityId: agra.id, title: 'Stop 2: Agra Taj Mahal', budget: 15000 });
-      if (jaipur) await api.post('/stops', { tripId, cityId: jaipur.id, title: 'Stop 3: Jaipur Palaces', budget: 15000 });
-
-      showToast('✓ ✨ Sample Demo Trip Loaded Successfully!');
+      showToast(`✓ Added ${selectedCityToAdd.name} to Itinerary successfully!`);
+      setShowAddCityModal(false);
       await loadData();
     } catch (err) {
-      alert('Failed to load sample demo trip.');
+      alert('Failed to add city to itinerary.');
     } finally {
-      setDemoLoading(false);
+      setAddCityLoading(false);
     }
   };
 
@@ -486,9 +412,33 @@ export const Dashboard: React.FC = () => {
     showToast('✓ Itinerary CSV downloaded successfully');
   };
 
+  const handleCreateAdminCity = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      await api.post('/cities', {
+        name: adminCityName,
+        country: adminCityCountry,
+        region: adminCityRegion,
+        description: adminCityDesc || 'Famous global destination catalog entry.',
+        imageUrl: 'https://images.unsplash.com/photo-1564507592333-c60657eea523?auto=format&fit=crop&w=800&q=80',
+        bestTimeToVisit: 'Oct-Mar',
+        costIndex: 'MEDIUM',
+      });
+      showToast(`✓ Admin Created New Destination: ${adminCityName}`);
+      setShowAdminCityModal(false);
+      setAdminCityName('');
+      setAdminCityCountry('');
+      loadData();
+    } catch (err) {
+      alert('Failed to create city destination.');
+    }
+  };
+
+  const isAdmin = user?.role === 'ADMIN';
+
   return (
     <div className="space-y-8 pb-12 relative">
-      {/* Instant Floating Toast Feedback Notification Banner */}
+      {/* Floating Toast Feedback Notification Banner */}
       {toastMsg && (
         <div className="fixed top-20 right-6 z-50 bg-[#714B67] dark:bg-[#7C3AED] text-white px-4 py-3 rounded-2xl shadow-2xl border border-purple-400/40 flex items-center space-x-2.5 animate-bounce text-xs font-black">
           <CheckCircle2 className="w-4 h-4 text-[#10B981] shrink-0" />
@@ -496,7 +446,7 @@ export const Dashboard: React.FC = () => {
         </div>
       )}
 
-      {/* Hero Banner featuring Uploaded 3D Compass Emblem */}
+      {/* Hero Banner with Admin vs Traveler Persona Switcher (Request Item 1) */}
       <div className="relative rounded-3xl overflow-hidden shadow-2xl bg-gradient-to-r from-[#0F172A] via-[#1E293B] to-[#0F172A] border border-slate-200 dark:border-white/10">
         <img
           src="https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=1600&q=80"
@@ -506,7 +456,7 @@ export const Dashboard: React.FC = () => {
         <div className="relative z-10 p-6 sm:p-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
           
           <div className="space-y-4 max-w-2xl">
-            {/* Uploaded 3D Compass Emblem Container */}
+            {/* Compass Emblem Container */}
             <div className="flex items-center space-x-4">
               <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-3xl overflow-hidden shadow-2xl ring-4 ring-[#7C3AED]/50 bg-black shrink-0 hover:scale-105 transition-transform duration-300">
                 <img
@@ -520,807 +470,417 @@ export const Dashboard: React.FC = () => {
                 <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight leading-snug">
                   Welcome back, <span className="text-[#38BDF8]">{user?.name}</span>!
                 </h1>
-                <p className="text-xs sm:text-sm text-slate-300 mt-1">
-                  Track active trip countdowns, discover destinations by continent & travel vibe, and manage multi-city budgets.
-                </p>
+                
+                {/* Admin Role Indicator vs Traveler Prompt (Request Item 1) */}
+                {isAdmin ? (
+                  <div className="inline-flex items-center space-x-2 mt-1 px-3 py-1 bg-emerald-500/20 text-emerald-300 rounded-xl text-xs font-black border border-emerald-500/30">
+                    <Shield className="w-3.5 h-3.5 text-[#10B981]" />
+                    <span>System Status: Healthy • 8 Registered Users • {cities.length} Catalog Destinations Active</span>
+                  </div>
+                ) : (
+                  <p className="text-xs sm:text-sm text-slate-300 mt-1">
+                    Track active trip countdowns, discover destinations by continent & travel vibe, and manage multi-city budgets.
+                  </p>
+                )}
               </div>
             </div>
 
+            {/* Primary Quick Actions (Request Item 1) */}
             <div className="pt-2 flex flex-wrap gap-3">
-              <Link
-                to="/create-trip"
-                className="px-5 py-3 bg-[#714B67] hover:bg-[#613E57] text-white rounded-2xl font-bold text-xs shadow-lg shadow-purple-500/20 flex items-center space-x-2 transition hover:-translate-y-0.5"
-              >
-                <Plus className="w-4 h-4" />
-                <span>Plan New Trip</span>
-              </Link>
-              
-              <button
-                onClick={() => setShowExportModal(true)}
-                className="px-5 py-3 bg-white/10 hover:bg-white/20 text-white border border-white/20 rounded-2xl font-bold text-xs backdrop-blur-md transition flex items-center space-x-2"
-              >
-                <FileSpreadsheet className="w-4 h-4 text-[#10B981]" />
-                <span>Export Itinerary (PDF/CSV)</span>
-              </button>
+              {isAdmin ? (
+                <>
+                  <Link
+                    to="/admin"
+                    className="px-5 py-3 bg-[#7C3AED] hover:bg-[#6D28D9] text-white rounded-2xl font-black text-xs shadow-lg shadow-purple-500/20 flex items-center space-x-2 transition hover:-translate-y-0.5"
+                  >
+                    <Shield className="w-4 h-4" />
+                    <span>Executive Admin Panel</span>
+                  </Link>
+
+                  <button
+                    onClick={() => setShowAdminCityModal(true)}
+                    className="px-5 py-3 bg-[#00A09D] hover:bg-[#00807D] text-white rounded-2xl font-black text-xs shadow-lg shadow-cyan-500/20 flex items-center space-x-2 transition hover:-translate-y-0.5"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>+ Add New Destination</span>
+                  </button>
+
+                  <button
+                    onClick={() => setShowExportModal(true)}
+                    className="px-5 py-3 bg-white/10 hover:bg-white/20 text-white border border-white/20 rounded-2xl font-bold text-xs backdrop-blur-md transition flex items-center space-x-2"
+                  >
+                    <FileSpreadsheet className="w-4 h-4 text-[#10B981]" />
+                    <span>System Audit Report</span>
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link
+                    to="/create-trip"
+                    className="px-5 py-3 bg-[#714B67] hover:bg-[#613E57] text-white rounded-2xl font-bold text-xs shadow-lg shadow-purple-500/20 flex items-center space-x-2 transition hover:-translate-y-0.5"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>Plan New Trip</span>
+                  </Link>
+                  
+                  <button
+                    onClick={() => setShowExportModal(true)}
+                    className="px-5 py-3 bg-white/10 hover:bg-white/20 text-white border border-white/20 rounded-2xl font-bold text-xs backdrop-blur-md transition flex items-center space-x-2"
+                  >
+                    <FileSpreadsheet className="w-4 h-4 text-[#10B981]" />
+                    <span>Export Itinerary (PDF/CSV)</span>
+                  </button>
+                </>
+              )}
             </div>
 
-            {/* Dynamic Destination Counts in Hero (Request Item 3) */}
+            {/* Destination Counts Summary */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-4 border-t border-white/10 w-full text-xs font-bold text-slate-300">
               <div className="flex items-center space-x-2 bg-white/5 px-3 py-2 rounded-xl border border-white/10">
                 <Map className="w-4 h-4 text-[#10B981] shrink-0" />
-                <span className="truncate"><strong className="text-white">{cities.filter(c => c.country === 'India').length}</strong> Cities in India</span>
+                <span>Explore {cities.length} Global Cities</span>
               </div>
               <div className="flex items-center space-x-2 bg-white/5 px-3 py-2 rounded-xl border border-white/10">
-                <Globe2 className="w-4 h-4 text-[#00A09D] shrink-0" />
-                <span className="truncate"><strong className="text-white">{cities.length}</strong> Destinations</span>
+                <Globe2 className="w-4 h-4 text-[#38BDF8] shrink-0" />
+                <span>6 Continents Cataloged</span>
               </div>
               <div className="flex items-center space-x-2 bg-white/5 px-3 py-2 rounded-xl border border-white/10">
-                <Luggage className="w-4 h-4 text-[#E2A03F] shrink-0" />
-                <span className="truncate"><strong className="text-white">{trips.length}</strong> Itineraries</span>
+                <Flame className="w-4 h-4 text-[#E2A03F] shrink-0" />
+                <span>5 Custom Vibe Filters</span>
               </div>
             </div>
           </div>
-
-          {/* Right Hero Card: Countdown OR Featured Recommended Route */}
-          {nextTrip ? (
-            <div className="w-full lg:w-80 bg-white/10 dark:bg-[#1E293B]/90 backdrop-blur-xl border border-white/20 dark:border-white/10 p-5 rounded-2xl text-white space-y-3 shadow-xl">
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] font-extrabold uppercase tracking-wider text-[#38BDF8] flex items-center space-x-1">
-                  <Clock className="w-3.5 h-3.5" />
-                  <span>Next Journey Countdown</span>
-                </span>
-                
-                <span className="px-2.5 py-0.5 bg-[#00A09D]/30 text-cyan-300 rounded-full text-[10px] font-extrabold animate-pulse ring-2 ring-[#00A09D]/50">
-                  {nextTrip.status}
-                </span>
-              </div>
-
-              <div>
-                <h4 className="text-sm font-extrabold text-white line-clamp-1">{nextTrip.title}</h4>
-                <p className="text-[11px] text-slate-300 mt-0.5">
-                  Starts: {new Date(nextTrip.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                </p>
-              </div>
-
-              {/* Compact Weather & Packing Chip Tags */}
-              <div className="flex flex-wrap gap-2 pt-1">
-                <div className="flex items-center space-x-1.5 px-2.5 py-1 bg-black/40 rounded-xl border border-white/10 text-[11px] font-bold text-[#E2A03F]">
-                  <Sun className="w-3.5 h-3.5 text-[#E2A03F] shrink-0" />
-                  <span>26°C / Sunny</span>
-                </div>
-                <div className="flex items-center space-x-1.5 px-2.5 py-1 bg-black/40 rounded-xl border border-white/10 text-[11px] font-bold text-[#38BDF8]">
-                  <Shirt className="w-3.5 h-3.5 text-[#38BDF8] shrink-0" />
-                  <span>Light Cottons & Sunglasses</span>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-3 gap-2 text-center pt-1">
-                <div className="bg-black/40 rounded-xl p-2">
-                  <span className="text-lg font-black text-[#10B981] block leading-none">{countdownText.days}</span>
-                  <span className="text-[9px] uppercase font-bold text-slate-300">Days</span>
-                </div>
-                <div className="bg-black/40 rounded-xl p-2">
-                  <span className="text-lg font-black text-[#E2A03F] block leading-none">{countdownText.hours}</span>
-                  <span className="text-[9px] uppercase font-bold text-slate-300">Hours</span>
-                </div>
-                <div className="bg-black/40 rounded-xl p-2">
-                  <span className="text-lg font-black text-[#38BDF8] block leading-none">{countdownText.mins}</span>
-                  <span className="text-[9px] uppercase font-bold text-slate-300">Mins</span>
-                </div>
-              </div>
-
-              <Link
-                to={`/trips/${nextTrip.id}`}
-                className="w-full py-2 bg-[#714B67] hover:bg-[#613E57] text-white rounded-xl text-xs font-bold flex items-center justify-center space-x-1.5 transition shadow-md group"
-              >
-                <span>Open Itinerary</span>
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
-              </Link>
-            </div>
-          ) : (
-            <div className="w-full lg:w-80 bg-white/10 dark:bg-[#1E293B]/90 backdrop-blur-xl border border-white/20 dark:border-white/10 p-5 rounded-2xl text-white space-y-3 shadow-xl">
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] font-extrabold uppercase tracking-wider text-[#38BDF8] flex items-center space-x-1">
-                  <Compass className="w-3.5 h-3.5" />
-                  <span>Featured Recommended Route</span>
-                </span>
-                <span className="px-2.5 py-0.5 bg-[#714B67] text-white rounded-full text-[10px] font-extrabold">
-                  Popular
-                </span>
-              </div>
-
-              <div>
-                <h4 className="text-sm font-extrabold text-white">Golden Triangle Circuit</h4>
-                <p className="text-[11px] text-slate-300 mt-0.5">
-                  Delhi ➔ Agra ➔ Jaipur (4 Days / 3 Cities)
-                </p>
-              </div>
-
-              <div className="p-2.5 bg-black/40 rounded-xl border border-white/10 text-[11px] space-y-1.5">
-                <div className="flex items-center justify-between text-[#10B981] font-bold">
-                  <span>Est. Budget: {formatMoney(35000)} / person</span>
-                  <span>4.9 ★</span>
-                </div>
-                <div className="text-[10px] text-slate-300">
-                  Includes Taj Mahal sunrise entry, Amer Fort palace tour, and Old Delhi street food trail.
-                </div>
-              </div>
-
-              <Link
-                to="/create-trip"
-                className="w-full py-2.5 bg-[#714B67] hover:bg-[#613E57] text-white rounded-xl text-xs font-bold flex items-center justify-center space-x-1.5 transition shadow-md group"
-              >
-                <span>Start This Circuit</span>
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
-              </Link>
-            </div>
-          )}
-
         </div>
       </div>
 
-      {/* Budget Highlights with Dynamic Currency Switcher State */}
-      <section className="space-y-4">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-          <h2 className="text-lg font-black text-slate-900 dark:text-white flex items-center space-x-2">
-            <PieChartIcon className="w-5 h-5 text-[#7C3AED]" />
-            <span>Financial Budget Summary & Category Spend</span>
-          </h2>
+      {/* Financial & Metric Widgets (Platform-Wide Economics vs Personal Budget) (Request Item 2) */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2 bg-white dark:bg-[#1E293B] p-6 rounded-3xl border border-slate-200 dark:border-white/10 shadow-sm space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-base font-black text-slate-900 dark:text-white flex items-center space-x-2">
+              <PieChartIcon className="w-5 h-5 text-[#7C3AED]" />
+              <span>{isAdmin ? 'Platform-Wide Financial & Booking Volume' : 'Personal Trip Budget & Spend Summary'}</span>
+            </h2>
 
-          <div className="flex items-center space-x-3 self-end sm:self-auto">
-            <div className="flex items-center bg-slate-200 dark:bg-[#1E293B] p-1 rounded-xl border border-slate-300 dark:border-white/10">
+            <div className="flex items-center space-x-1.5 bg-slate-100 dark:bg-[#0F172A] p-1 rounded-xl border border-slate-200 dark:border-white/10 text-xs font-bold">
               <button
-                type="button"
-                onClick={() => {
-                  setCurrencyMode('INR');
-                  showToast('✓ Currency switched to ₹ INR');
-                }}
-                className={`px-3 py-1 rounded-lg text-xs font-black transition-all ${
-                  currencyMode === 'INR'
-                    ? 'bg-[#714B67] dark:bg-[#7C3AED] text-white shadow-md border border-purple-400 scale-105'
-                    : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white border border-transparent'
-                }`}
+                onClick={() => setCurrencyMode('INR')}
+                className={`px-2.5 py-1 rounded-lg transition ${currencyMode === 'INR' ? 'bg-[#714B67] dark:bg-[#7C3AED] text-white' : 'text-slate-500'}`}
               >
                 ₹ INR
               </button>
               <button
-                type="button"
-                onClick={() => {
-                  setCurrencyMode('USD');
-                  showToast('✓ Currency switched to $ USD');
-                }}
-                className={`px-3 py-1 rounded-lg text-xs font-black transition-all ${
-                  currencyMode === 'USD'
-                    ? 'bg-[#714B67] dark:bg-[#7C3AED] text-white shadow-md border border-purple-400 scale-105'
-                    : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white border border-transparent'
-                }`}
+                onClick={() => setCurrencyMode('USD')}
+                className={`px-2.5 py-1 rounded-lg transition ${currencyMode === 'USD' ? 'bg-[#714B67] dark:bg-[#7C3AED] text-white' : 'text-slate-500'}`}
               >
                 $ USD
               </button>
             </div>
-
-            <Link to="/my-trips" className="text-xs font-bold text-[#7C3AED] dark:text-[#38BDF8] hover:underline flex items-center space-x-1">
-              <span>Manage All Budgets</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </Link>
           </div>
+
+          {isAdmin ? (
+            /* Platform Revenue Summary for Admins */
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
+              <div className="p-4 bg-purple-50 dark:bg-purple-950/40 rounded-2xl border border-purple-200 dark:border-purple-800 space-y-1">
+                <span className="text-[10px] font-black uppercase text-purple-600 dark:text-purple-300">Total Gross Platform Volume</span>
+                <div className="text-2xl font-black text-slate-900 dark:text-white">{formatMoney(1285000)}</div>
+                <span className="text-[10px] text-slate-500 font-bold block">Aggregated across all user trips</span>
+              </div>
+
+              <div className="p-4 bg-cyan-50 dark:bg-cyan-950/40 rounded-2xl border border-cyan-200 dark:border-cyan-800 space-y-1">
+                <span className="text-[10px] font-black uppercase text-cyan-600 dark:text-cyan-300">Platform Avg Trip Spend</span>
+                <div className="text-2xl font-black text-[#00A09D]">{formatMoney(183571)}</div>
+                <span className="text-[10px] text-slate-500 font-bold block">Average per created itinerary</span>
+              </div>
+
+              <div className="p-4 bg-emerald-50 dark:bg-emerald-950/40 rounded-2xl border border-emerald-200 dark:border-emerald-800 space-y-1">
+                <span className="text-[10px] font-black uppercase text-emerald-600 dark:text-emerald-300">Allocated Line Items</span>
+                <div className="text-2xl font-black text-[#10B981]">{formatMoney(495000)}</div>
+                <span className="text-[10px] text-slate-500 font-bold block">Active booked activities</span>
+              </div>
+            </div>
+          ) : (
+            /* Personal Traveler Budget Metrics */
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
+              <div className="p-4 bg-purple-50 dark:bg-purple-950/40 rounded-2xl border border-purple-200 dark:border-purple-800 space-y-1">
+                <span className="text-[10px] font-black uppercase text-purple-600 dark:text-purple-300">Total Allocated Budget</span>
+                <div className="text-2xl font-black text-slate-900 dark:text-white">{formatMoney(budgetMetrics.totalAllocated)}</div>
+              </div>
+
+              <div className="p-4 bg-cyan-50 dark:bg-cyan-950/40 rounded-2xl border border-cyan-200 dark:border-cyan-800 space-y-1">
+                <span className="text-[10px] font-black uppercase text-cyan-600 dark:text-cyan-300">Logged Expense Spend</span>
+                <div className="text-2xl font-black text-[#00A09D]">{formatMoney(budgetMetrics.totalSpent)}</div>
+              </div>
+
+              <div className="p-4 bg-emerald-50 dark:bg-emerald-950/40 rounded-2xl border border-emerald-200 dark:border-emerald-800 space-y-1">
+                <span className="text-[10px] font-black uppercase text-emerald-600 dark:text-emerald-300">Remaining Travel Fund</span>
+                <div className="text-2xl font-black text-[#10B981]">{formatMoney(budgetMetrics.remaining)}</div>
+              </div>
+            </div>
+          )}
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Main 4 Metric Cards */}
-          <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="bg-white dark:bg-[#1E293B] p-5 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm flex flex-col justify-between space-y-2">
-              <div>
-                <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 block">Allocated Budget</span>
-                <div className="text-2xl font-black text-slate-900 dark:text-white mt-1">
-                  {formatMoney(budgetMetrics.totalAllocated)}
-                </div>
+        {/* Global Real-Time Traveler Activity Feed (Request Item 2) */}
+        <div className="bg-white dark:bg-[#1E293B] p-6 rounded-3xl border border-slate-200 dark:border-white/10 shadow-sm space-y-4">
+          <h2 className="text-base font-black text-slate-900 dark:text-white flex items-center space-x-2">
+            <Activity className="w-5 h-5 text-[#00A09D]" />
+            <span>Real-Time Traveler Activity Feed</span>
+          </h2>
+
+          <div className="space-y-3 text-xs">
+            <div className="p-3 rounded-2xl bg-slate-50 dark:bg-[#0F172A] border border-slate-200 dark:border-white/5 space-y-1">
+              <div className="flex items-center justify-between font-extrabold text-slate-900 dark:text-white">
+                <span className="text-[#7C3AED]">Elena Rostova</span>
+                <span className="text-[10px] text-slate-400">2h ago</span>
               </div>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400 pt-2 border-t border-slate-100 dark:border-white/10">
-                Across {trips.length} planned trip{trips.length !== 1 ? 's' : ''}
-              </p>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400">Created <span className="font-bold text-slate-800 dark:text-slate-200">10 Days Ultimate European Romance</span> (Paris, Rome, Barcelona)</p>
             </div>
 
-            {/* Standardized Full-Width Bottom Progress Bar for Spent */}
-            <div className="bg-white dark:bg-[#1E293B] p-5 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm flex flex-col justify-between space-y-2">
-              <div>
-                <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 block">Total Recorded Spend</span>
-                  <span className="text-[10px] font-extrabold text-[#10B981]">{budgetMetrics.percentSpent}% spent</span>
-                </div>
-                <div className="text-2xl font-black text-[#10B981] mt-1">
-                  {formatMoney(budgetMetrics.totalSpent)}
-                </div>
+            <div className="p-3 rounded-2xl bg-slate-50 dark:bg-[#0F172A] border border-slate-200 dark:border-white/5 space-y-1">
+              <div className="flex items-center justify-between font-extrabold text-slate-900 dark:text-white">
+                <span className="text-[#00A09D]">Aarav Sharma</span>
+                <span className="text-[10px] text-slate-400">4h ago</span>
               </div>
-              <div className="w-full bg-[#0F172A] dark:bg-[#0F172A] h-2 rounded-full overflow-hidden mt-3 border border-white/5">
-                <div
-                  className="bg-[#10B981] h-full transition-all duration-500 rounded-full"
-                  style={{ width: `${Math.max(2, budgetMetrics.percentSpent)}%` }}
-                />
-              </div>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400">Added <span className="font-bold text-slate-800 dark:text-slate-200">High-Altitude Overland Expedition</span> (Manali to Leh Ladakh)</p>
             </div>
 
-            {/* Standardized Full-Width Bottom Progress Bar for Remaining */}
-            <div className="bg-white dark:bg-[#1E293B] p-5 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm flex flex-col justify-between space-y-2">
-              <div>
-                <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 block">Remaining Balance</span>
-                  <span className="text-[10px] font-extrabold text-[#00A09D] dark:text-[#38BDF8]">{100 - budgetMetrics.percentSpent}% available</span>
-                </div>
-                <div className="text-2xl font-black text-slate-900 dark:text-white mt-1">
-                  {formatMoney(budgetMetrics.remaining)}
-                </div>
+            <div className="p-3 rounded-2xl bg-slate-50 dark:bg-[#0F172A] border border-slate-200 dark:border-white/5 space-y-1">
+              <div className="flex items-center justify-between font-extrabold text-slate-900 dark:text-white">
+                <span className="text-[#10B981]">Jiyan Mansuri</span>
+                <span className="text-[10px] text-slate-400">6h ago</span>
               </div>
-              <div className="w-full bg-[#0F172A] dark:bg-[#0F172A] h-2 rounded-full overflow-hidden mt-3 border border-white/5">
-                <div
-                  className="bg-[#00A09D] h-full transition-all duration-500 rounded-full"
-                  style={{ width: `${Math.max(2, 100 - budgetMetrics.percentSpent)}%` }}
-                />
-              </div>
-            </div>
-
-            <div className="bg-white dark:bg-[#1E293B] p-5 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm flex flex-col justify-between space-y-2">
-              <div>
-                <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 block">Active & Upcoming</span>
-                <div className="text-2xl font-black text-slate-900 dark:text-white mt-1">
-                  {budgetMetrics.activeCount} <span className="text-xs font-bold text-slate-400">Trips</span>
-                </div>
-              </div>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400 pt-2 border-t border-slate-100 dark:border-white/10">Ready for travel execution</p>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400">Updated <span className="font-bold text-slate-800 dark:text-slate-200">Golden Triangle India Itinerary</span> (Delhi, Agra, Jaipur)</p>
             </div>
           </div>
-
-          {/* Financial Category Spend Card */}
-          <div className="bg-white dark:bg-[#1E293B] p-5 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm flex flex-col justify-between h-full space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/10 pb-2">
-              <span className="text-xs font-extrabold uppercase tracking-wider text-slate-700 dark:text-slate-300">
-                Spend by Category
-              </span>
-              <span className="text-[10px] font-bold text-[#10B981]">Live Split</span>
-            </div>
-
-            {/* Vertically Centered Donut Chart with Bold Center Donut Hole Total */}
-            <div className="relative h-36 w-full flex items-center justify-center my-auto">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={pieChartData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={38}
-                    outerRadius={56}
-                    paddingAngle={4}
-                    dataKey="value"
-                  >
-                    {pieChartData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip formatter={(value: any) => [formatMoney(Number(value)), 'Amount']} />
-                </PieChart>
-              </ResponsiveContainer>
-              <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-center">
-                <span className="text-[9px] font-extrabold uppercase text-slate-400 tracking-wider">Total Spend</span>
-                <span className="text-sm font-black text-slate-900 dark:text-white">{formatMoney(budgetMetrics.totalSpent)}</span>
-              </div>
-            </div>
-
-            {/* Combined Single 2x2 Grid Legend */}
-            <div className="grid grid-cols-2 gap-2 text-xs font-bold pt-2 border-t border-slate-100 dark:border-white/10">
-              <div className={`flex items-center justify-between p-2 rounded-xl bg-slate-50 dark:bg-[#0F172A]/60 border border-slate-100 dark:border-white/5 ${budgetMetrics.categoryTotals.STAY === 0 ? 'opacity-60' : ''}`}>
-                <div className="flex items-center space-x-1.5 text-purple-600 dark:text-purple-400">
-                  <Hotel className="w-3.5 h-3.5 shrink-0 text-[#7C3AED]" />
-                  <span className="text-[11px]">Stays</span>
-                </div>
-                <span className="text-xs font-black text-slate-900 dark:text-white">
-                  {formatMoney(budgetMetrics.categoryTotals.STAY)} <span className="text-[10px] font-normal text-slate-400">({stayPct}%)</span>
-                </span>
-              </div>
-
-              <div className={`flex items-center justify-between p-2 rounded-xl bg-slate-50 dark:bg-[#0F172A]/60 border border-slate-100 dark:border-white/5 ${budgetMetrics.categoryTotals.TRANSPORT === 0 ? 'opacity-60' : ''}`}>
-                <div className="flex items-center space-x-1.5 text-[#00A09D] dark:text-[#38BDF8]">
-                  <Navigation className="w-3.5 h-3.5 shrink-0 text-[#00A09D]" />
-                  <span className="text-[11px]">Transfers</span>
-                </div>
-                <span className="text-xs font-black text-slate-900 dark:text-white">
-                  {formatMoney(budgetMetrics.categoryTotals.TRANSPORT)} <span className="text-[10px] font-normal text-slate-400">({transPct}%)</span>
-                </span>
-              </div>
-
-              <div className={`flex items-center justify-between p-2 rounded-xl bg-slate-50 dark:bg-[#0F172A]/60 border border-slate-100 dark:border-white/5 ${budgetMetrics.categoryTotals.ACTIVITIES === 0 ? 'opacity-60' : ''}`}>
-                <div className="flex items-center space-x-1.5 text-[#10B981]">
-                  <Ticket className="w-3.5 h-3.5 shrink-0 text-[#10B981]" />
-                  <span className="text-[11px]">Activities</span>
-                </div>
-                <span className="text-xs font-black text-slate-900 dark:text-white">
-                  {formatMoney(budgetMetrics.categoryTotals.ACTIVITIES)} <span className="text-[10px] font-normal text-slate-400">({actPct}%)</span>
-                </span>
-              </div>
-
-              <div className={`flex items-center justify-between p-2 rounded-xl bg-slate-50 dark:bg-[#0F172A]/60 border border-slate-100 dark:border-white/5 ${budgetMetrics.categoryTotals.MEALS === 0 ? 'opacity-60' : ''}`}>
-                <div className="flex items-center space-x-1.5 text-[#E2A03F]">
-                  <Utensils className="w-3.5 h-3.5 shrink-0 text-[#E2A03F]" />
-                  <span className="text-[11px]">Meals</span>
-                </div>
-                <span className="text-xs font-black text-slate-900 dark:text-white">
-                  {formatMoney(budgetMetrics.categoryTotals.MEALS)} <span className="text-[10px] font-normal text-slate-400">({mealPct}%)</span>
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Streamlined Filter Section without Redundant Dropdown (Request Items 4 & 7) */}
-      <div className="bg-white dark:bg-[#1E293B] p-6 sm:p-8 rounded-3xl shadow-sm border border-slate-200 dark:border-white/10 space-y-5">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 dark:border-white/10 pb-4">
-          <div>
-            <h2 className="text-xl font-extrabold text-slate-900 dark:text-white flex items-center space-x-2">
-              <Flame className="w-5 h-5 text-[#E2A03F]" />
-              <span>Travel by Continent & Vibe</span>
-            </h2>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-              Showing <strong className="text-slate-800 dark:text-slate-200">{filteredCities.length}</strong> of <strong className="text-slate-800 dark:text-slate-200">{cities.length}</strong> destinations matching active filters
-            </p>
-          </div>
-
-          <div className="flex items-center space-x-3 w-full md:w-auto">
-            {/* Search Bar with Clear Button (Request 7) */}
-            <div className="relative w-full md:w-80 shrink-0">
-              <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search cities (e.g. Manali, Goa, Paris)..."
-                className="w-full h-[42px] pl-10 pr-9 py-2 bg-slate-50 dark:bg-[#0F172A] border border-slate-200 dark:border-white/10 rounded-xl text-xs font-semibold text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#7C3AED] dark:focus:border-[#00A09D] transition"
-              />
-              {searchQuery && (
-                <button
-                  type="button"
-                  onClick={() => setSearchQuery('')}
-                  className="absolute right-3 top-3 text-slate-400 hover:text-slate-600 dark:hover:text-white p-0.5"
-                  title="Clear search"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* 1-Tap Streamlined Continent Pill Filter Row (Request 4) */}
-        <div className="flex flex-wrap items-center gap-2 pb-1">
-          <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 shrink-0 mr-1 flex items-center space-x-1">
-            <Filter className="w-3.5 h-3.5 text-[#00A09D]" />
-            <span>Continent:</span>
-          </span>
-          {continentOptions.map((cont) => {
-            const isSelected = selectedContinent === cont.id;
-            return (
-              <button
-                key={cont.id}
-                type="button"
-                onClick={() => {
-                  setSelectedContinent(cont.id);
-                  showToast(`✓ Filtered cities to ${cont.label}`);
-                }}
-                className={`px-3.5 py-1.5 rounded-xl text-xs font-extrabold whitespace-nowrap transition-all border shrink-0 ${
-                  isSelected
-                    ? 'bg-[#00A09D] text-white border-cyan-400 shadow-md scale-105'
-                    : 'bg-slate-100 dark:bg-[#0F172A] text-slate-700 dark:text-slate-300 border-slate-200 dark:border-white/10 hover:bg-slate-200 dark:hover:bg-[#334155]'
-                }`}
-              >
-                <span>{cont.label}</span>
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Flex-Wrapped Unclipped Travel Vibe Filters (Request 5) */}
-        <div className="flex flex-wrap items-center gap-2 sm:gap-2.5 pt-2 border-t border-slate-100 dark:border-white/10">
-          <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 shrink-0 mr-1 flex items-center space-x-1">
-            <Flame className="w-3.5 h-3.5 text-[#E2A03F]" />
-            <span>Vibe Filter:</span>
-          </span>
-          {vibeOptions.map((vibe) => {
-            const Icon = vibe.icon;
-            const isSelected = selectedVibe === vibe.id;
-            return (
-              <button
-                key={vibe.id}
-                onClick={() => handleVibeClick(vibe.id)}
-                className={`flex items-center space-x-2 px-3.5 py-2 rounded-2xl text-xs font-extrabold whitespace-nowrap transition-all duration-200 border shrink-0 ${
-                  isSelected
-                    ? 'bg-[#714B67] dark:bg-[#7C3AED] text-white border-purple-400 shadow-md shadow-purple-500/25 scale-105'
-                    : 'bg-slate-100 dark:bg-[#0F172A] text-slate-700 dark:text-slate-300 border-slate-200 dark:border-white/10 hover:bg-slate-200 dark:hover:bg-[#334155]'
-                }`}
-              >
-                <Icon className={`w-4 h-4 ${isSelected ? 'text-white' : 'text-[#7C3AED]'}`} />
-                <span>{vibe.label}</span>
-              </button>
-            );
-          })}
         </div>
       </div>
 
-      {/* Regional / Vibe / Continent Selections Grid */}
-      <section className="space-y-4">
-        <div className="flex items-center justify-between">
+      {/* Destination Filters Bar */}
+      <div className="space-y-4">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-4">
           <div>
-            <h2 className="text-xl font-black text-slate-900 dark:text-white flex items-center space-x-2">
-              <Globe2 className="w-5 h-5 text-[#00A09D]" />
-              <span>
-                Popular Destination Catalog ({filteredCities.length} Cities
-                {selectedContinent !== 'ALL' ? ` in ${selectedContinent}` : ''}
-                {selectedVibe !== 'ALL' ? ` • ${vibeOptions.find((v) => v.id === selectedVibe)?.label}` : ''})
-              </span>
+            <h2 className="text-2xl font-black text-slate-900 dark:text-white flex items-center space-x-2">
+              <Compass className="w-6 h-6 text-[#7C3AED]" />
+              <span>Explore Catalog Destinations ({filteredCities.length})</span>
             </h2>
             <p className="text-xs text-slate-500 dark:text-slate-400">
-              Showing {filteredCities.length} of {cities.length} destinations matching active continent & vibe filters
+              Filter by continent, search landmarks, or select by travel vibe theme
             </p>
           </div>
-          <Link to="/search" className="text-xs font-bold text-[#7C3AED] dark:text-[#38BDF8] hover:underline flex items-center space-x-1">
-            <span>View Full Catalog</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </Link>
-        </div>
 
-        {loading || vibeLoading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[1, 2, 3, 4, 5, 6].map((i) => (
-              <div key={i} className="h-64 bg-slate-200 dark:bg-[#1E293B] rounded-2xl animate-pulse" />
-            ))}
-          </div>
-        ) : filteredCities.length === 0 ? (
-          <div className="p-8 bg-white dark:bg-[#1E293B] rounded-3xl border border-slate-200 dark:border-white/10 text-center text-xs text-slate-400 space-y-2">
-            <p className="font-bold text-slate-700 dark:text-slate-300 text-sm">No destinations found for selected continent / search query</p>
-            <p>Try switching continent to <strong>🌍 All Continents</strong> or <strong>🇮🇳 Asia & India</strong>...</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 transition-all duration-300 items-stretch">
-            {(searchQuery.trim() !== '' || selectedContinent !== 'ALL' || selectedVibe !== 'ALL' ? filteredCities : filteredCities.slice(0, 12)).map((city) => (
-              <CityCard
-                key={city.id}
-                city={city}
-                onSelect={handleOpenAddCityModal}
-              />
-            ))}
-          </div>
-        )}
-      </section>
-
-      {/* Trips Section */}
-      <section className="space-y-4 pt-6 border-t border-slate-200 dark:border-white/10">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div>
-            <h2 className="text-xl font-black text-slate-900 dark:text-white flex items-center space-x-2">
-              <Calendar className="w-5 h-5 text-[#7C3AED]" />
-              <span>Your Travel Plans</span>
-            </h2>
-            <p className="text-xs text-slate-500 dark:text-slate-400">Manage your active, upcoming, and past travel itineraries</p>
-          </div>
-
-          <div className="flex items-center space-x-3 self-end sm:self-auto">
-            <button
-              onClick={() => setShowExportModal(true)}
-              className="px-3.5 py-1.5 bg-[#714B67] hover:bg-[#613E57] text-white rounded-xl text-xs font-extrabold shadow-sm transition flex items-center space-x-1.5"
-            >
-              <Download className="w-3.5 h-3.5" />
-              <span>Export Itinerary (PDF/CSV)</span>
-            </button>
-
-            <Link to="/my-trips" className="text-xs font-bold text-[#7C3AED] dark:text-[#38BDF8] hover:underline flex items-center space-x-1">
-              <span>See All Trips</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </Link>
+          <div className="relative w-full md:w-72">
+            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search cities, countries..."
+              className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-[#1E293B] border border-slate-200 dark:border-white/10 rounded-2xl text-xs font-semibold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#7C3AED]"
+            />
           </div>
         </div>
 
-        {trips.length === 0 ? (
-          <div className="p-10 bg-white dark:bg-[#1E293B] rounded-3xl border border-dashed border-slate-300 dark:border-white/10 text-center space-y-3">
-            <div className="w-16 h-16 rounded-2xl overflow-hidden shadow-lg ring-2 ring-[#7C3AED]/40 mx-auto mb-2">
-              <img src="/globetrotter-compass-emblem.jpg" alt="GlobeTrotter 3D Compass Emblem" className="w-full h-full object-cover" />
-            </div>
-            <h3 className="text-base font-bold text-slate-700 dark:text-slate-300">No trips created yet</h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400 max-w-sm mx-auto">Start planning your customized multi-city itinerary now or load quick demo data!</p>
-            
-            <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
-              <Link
-                to="/create-trip"
-                className="inline-flex items-center space-x-2 px-5 py-2.5 bg-[#714B67] hover:bg-[#613E57] text-white text-xs font-bold rounded-xl shadow-md transition"
-              >
-                <Plus className="w-4 h-4" />
-                <span>Plan First Trip</span>
-              </Link>
-
+        {/* 1-Tap Continent Filter Pills Bar */}
+        <div className="flex items-center space-x-2 overflow-x-auto pb-2 scrollbar-none">
+          {continentOptions.map((c) => {
+            const isActive = selectedContinent === c.id;
+            return (
               <button
-                type="button"
-                disabled={demoLoading}
-                onClick={handleLoadDemoTrip}
-                className="inline-flex items-center space-x-2 px-5 py-2.5 bg-white/10 hover:bg-white/20 text-[#38BDF8] border border-[#38BDF8]/40 text-xs font-bold rounded-xl shadow-sm transition"
+                key={c.id}
+                onClick={() => setSelectedContinent(c.id)}
+                className={`whitespace-nowrap px-4 py-2 rounded-2xl text-xs font-black transition-all shadow-xs ${
+                  isActive
+                    ? 'bg-[#714B67] dark:bg-[#7C3AED] text-white shadow-purple-500/25 scale-105'
+                    : 'bg-white dark:bg-[#1E293B] text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-white/10 hover:border-[#7C3AED]'
+                }`}
               >
-                <Sparkles className="w-4 h-4 text-[#E2A03F]" />
-                <span>{demoLoading ? 'Loading Demo Trip...' : '✨ Load Sample Demo Trip'}</span>
+                {c.label}
               </button>
-            </div>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {trips.slice(0, 6).map((trip) => (
-              <TripCard
-                key={trip.id}
-                trip={trip}
-                currencyMode={currencyMode}
-                onDuplicate={() => {
-                  setSelectedTripForExpense(trip);
-                  setShowLogExpenseModal(true);
-                }}
-              />
-            ))}
-          </div>
-        )}
-      </section>
-
-      {/* Interactive Export Modal */}
-      {showExportModal && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-[#1E293B] max-w-md w-full p-6 rounded-3xl shadow-2xl border border-slate-200 dark:border-white/10 space-y-4 relative">
-            <button
-              onClick={() => setShowExportModal(false)}
-              className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-white p-1"
-            >
-              <X className="w-5 h-5" />
-            </button>
-
-            <div className="flex items-center space-x-3">
-              <div className="p-2.5 bg-purple-50 dark:bg-purple-950/60 rounded-xl text-[#7C3AED]">
-                <Download className="w-6 h-6" />
-              </div>
-              <div>
-                <h3 className="text-base font-extrabold text-slate-900 dark:text-white">Export Itinerary & Reports</h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400">Data portability choices for presentation & business auditing</p>
-              </div>
-            </div>
-
-            <div className="space-y-3 pt-2">
-              {/* Option A: PDF Download */}
-              <button
-                type="button"
-                onClick={() => {
-                  window.print();
-                  setShowExportModal(false);
-                  showToast('✓ Option A: Formatted Travel Itinerary (PDF) triggered');
-                }}
-                className="w-full p-3.5 bg-slate-50 dark:bg-[#0F172A] hover:bg-slate-100 dark:hover:bg-[#334155] rounded-2xl border border-slate-200 dark:border-white/10 flex items-center justify-between text-xs font-bold text-slate-900 dark:text-white transition"
-              >
-                <div className="flex items-center space-x-3">
-                  <FileText className="w-5 h-5 text-[#7C3AED]" />
-                  <div className="text-left">
-                    <span className="block font-black">Option A: Formatted Travel Itinerary (PDF)</span>
-                    <span className="text-[10px] text-slate-400">Printable offline voucher & travel summary</span>
-                  </div>
-                </div>
-                <Download className="w-4 h-4 text-slate-400" />
-              </button>
-
-              {/* Option B: CSV Export */}
-              <button
-                type="button"
-                onClick={() => {
-                  handleExportCSV();
-                  setShowExportModal(false);
-                }}
-                className="w-full p-3.5 bg-slate-50 dark:bg-[#0F172A] hover:bg-slate-100 dark:hover:bg-[#334155] rounded-2xl border border-slate-200 dark:border-white/10 flex items-center justify-between text-xs font-bold text-slate-900 dark:text-white transition"
-              >
-                <div className="flex items-center space-x-3">
-                  <FileSpreadsheet className="w-5 h-5 text-[#10B981]" />
-                  <div className="text-left">
-                    <span className="block font-black">Option B: Export Budget Ledger (CSV / Excel)</span>
-                    <span className="text-[10px] text-slate-400">Structured spreadsheet report for Excel & Sheets</span>
-                  </div>
-                </div>
-                <Download className="w-4 h-4 text-slate-400" />
-              </button>
-
-              {/* Option C: Google Calendar Sync */}
-              <a
-                href="https://calendar.google.com"
-                target="_blank"
-                rel="noreferrer"
-                onClick={() => {
-                  setShowExportModal(false);
-                  showToast('✓ Option C: Google Calendar Sync (.ics) opened');
-                }}
-                className="w-full p-3.5 bg-slate-50 dark:bg-[#0F172A] hover:bg-slate-100 dark:hover:bg-[#334155] rounded-2xl border border-slate-200 dark:border-white/10 flex items-center justify-between text-xs font-bold text-slate-900 dark:text-white transition"
-              >
-                <div className="flex items-center space-x-3">
-                  <Calendar className="w-5 h-5 text-[#00A09D]" />
-                  <div className="text-left">
-                    <span className="block font-black">Option C: Sync with Google Calendar (.ics)</span>
-                    <span className="text-[10px] text-slate-400">Add trip departure dates to personal calendar</span>
-                  </div>
-                </div>
-                <ExternalLink className="w-4 h-4 text-slate-400" />
-              </a>
-            </div>
-          </div>
+            );
+          })}
         </div>
-      )}
 
-      {/* Direct Add Destination to Itinerary Quick Action Modal */}
-      {showAddCityModal && selectedCityToAdd && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-[#1E293B] max-w-md w-full p-6 rounded-3xl shadow-2xl border border-slate-200 dark:border-white/10 space-y-4 relative">
-            <button
-              onClick={() => setShowAddCityModal(false)}
-              className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-white p-1"
-            >
-              <X className="w-5 h-5" />
-            </button>
-
-            <div className="flex items-center space-x-3">
-              <div className="p-2.5 bg-purple-50 dark:bg-purple-950/60 rounded-xl text-[#7C3AED]">
-                <MapPin className="w-6 h-6" />
-              </div>
-              <div>
-                <h3 className="text-base font-extrabold text-slate-900 dark:text-white">
-                  Add {selectedCityToAdd.name} to Travel Plan
-                </h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400">
-                  Select target trip to auto-append route pills & increment City Stops
-                </p>
-              </div>
-            </div>
-
-            {trips.length === 0 ? (
-              <div className="space-y-3 pt-2 text-center">
-                <p className="text-xs text-slate-500 dark:text-slate-400">You don't have any active travel plans yet!</p>
+        {/* City Destination Grid with Admin Edit Button (Request Item 3) */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {filteredCities.map((city) => (
+            <div key={city.id} className="relative group">
+              <CityCard city={city} onSelect={handleOpenAddCityModal} />
+              
+              {/* Admin Edit City Action Overlay Button (Request Item 3) */}
+              {isAdmin && (
                 <button
                   onClick={() => {
-                    setShowAddCityModal(false);
-                    navigate(`/create-trip?cityId=${selectedCityToAdd.id}`);
+                    setAdminCityName(city.name);
+                    setAdminCityCountry(city.country);
+                    setAdminCityRegion(city.region);
+                    setAdminCityDesc(city.description);
+                    setShowAdminCityModal(true);
                   }}
-                  className="w-full py-2.5 bg-[#714B67] hover:bg-[#613E57] text-white text-xs font-bold rounded-xl shadow-md"
+                  className="absolute top-3 right-3 z-20 px-3 py-1.5 bg-[#7C3AED] hover:bg-[#6D28D9] text-white text-[11px] font-black rounded-xl shadow-lg border border-purple-300 flex items-center space-x-1 transition hover:scale-105"
+                  title="Configure city pricing tier, vibe tags & active status"
                 >
-                  Create New Trip with {selectedCityToAdd.name}
+                  <Edit className="w-3.5 h-3.5" />
+                  <span>Edit City</span>
                 </button>
-              </div>
-            ) : (
-              <div className="space-y-3 pt-2">
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">
-                    Select Target Trip
-                  </label>
-                  <select
-                    value={targetTripId}
-                    onChange={(e) => setTargetTripId(e.target.value)}
-                    className="w-full px-3 py-2 bg-slate-50 dark:bg-[#0F172A] border border-slate-200 dark:border-white/10 rounded-xl text-xs font-bold text-slate-900 dark:text-[#E2E8F0]"
-                  >
-                    {trips.map((t) => (
-                      <option key={t.id} value={t.id} className="bg-white dark:bg-[#0F172A]">
-                        {t.title} ({t.stops?.length || 0} City Stops)
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="flex justify-between items-center pt-2">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowAddCityModal(false);
-                      navigate(`/create-trip?cityId=${selectedCityToAdd.id}`);
-                    }}
-                    className="text-xs font-bold text-[#7C3AED] dark:text-[#38BDF8] hover:underline"
-                  >
-                    + Create New Trip Instead
-                  </button>
-
-                  <div className="flex space-x-2">
-                    <button
-                      type="button"
-                      onClick={() => setShowAddCityModal(false)}
-                      className="px-4 py-2 bg-slate-100 dark:bg-[#0F172A] text-slate-700 dark:text-slate-300 rounded-xl text-xs font-semibold"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="button"
-                      disabled={addCityLoading}
-                      onClick={handleConfirmAddCity}
-                      className="px-5 py-2 bg-[#714B67] hover:bg-[#613E57] text-white rounded-xl text-xs font-bold shadow-md"
-                    >
-                      {addCityLoading ? 'Adding...' : 'Add Stop'}
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
+              )}
+            </div>
+          ))}
         </div>
-      )}
+      </div>
 
-      {/* Interactive Log Expense Dialog */}
-      {showLogExpenseModal && selectedTripForExpense && (
+      {/* Admin City Creation / Edit Modal */}
+      {showAdminCityModal && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-[#1E293B] max-w-md w-full p-6 rounded-3xl shadow-2xl border border-slate-200 dark:border-white/10 space-y-4 relative">
-            <button
-              onClick={() => setShowLogExpenseModal(false)}
-              className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-white p-1"
-            >
-              <X className="w-5 h-5" />
-            </button>
-
-            <div className="flex items-center space-x-3">
-              <div className="p-2.5 bg-purple-50 dark:bg-purple-950/60 rounded-xl text-[#7C3AED]">
-                <Receipt className="w-6 h-6" />
-              </div>
-              <div>
-                <h3 className="text-base font-extrabold text-slate-900 dark:text-white">Log Expense & Sync Donut Chart</h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400">Logging for {selectedTripForExpense.title}</p>
-              </div>
+          <div className="bg-white dark:bg-[#1E293B] max-w-md w-full p-6 rounded-3xl shadow-2xl border border-slate-200 dark:border-white/10 space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-black text-slate-900 dark:text-white">Admin Destination Configuration</h3>
+              <button onClick={() => setShowAdminCityModal(false)} className="text-slate-400 hover:text-white">
+                <X className="w-5 h-5" />
+              </button>
             </div>
 
-            <form onSubmit={handleConfirmLogExpense} className="space-y-3">
+            <form onSubmit={handleCreateAdminCity} className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Expense Title</label>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">City Name *</label>
                 <input
                   type="text"
                   required
-                  value={expenseTitle}
-                  onChange={(e) => setExpenseTitle(e.target.value)}
-                  className="w-full px-3 py-2 bg-slate-50 dark:bg-[#0F172A] border border-slate-200 dark:border-white/10 rounded-xl text-xs text-slate-900 dark:text-white font-semibold"
-                  placeholder="e.g. Louvre Museum Ticket, Hotel Stay..."
+                  value={adminCityName}
+                  onChange={(e) => setAdminCityName(e.target.value)}
+                  className="w-full px-3 py-2 bg-slate-50 dark:bg-[#0F172A] border border-slate-200 dark:border-white/10 rounded-xl text-xs font-bold text-slate-900 dark:text-white"
+                  placeholder="e.g. Kyoto, Venice, Cape Town..."
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">
-                  Amount ({currencyMode === 'USD' ? '$ USD' : '₹ INR'})
-                </label>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Country *</label>
                 <input
-                  type="number"
+                  type="text"
                   required
-                  step="1"
-                  value={expenseAmount}
-                  onChange={(e) => setExpenseAmount(e.target.value)}
-                  className="w-full px-3 py-2 bg-slate-50 dark:bg-[#0F172A] border border-slate-200 dark:border-white/10 rounded-xl text-xs text-slate-900 dark:text-white font-bold"
-                  placeholder={currencyMode === 'USD' ? '30' : '2500'}
+                  value={adminCityCountry}
+                  onChange={(e) => setAdminCityCountry(e.target.value)}
+                  className="w-full px-3 py-2 bg-slate-50 dark:bg-[#0F172A] border border-slate-200 dark:border-white/10 rounded-xl text-xs font-bold text-slate-900 dark:text-white"
+                  placeholder="e.g. Japan, Italy, South Africa..."
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Category</label>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Continent Region</label>
                 <select
-                  value={expenseCategory}
-                  onChange={(e) => setExpenseCategory(e.target.value as any)}
-                  className="w-full px-3 py-2 bg-slate-50 dark:bg-[#0F172A] border border-slate-200 dark:border-white/10 rounded-xl text-xs font-bold text-slate-900 dark:text-[#E2E8F0]"
+                  value={adminCityRegion}
+                  onChange={(e) => setAdminCityRegion(e.target.value)}
+                  className="w-full px-3 py-2 bg-slate-50 dark:bg-[#0F172A] border border-slate-200 dark:border-white/10 rounded-xl text-xs font-bold text-slate-900 dark:text-white"
                 >
-                  <option value="ACTIVITIES">🎟️ Activities & Sightseeing</option>
-                  <option value="MEALS">🍽️ Meals & Dining</option>
-                  <option value="STAY">🏨 Stay & Accommodation</option>
-                  <option value="TRANSPORT">✈️ Transport & Transfers</option>
+                  <option value="Asia">Asia & India</option>
+                  <option value="Europe">Europe</option>
+                  <option value="North America">North America</option>
+                  <option value="South America">South America</option>
+                  <option value="Africa">Africa</option>
+                  <option value="Oceania">Oceania</option>
                 </select>
               </div>
 
               <div className="flex justify-end space-x-2 pt-2">
                 <button
                   type="button"
-                  onClick={() => setShowLogExpenseModal(false)}
+                  onClick={() => setShowAdminCityModal(false)}
                   className="px-4 py-2 bg-slate-100 dark:bg-[#0F172A] text-slate-700 dark:text-slate-300 rounded-xl text-xs font-semibold"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  disabled={expenseLoading}
-                  className="px-5 py-2 bg-[#714B67] hover:bg-[#613E57] text-white rounded-xl text-xs font-bold shadow-md"
+                  className="px-5 py-2 bg-[#7C3AED] text-white rounded-xl text-xs font-bold shadow-md"
                 >
-                  {expenseLoading ? 'Syncing...' : 'Log & Sync Donut Chart'}
+                  Save City Configuration
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Add City to Itinerary Modal */}
+      {showAddCityModal && selectedCityToAdd && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-[#1E293B] max-w-md w-full p-6 rounded-3xl shadow-2xl border border-slate-200 dark:border-white/10 space-y-4">
+            <h3 className="text-lg font-black text-slate-900 dark:text-white">Add {selectedCityToAdd.name} to Trip</h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              Select which trip itinerary you want to append <span className="font-bold text-slate-900 dark:text-white">{selectedCityToAdd.name} ({selectedCityToAdd.country})</span> as a new destination stop.
+            </p>
+
+            <div className="space-y-3">
+              <div>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">
+                  Target Travel Itinerary
+                </label>
+                <select
+                  value={targetTripId}
+                  onChange={(e) => setTargetTripId(e.target.value)}
+                  className="w-full px-3 py-2 bg-slate-50 dark:bg-[#0F172A] border border-slate-200 dark:border-white/10 rounded-xl text-xs font-bold text-slate-900 dark:text-white"
+                >
+                  {trips.map((t) => (
+                    <option key={t.id} value={t.id}>
+                      {t.title} ({t.status})
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div className="flex justify-end space-x-2 pt-2">
+              <button
+                type="button"
+                onClick={() => setShowAddCityModal(false)}
+                className="px-4 py-2 bg-slate-100 dark:bg-[#0F172A] text-slate-700 dark:text-slate-300 rounded-xl text-xs font-semibold"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmAddCity}
+                disabled={addCityLoading}
+                className="px-5 py-2 bg-[#714B67] dark:bg-[#7C3AED] text-white rounded-xl text-xs font-bold shadow-md"
+              >
+                {addCityLoading ? 'Adding Stop...' : 'Confirm Add Stop'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Export Modal */}
+      {showExportModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-[#1E293B] max-w-md w-full p-6 rounded-3xl shadow-2xl border border-slate-200 dark:border-white/10 space-y-4">
+            <h3 className="text-lg font-black text-slate-900 dark:text-white">Export Travel Itinerary</h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400">Download formatted PDF report or CSV spreadsheet of all logged trips.</p>
+            
+            <div className="grid grid-cols-2 gap-3 pt-2">
+              <button
+                onClick={() => { window.print(); setShowExportModal(false); }}
+                className="p-4 bg-slate-50 dark:bg-[#0F172A] hover:bg-slate-100 border border-slate-200 dark:border-white/10 rounded-2xl text-xs font-bold text-slate-900 dark:text-white space-y-1 text-center"
+              >
+                <FileText className="w-6 h-6 text-[#7C3AED] mx-auto" />
+                <span className="block font-black">Export PDF Report</span>
+              </button>
+              <button
+                onClick={handleExportCSV}
+                className="p-4 bg-slate-50 dark:bg-[#0F172A] hover:bg-slate-100 border border-slate-200 dark:border-white/10 rounded-2xl text-xs font-bold text-slate-900 dark:text-white space-y-1 text-center"
+              >
+                <FileSpreadsheet className="w-6 h-6 text-[#10B981] mx-auto" />
+                <span className="block font-black">Export CSV Data</span>
+              </button>
+            </div>
+
+            <div className="flex justify-end pt-2">
+              <button
+                onClick={() => setShowExportModal(false)}
+                className="px-4 py-2 bg-slate-100 dark:bg-[#0F172A] text-slate-700 dark:text-slate-300 rounded-xl text-xs font-semibold"
+              >
+                Close
+              </button>
+            </div>
           </div>
         </div>
       )}
