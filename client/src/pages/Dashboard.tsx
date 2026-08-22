@@ -35,6 +35,9 @@ import {
   X,
   MapPin,
   CheckCircle2,
+  Download,
+  FileSpreadsheet,
+  Receipt,
 } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 
@@ -66,97 +69,110 @@ export const Dashboard: React.FC = () => {
     categoryTotals: { STAY: 0, TRANSPORT: 0, ACTIVITIES: 0, MEALS: 0 } as any,
   });
 
-  // Direct "Add City to Itinerary" Modal State (Request 4)
+  // Direct "Add City to Itinerary" Modal State (Request 2)
   const [showAddCityModal, setShowAddCityModal] = useState(false);
   const [selectedCityToAdd, setSelectedCityToAdd] = useState<CityData | null>(null);
   const [targetTripId, setTargetTripId] = useState('');
   const [addCityLoading, setAddCityLoading] = useState(false);
   const [addCitySuccessMsg, setAddCitySuccessMsg] = useState('');
 
+  // Interactive Log Expense Modal State (Request 4)
+  const [showLogExpenseModal, setShowLogExpenseModal] = useState(false);
+  const [selectedTripForExpense, setSelectedTripForExpense] = useState<TripData | null>(null);
+  const [expenseTitle, setExpenseTitle] = useState('');
+  const [expenseAmount, setExpenseAmount] = useState('2500');
+  const [expenseCategory, setExpenseCategory] = useState<'STAY' | 'TRANSPORT' | 'ACTIVITIES' | 'MEALS'>('ACTIVITIES');
+  const [expenseLoading, setExpenseLoading] = useState(false);
+  const [expenseSuccessMsg, setExpenseSuccessMsg] = useState('');
+
+  const loadData = async () => {
+    try {
+      const [citiesRes, tripsRes] = await Promise.all([
+        api.get('/cities'),
+        api.get('/trips'),
+      ]);
+
+      const allTrips: TripData[] = tripsRes.data;
+      setCities(citiesRes.data);
+      setTrips(allTrips);
+      if (allTrips.length > 0 && !targetTripId) {
+        setTargetTripId(allTrips[0].id);
+      }
+
+      recalculateMetrics(allTrips);
+    } catch (err) {
+      console.error('Error loading dashboard data:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [citiesRes, tripsRes] = await Promise.all([
-          api.get('/cities'),
-          api.get('/trips'),
-        ]);
+    loadData();
+  }, []);
 
-        const allTrips: TripData[] = tripsRes.data;
-        setCities(citiesRes.data);
-        setTrips(allTrips);
-        if (allTrips.length > 0) {
-          setTargetTripId(allTrips[0].id);
-        }
+  const recalculateMetrics = (allTrips: TripData[]) => {
+    let totalAllocated = 0;
+    let totalSpent = 0;
+    let activeCount = 0;
+    const catTotals = { STAY: 0, TRANSPORT: 0, ACTIVITIES: 0, MEALS: 0 };
 
-        let totalAllocated = 0;
-        let totalSpent = 0;
-        let activeCount = 0;
-        const catTotals = { STAY: 0, TRANSPORT: 0, ACTIVITIES: 0, MEALS: 0 };
-
-        allTrips.forEach((t) => {
-          totalAllocated += t.totalBudget || 0;
-          if (t.status === 'ONGOING' || t.status === 'UPCOMING') {
-            activeCount++;
-          }
-          if (t.stops) {
-            t.stops.forEach((s: any) => {
-              if (s.items) {
-                s.items.forEach((item: any) => {
-                  totalSpent += item.cost || 0;
-                  const type = (item.type || 'ACTIVITIES').toUpperCase();
-                  if (type === 'STAY') catTotals.STAY += item.cost || 0;
-                  else if (type === 'TRANSPORT') catTotals.TRANSPORT += item.cost || 0;
-                  else if (type === 'MEAL') catTotals.MEALS += item.cost || 0;
-                  else catTotals.ACTIVITIES += item.cost || 0;
-                });
-              }
+    allTrips.forEach((t) => {
+      totalAllocated += t.totalBudget || 0;
+      if (t.status === 'ONGOING' || t.status === 'UPCOMING') {
+        activeCount++;
+      }
+      if (t.stops) {
+        t.stops.forEach((s: any) => {
+          if (s.items) {
+            s.items.forEach((item: any) => {
+              totalSpent += item.cost || 0;
+              const type = (item.type || 'ACTIVITIES').toUpperCase();
+              if (type === 'STAY') catTotals.STAY += item.cost || 0;
+              else if (type === 'TRANSPORT') catTotals.TRANSPORT += item.cost || 0;
+              else if (type === 'MEAL') catTotals.MEALS += item.cost || 0;
+              else catTotals.ACTIVITIES += item.cost || 0;
             });
           }
         });
-
-        if (totalSpent === 0 && totalAllocated > 0) {
-          totalSpent = Math.round(totalAllocated * 0.42);
-          catTotals.STAY = Math.round(totalSpent * 0.45);
-          catTotals.TRANSPORT = Math.round(totalSpent * 0.25);
-          catTotals.ACTIVITIES = Math.round(totalSpent * 0.20);
-          catTotals.MEALS = Math.round(totalSpent * 0.10);
-        }
-
-        const remaining = totalAllocated - totalSpent;
-        const percentSpent = totalAllocated > 0 ? Math.min(100, Math.round((totalSpent / totalAllocated) * 100)) : 0;
-
-        setBudgetMetrics({
-          totalAllocated,
-          totalSpent,
-          remaining,
-          activeCount,
-          percentSpent,
-          categoryTotals: catTotals,
-        });
-
-        const now = new Date();
-        const upcoming = allTrips
-          .filter((t) => new Date(t.startDate) >= now || t.status === 'ONGOING' || t.status === 'UPCOMING')
-          .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
-
-        if (upcoming.length > 0) {
-          setNextTrip(upcoming[0]);
-          calculateCountdown(upcoming[0].startDate);
-        } else if (allTrips.length > 0) {
-          setNextTrip(allTrips[0]);
-          calculateCountdown(allTrips[0].startDate);
-        } else {
-          setNextTrip(null);
-        }
-      } catch (err) {
-        console.error('Error loading dashboard data:', err);
-      } finally {
-        setLoading(false);
       }
-    };
+    });
 
-    fetchData();
-  }, []);
+    if (totalSpent === 0 && totalAllocated > 0) {
+      totalSpent = Math.round(totalAllocated * 0.42);
+      catTotals.STAY = Math.round(totalSpent * 0.45);
+      catTotals.TRANSPORT = Math.round(totalSpent * 0.25);
+      catTotals.ACTIVITIES = Math.round(totalSpent * 0.20);
+      catTotals.MEALS = Math.round(totalSpent * 0.10);
+    }
+
+    const remaining = Math.max(0, totalAllocated - totalSpent);
+    const percentSpent = totalAllocated > 0 ? Math.min(100, Math.round((totalSpent / totalAllocated) * 100)) : 0;
+
+    setBudgetMetrics({
+      totalAllocated,
+      totalSpent,
+      remaining,
+      activeCount,
+      percentSpent,
+      categoryTotals: catTotals,
+    });
+
+    const now = new Date();
+    const upcoming = allTrips
+      .filter((t) => new Date(t.startDate) >= now || t.status === 'ONGOING' || t.status === 'UPCOMING')
+      .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
+
+    if (upcoming.length > 0) {
+      setNextTrip(upcoming[0]);
+      calculateCountdown(upcoming[0].startDate);
+    } else if (allTrips.length > 0) {
+      setNextTrip(allTrips[0]);
+      calculateCountdown(allTrips[0].startDate);
+    } else {
+      setNextTrip(null);
+    }
+  };
 
   const calculateCountdown = (targetDateStr: string) => {
     const target = new Date(targetDateStr).getTime();
@@ -226,18 +242,26 @@ export const Dashboard: React.FC = () => {
     { id: 'BUDGET', label: 'Budget Escapes', icon: Tag },
   ];
 
-  const pieChartData = [
+  // Donut Chart Data with Non-Zero Fallbacks to Prevent NaN & Pie Artifacts (Request 1)
+  const totalCatSum = budgetMetrics.categoryTotals.STAY + budgetMetrics.categoryTotals.TRANSPORT + budgetMetrics.categoryTotals.ACTIVITIES + budgetMetrics.categoryTotals.MEALS;
+  
+  const pieChartData = totalCatSum > 0 ? [
     { name: 'Stays', value: budgetMetrics.categoryTotals.STAY || 0, color: '#7C3AED' },
     { name: 'Transfers', value: budgetMetrics.categoryTotals.TRANSPORT || 0, color: '#00A09D' },
     { name: 'Activities', value: budgetMetrics.categoryTotals.ACTIVITIES || 0, color: '#10B981' },
     { name: 'Meals', value: budgetMetrics.categoryTotals.MEALS || 0, color: '#E2A03F' },
+  ] : [
+    { name: 'Stays', value: 25, color: '#7C3AED' },
+    { name: 'Transfers', value: 25, color: '#00A09D' },
+    { name: 'Activities', value: 25, color: '#10B981' },
+    { name: 'Meals', value: 25, color: '#E2A03F' },
   ];
 
-  const totalCatSum = Math.max(1, budgetMetrics.categoryTotals.STAY + budgetMetrics.categoryTotals.TRANSPORT + budgetMetrics.categoryTotals.ACTIVITIES + budgetMetrics.categoryTotals.MEALS);
-  const stayPct = Math.round((budgetMetrics.categoryTotals.STAY / totalCatSum) * 100);
-  const transPct = Math.round((budgetMetrics.categoryTotals.TRANSPORT / totalCatSum) * 100);
-  const actPct = Math.round((budgetMetrics.categoryTotals.ACTIVITIES / totalCatSum) * 100);
-  const mealPct = Math.round((budgetMetrics.categoryTotals.MEALS / totalCatSum) * 100);
+  const safeSum = Math.max(1, totalCatSum);
+  const stayPct = Math.round(((budgetMetrics.categoryTotals.STAY || 0) / safeSum) * 100);
+  const transPct = Math.round(((budgetMetrics.categoryTotals.TRANSPORT || 0) / safeSum) * 100);
+  const actPct = Math.round(((budgetMetrics.categoryTotals.ACTIVITIES || 0) / safeSum) * 100);
+  const mealPct = Math.round(((budgetMetrics.categoryTotals.MEALS || 0) / safeSum) * 100);
 
   const handleOpenAddCityModal = (city: CityData) => {
     setSelectedCityToAdd(city);
@@ -257,6 +281,7 @@ export const Dashboard: React.FC = () => {
           budget: 15000,
         });
         setAddCitySuccessMsg(`Added ${selectedCityToAdd.name} to target trip!`);
+        await loadData(); // Auto-append to trip's route pills and update City Stops counter dynamically
         setTimeout(() => {
           setShowAddCityModal(false);
           setAddCitySuccessMsg('');
@@ -269,6 +294,67 @@ export const Dashboard: React.FC = () => {
     } finally {
       setAddCityLoading(false);
     }
+  };
+
+  // Interactive Log Expense Submission (Request 4)
+  const handleConfirmLogExpense = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedTripForExpense) return;
+    setExpenseLoading(true);
+    try {
+      const numericAmount = parseFloat(expenseAmount) || 0;
+      const amountInINR = currencyMode === 'USD' ? numericAmount * 83 : numericAmount;
+
+      await api.post('/expenses', {
+        tripId: selectedTripForExpense.id,
+        category: expenseCategory,
+        amount: amountInINR,
+        notes: expenseTitle || `${expenseCategory} expense entry`,
+      });
+
+      // Instantly animate Donut Chart & Category Progress Bar
+      const updatedCatTotals = { ...budgetMetrics.categoryTotals };
+      updatedCatTotals[expenseCategory] = (updatedCatTotals[expenseCategory] || 0) + amountInINR;
+      const newTotalSpent = budgetMetrics.totalSpent + amountInINR;
+      const newPercent = budgetMetrics.totalAllocated > 0 ? Math.min(100, Math.round((newTotalSpent / budgetMetrics.totalAllocated) * 100)) : 0;
+
+      setBudgetMetrics({
+        ...budgetMetrics,
+        totalSpent: newTotalSpent,
+        remaining: Math.max(0, budgetMetrics.totalAllocated - newTotalSpent),
+        percentSpent: newPercent,
+        categoryTotals: updatedCatTotals,
+      });
+
+      setExpenseSuccessMsg('Expense logged! Donut chart & spend metrics updated in real-time.');
+      setTimeout(() => {
+        setShowLogExpenseModal(false);
+        setExpenseSuccessMsg('');
+        setExpenseTitle('');
+      }, 1500);
+    } catch (err) {
+      alert('Failed to log expense.');
+    } finally {
+      setExpenseLoading(false);
+    }
+  };
+
+  // Export Itinerary CSV Functionality (Request 5)
+  const handleExportCSV = () => {
+    let csvContent = 'data:text/csv;charset=utf-8,';
+    csvContent += 'Trip ID,Title,Status,Start Date,End Date,Total Budget (INR),Destination Count\n';
+
+    trips.forEach((t) => {
+      csvContent += `"${t.id}","${t.title}","${t.status}","${t.startDate}","${t.endDate}",${t.totalBudget},${t.stops?.length || 0}\n`;
+    });
+
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', 'GlobeTrotter_Travel_Itineraries.csv');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   return (
@@ -302,12 +388,13 @@ export const Dashboard: React.FC = () => {
                 <Plus className="w-4 h-4" />
                 <span>Plan New Trip</span>
               </Link>
-              <Link
-                to="/community"
-                className="px-5 py-3 bg-white/10 hover:bg-white/20 text-white border border-white/20 rounded-2xl font-bold text-xs backdrop-blur-md transition"
+              <button
+                onClick={handleExportCSV}
+                className="px-5 py-3 bg-white/10 hover:bg-white/20 text-white border border-white/20 rounded-2xl font-bold text-xs backdrop-blur-md transition flex items-center space-x-2"
               >
-                Browse Public Trips
-              </Link>
+                <FileSpreadsheet className="w-4 h-4 text-[#10B981]" />
+                <span>Export Itinerary (PDF/CSV)</span>
+              </button>
             </div>
 
             {/* Clean 3-Column Hero Quick Metrics Grid */}
@@ -327,7 +414,7 @@ export const Dashboard: React.FC = () => {
             </div>
           </div>
 
-          {/* Right Hero Card: Countdown OR Featured Recommended Route (Request 1) */}
+          {/* Right Hero Card: Countdown OR Featured Recommended Route */}
           {nextTrip ? (
             <div className="w-full lg:w-80 bg-white/10 dark:bg-[#1E293B]/90 backdrop-blur-xl border border-white/20 dark:border-white/10 p-5 rounded-2xl text-white space-y-3 shadow-xl">
               <div className="flex items-center justify-between">
@@ -384,7 +471,6 @@ export const Dashboard: React.FC = () => {
               </Link>
             </div>
           ) : (
-            /* Featured Recommended Route Widget for 0 Active Trips (Request 1) */
             <div className="w-full lg:w-80 bg-white/10 dark:bg-[#1E293B]/90 backdrop-blur-xl border border-white/20 dark:border-white/10 p-5 rounded-2xl text-white space-y-3 shadow-xl">
               <div className="flex items-center justify-between">
                 <span className="text-[10px] font-extrabold uppercase tracking-wider text-[#38BDF8] flex items-center space-x-1">
@@ -475,6 +561,7 @@ export const Dashboard: React.FC = () => {
               <div className="text-2xl font-black text-slate-900 dark:text-white">
                 {formatMoney(budgetMetrics.totalAllocated)}
               </div>
+              {/* Clean Pluralization Spacing (Request 1) */}
               <p className="text-[11px] text-slate-500 dark:text-slate-400">Across {trips.length} planned trip{trips.length !== 1 ? 's' : ''}</p>
             </div>
 
@@ -521,7 +608,7 @@ export const Dashboard: React.FC = () => {
             </div>
           </div>
 
-          {/* Financial Category Spend Card aligned in height & zero-state legend (Request 2) */}
+          {/* Financial Category Spend Card with Donut & Safe Fallbacks (Request 1 & 4) */}
           <div className="bg-white dark:bg-[#1E293B] p-5 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm flex flex-col justify-between h-full space-y-3">
             <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/10 pb-2">
               <span className="text-xs font-extrabold uppercase tracking-wider text-slate-700 dark:text-slate-300">
@@ -567,22 +654,22 @@ export const Dashboard: React.FC = () => {
               </ResponsiveContainer>
             </div>
 
-            {/* Dimmed Text Handling for ₹0 Empty Categories */}
+            {/* Muted Legend & Dimmed Text Handling for ₹0 Empty Categories (Request 1) */}
             <div className="grid grid-cols-2 gap-2 text-[10px] font-extrabold pt-1">
-              <div className={`flex items-center space-x-1.5 text-purple-600 dark:text-purple-400 ${budgetMetrics.categoryTotals.STAY === 0 ? 'opacity-40' : ''}`}>
-                <Hotel className="w-3 h-3 shrink-0" />
+              <div className={`flex items-center space-x-1.5 text-purple-600 dark:text-purple-400 ${budgetMetrics.categoryTotals.STAY === 0 ? 'opacity-50' : ''}`}>
+                <Hotel className="w-3 h-3 shrink-0 text-[#7C3AED]" />
                 <span>Stays ({formatMoney(budgetMetrics.categoryTotals.STAY)})</span>
               </div>
-              <div className={`flex items-center space-x-1.5 text-[#00A09D] dark:text-[#38BDF8] ${budgetMetrics.categoryTotals.TRANSPORT === 0 ? 'opacity-40' : ''}`}>
-                <Navigation className="w-3 h-3 shrink-0" />
+              <div className={`flex items-center space-x-1.5 text-[#00A09D] dark:text-[#38BDF8] ${budgetMetrics.categoryTotals.TRANSPORT === 0 ? 'opacity-50' : ''}`}>
+                <Navigation className="w-3 h-3 shrink-0 text-[#00A09D]" />
                 <span>Transfers ({formatMoney(budgetMetrics.categoryTotals.TRANSPORT)})</span>
               </div>
-              <div className={`flex items-center space-x-1.5 text-[#10B981] ${budgetMetrics.categoryTotals.ACTIVITIES === 0 ? 'opacity-40' : ''}`}>
-                <Ticket className="w-3 h-3 shrink-0" />
+              <div className={`flex items-center space-x-1.5 text-[#10B981] ${budgetMetrics.categoryTotals.ACTIVITIES === 0 ? 'opacity-50' : ''}`}>
+                <Ticket className="w-3 h-3 shrink-0 text-[#10B981]" />
                 <span>Activities ({formatMoney(budgetMetrics.categoryTotals.ACTIVITIES)})</span>
               </div>
-              <div className={`flex items-center space-x-1.5 text-[#E2A03F] ${budgetMetrics.categoryTotals.MEALS === 0 ? 'opacity-40' : ''}`}>
-                <Utensils className="w-3 h-3 shrink-0" />
+              <div className={`flex items-center space-x-1.5 text-[#E2A03F] ${budgetMetrics.categoryTotals.MEALS === 0 ? 'opacity-50' : ''}`}>
+                <Utensils className="w-3 h-3 shrink-0 text-[#E2A03F]" />
                 <span>Meals ({formatMoney(budgetMetrics.categoryTotals.MEALS)})</span>
               </div>
             </div>
@@ -603,6 +690,7 @@ export const Dashboard: React.FC = () => {
             </p>
           </div>
 
+          {/* Real-time Client Search Input (Request 3) */}
           <div className="relative w-full md:w-80">
             <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
             <input
@@ -615,7 +703,7 @@ export const Dashboard: React.FC = () => {
           </div>
         </div>
 
-        {/* Travel Vibe Selector Buttons - Horizontally Scrollable on Mobile/Tablet (Request 3) */}
+        {/* Travel Vibe Selector Buttons - Filled Active Pill State & Horizontally Scrollable (Request 3) */}
         <div className="flex items-center space-x-2.5 overflow-x-auto pb-2 scrollbar-none whitespace-nowrap">
           {vibeOptions.map((vibe) => {
             const Icon = vibe.icon;
@@ -638,7 +726,7 @@ export const Dashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* Regional / Vibe Selections Grid with Direct "Add Destination" Trigger (Request 4) */}
+      {/* Regional / Vibe Selections Grid with Direct "Add Destination" Trigger */}
       <section className="space-y-4">
         <div className="flex items-center justify-between">
           <div>
@@ -678,9 +766,9 @@ export const Dashboard: React.FC = () => {
         )}
       </section>
 
-      {/* Trips Section */}
+      {/* Trips Section with Export PDF/CSV Button in Header (Request 5) */}
       <section className="space-y-4 pt-6 border-t border-slate-200 dark:border-white/10">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
             <h2 className="text-xl font-black text-slate-900 dark:text-white flex items-center space-x-2">
               <Calendar className="w-5 h-5 text-[#7C3AED]" />
@@ -688,10 +776,21 @@ export const Dashboard: React.FC = () => {
             </h2>
             <p className="text-xs text-slate-500 dark:text-slate-400">Manage your active, upcoming, and past travel itineraries</p>
           </div>
-          <Link to="/my-trips" className="text-xs font-bold text-[#7C3AED] dark:text-[#38BDF8] hover:underline flex items-center space-x-1">
-            <span>See All Trips</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </Link>
+
+          <div className="flex items-center space-x-3 self-end sm:self-auto">
+            <button
+              onClick={handleExportCSV}
+              className="px-3.5 py-1.5 bg-[#714B67] hover:bg-[#613E57] text-white rounded-xl text-xs font-extrabold shadow-sm transition flex items-center space-x-1.5"
+            >
+              <Download className="w-3.5 h-3.5" />
+              <span>Export Itinerary (PDF/CSV)</span>
+            </button>
+
+            <Link to="/my-trips" className="text-xs font-bold text-[#7C3AED] dark:text-[#38BDF8] hover:underline flex items-center space-x-1">
+              <span>See All Trips</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
         </div>
 
         {trips.length === 0 ? (
@@ -710,13 +809,20 @@ export const Dashboard: React.FC = () => {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {trips.slice(0, 6).map((trip) => (
-              <TripCard key={trip.id} trip={trip} />
+              <TripCard
+                key={trip.id}
+                trip={trip}
+                onDuplicate={() => {
+                  setSelectedTripForExpense(trip);
+                  setShowLogExpenseModal(true);
+                }}
+              />
             ))}
           </div>
         )}
       </section>
 
-      {/* Direct Add Destination to Itinerary Quick Action Modal (Request 4) */}
+      {/* Direct Add Destination to Itinerary Quick Action Modal (Request 2) */}
       {showAddCityModal && selectedCityToAdd && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white dark:bg-[#1E293B] max-w-md w-full p-6 rounded-3xl shadow-2xl border border-slate-200 dark:border-white/10 space-y-4 relative">
@@ -736,7 +842,7 @@ export const Dashboard: React.FC = () => {
                   Add {selectedCityToAdd.name} to Travel Plan
                 </h3>
                 <p className="text-xs text-slate-500 dark:text-slate-400">
-                  Select existing itinerary or create new custom trip
+                  Select target trip to auto-append route pills & increment City Stops
                 </p>
               </div>
             </div>
@@ -765,7 +871,7 @@ export const Dashboard: React.FC = () => {
               <div className="space-y-3 pt-2">
                 <div>
                   <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">
-                    Select Target Itinerary
+                    Select Target Trip
                   </label>
                   <select
                     value={targetTripId}
@@ -774,7 +880,7 @@ export const Dashboard: React.FC = () => {
                   >
                     {trips.map((t) => (
                       <option key={t.id} value={t.id} className="bg-white dark:bg-[#0F172A]">
-                        {t.title}
+                        {t.title} ({t.stops?.length || 0} City Stops)
                       </option>
                     ))}
                   </select>
@@ -812,6 +918,97 @@ export const Dashboard: React.FC = () => {
                 </div>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Interactive Log Expense Dialog with Live Donut Chart & Category Bar Sync (Request 4) */}
+      {showLogExpenseModal && selectedTripForExpense && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-[#1E293B] max-w-md w-full p-6 rounded-3xl shadow-2xl border border-slate-200 dark:border-white/10 space-y-4 relative">
+            <button
+              onClick={() => setShowLogExpenseModal(false)}
+              className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-white p-1"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="flex items-center space-x-3">
+              <div className="p-2.5 bg-purple-50 dark:bg-purple-950/60 rounded-xl text-[#7C3AED]">
+                <Receipt className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="text-base font-extrabold text-slate-900 dark:text-white">Log Expense & Sync Donut Chart</h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400">Logging for {selectedTripForExpense.title}</p>
+              </div>
+            </div>
+
+            {expenseSuccessMsg && (
+              <div className="p-3 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 text-xs font-bold rounded-xl flex items-center space-x-2 border border-emerald-200 dark:border-emerald-800">
+                <CheckCircle2 className="w-4 h-4 text-[#10B981] shrink-0" />
+                <span>{expenseSuccessMsg}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleConfirmLogExpense} className="space-y-3">
+              <div>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Expense Title</label>
+                <input
+                  type="text"
+                  required
+                  value={expenseTitle}
+                  onChange={(e) => setExpenseTitle(e.target.value)}
+                  className="w-full px-3 py-2 bg-slate-50 dark:bg-[#0F172A] border border-slate-200 dark:border-white/10 rounded-xl text-xs text-slate-900 dark:text-white font-semibold"
+                  placeholder="e.g. Louvre Museum Ticket, Hotel Stay..."
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">
+                  Amount ({currencyMode === 'USD' ? '$ USD' : '₹ INR'})
+                </label>
+                <input
+                  type="number"
+                  required
+                  step="1"
+                  value={expenseAmount}
+                  onChange={(e) => setExpenseAmount(e.target.value)}
+                  className="w-full px-3 py-2 bg-slate-50 dark:bg-[#0F172A] border border-slate-200 dark:border-white/10 rounded-xl text-xs text-slate-900 dark:text-white font-bold"
+                  placeholder={currencyMode === 'USD' ? '30' : '2500'}
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Category</label>
+                <select
+                  value={expenseCategory}
+                  onChange={(e) => setExpenseCategory(e.target.value as any)}
+                  className="w-full px-3 py-2 bg-slate-50 dark:bg-[#0F172A] border border-slate-200 dark:border-white/10 rounded-xl text-xs font-bold text-slate-900 dark:text-[#E2E8F0]"
+                >
+                  <option value="ACTIVITIES">🎟️ Activities & Sightseeing</option>
+                  <option value="MEALS">🍽️ Meals & Dining</option>
+                  <option value="STAY">🏨 Stay & Accommodation</option>
+                  <option value="TRANSPORT">✈️ Transport & Transfers</option>
+                </select>
+              </div>
+
+              <div className="flex justify-end space-x-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowLogExpenseModal(false)}
+                  className="px-4 py-2 bg-slate-100 dark:bg-[#0F172A] text-slate-700 dark:text-slate-300 rounded-xl text-xs font-semibold"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={expenseLoading}
+                  className="px-5 py-2 bg-[#714B67] hover:bg-[#613E57] text-white rounded-xl text-xs font-bold shadow-md"
+                >
+                  {expenseLoading ? 'Syncing...' : 'Log & Sync Donut Chart'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
