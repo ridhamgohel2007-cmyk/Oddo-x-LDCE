@@ -1,25 +1,69 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-body {
-  font-family: 'Inter', sans-serif;
-  @apply bg-slate-50 text-gray-900 transition-colors duration-200;
+@layer base {
+  body {
+    font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+    background-color: #F8FAFC;
+    color: #0F172A;
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+  }
+
+  html.dark body {
+    background-color: #0B1320;
+    color: #F1F5F9;
+  }
 }
 
-html.dark body {
-  @apply bg-slate-950 text-slate-100;
+/* Global Transition Helper */
+* {
+  transition-property: background-color, border-color, color, fill, stroke;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 300ms;
 }
 
-/* Custom dark mode card classes */
-.dark .dark-card {
-  @apply bg-slate-900 border-slate-800 text-slate-100;
+/* Base Surfaces */
+.theme-card {
+  background-color: #FFFFFF;
+  border-color: #E2E8F0;
+  color: #0F172A;
+  box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05);
 }
 
-.dark .dark-input {
-  @apply bg-slate-800 border-slate-700 text-slate-100 focus:bg-slate-800;
+html.dark .theme-card {
+  background-color: #111E2E;
+  border-color: #1E2D42;
+  color: #F1F5F9;
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.4);
 }
 
-.dark .dark-muted {
-  @apply text-slate-400;
+html.dark .theme-card:hover {
+  background-color: #162235;
+}
+
+.theme-input {
+  background-color: #F1F5F9;
+  border-color: #E2E8F0;
+  color: #0F172A;
+}
+
+html.dark .theme-input {
+  background-color: #162235;
+  border-color: #1E2D42;
+  color: #F1F5F9;
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  @apply bg-slate-300 dark:bg-slate-700 rounded-full;
 }
