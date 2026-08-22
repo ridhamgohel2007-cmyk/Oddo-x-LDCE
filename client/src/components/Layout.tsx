@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import {
@@ -18,7 +18,9 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [globalSearch, setGlobalSearch] = useState('');
 
+  // Ensure dark class is active and attach Ctrl+K keyboard shortcut listener
   React.useEffect(() => {
+    document.documentElement.classList.add('dark');
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
         e.preventDefault();
@@ -95,7 +97,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
               </form>
             )}
 
-            {/* Desktop Navigation Links with High-Contrast Odoo Active State */}
+            {/* Desktop Navigation Links */}
             {user && (
               <nav className="hidden md:flex items-center space-x-1.5 bg-slate-100/90 dark:bg-[#1E293B] p-1.5 rounded-2xl border border-slate-200 dark:border-white/10 shrink-0">
                 {navLinks.map((link) => {
@@ -117,9 +119,9 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
               </nav>
             )}
 
-            {/* Right Side User Profile & Actions */}
+            {/* Right Side User Profile & Actions (Theme Toggle Removed as Requested) */}
             {user ? (
-              <div className="flex items-center space-x-3 shrink-0">
+              <div className="flex items-center space-x-2.5 shrink-0">
                 <Link
                   to="/create-trip"
                   className="hidden sm:flex items-center space-x-1.5 px-3.5 py-2 bg-[#714B67] hover:bg-[#613E57] text-white text-xs font-bold rounded-xl shadow-md shadow-purple-500/20 transition hover:-translate-y-0.5"
@@ -131,18 +133,19 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                 {/* User Profile Avatar Pill */}
                 <Link
                   to="/profile"
-                  className="flex items-center space-x-2 p-1.5 rounded-2xl bg-slate-100 dark:bg-[#1E293B] hover:bg-slate-200 dark:hover:bg-slate-700 transition border border-slate-200 dark:border-white/10"
+                  className="flex items-center space-x-2.5 px-3 py-1.5 rounded-2xl bg-slate-100 dark:bg-[#1E293B] hover:bg-slate-200 dark:hover:bg-slate-700 transition border border-slate-200 dark:border-white/10 shrink-0"
+                  title={`${user.name} (${user.role})`}
                 >
                   <img
                     src={user.profilePic || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80'}
                     alt={user.name}
-                    className="w-7 h-7 rounded-xl object-cover ring-2 ring-[#7C3AED]/40"
+                    className="w-8 h-8 rounded-xl object-cover ring-2 ring-[#7C3AED]/40 shrink-0"
                   />
-                  <div className="hidden md:flex flex-col text-left">
-                    <span className="text-xs font-extrabold text-slate-800 dark:text-slate-200 leading-none">
+                  <div className="hidden md:flex flex-col text-left max-w-[140px]">
+                    <span className="text-xs font-black text-slate-800 dark:text-slate-200 leading-tight truncate">
                       {user.name}
                     </span>
-                    <span className="text-[9px] text-slate-500 dark:text-slate-400 font-bold capitalize mt-0.5">
+                    <span className="text-[9px] text-[#00A09D] dark:text-[#38BDF8] font-bold uppercase tracking-wider">
                       {user.role}
                     </span>
                   </div>
@@ -200,7 +203,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                   }`}
                 >
                   <span>{link.name}</span>
-                  <ChevronRight className="w-4 h-4 text-slate-400" />
+                  <ChevronRight className="w-4 h-4 text-[#7C3AED]" />
                 </Link>
               );
             })}

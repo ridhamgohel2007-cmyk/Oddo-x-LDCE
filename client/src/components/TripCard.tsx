@@ -22,6 +22,7 @@ import {
   Clock,
   Plus,
   Receipt,
+  ArrowRight,
 } from 'lucide-react';
 import { StatusBadge } from './StatusBadge';
 import api from '../lib/api';
@@ -76,7 +77,7 @@ export const TripCard: React.FC<TripCardProps> = ({ trip, onDelete, onDuplicate 
 
   const destinationCount = trip.stops?.length || 0;
 
-  // Compute Multi-City Route String & Transit Time Estimates (Odoo Teal #00A09D)
+  // Compute Multi-City Route String & Transit Time Estimates
   let routeNames: string[] = [];
   if (trip.stops && trip.stops.length > 0) {
     routeNames = trip.stops.map((s: any) => s.city?.name || s.title.replace('Stop: ', ''));
@@ -278,7 +279,7 @@ export const TripCard: React.FC<TripCardProps> = ({ trip, onDelete, onDuplicate 
             </p>
           </div>
 
-          {/* Odoo Teal Transit Snippet (Request 1: #00A09D) */}
+          {/* Odoo Teal Transit Snippet */}
           {routeNames.length > 0 && (
             <div className="p-2.5 bg-[#00A09D]/10 dark:bg-[#00A09D]/15 rounded-xl border border-[#00A09D]/30 text-[11px] font-bold text-[#00A09D] dark:text-[#38BDF8] space-y-1">
               <div className="flex items-center space-x-1.5">
@@ -296,39 +297,38 @@ export const TripCard: React.FC<TripCardProps> = ({ trip, onDelete, onDuplicate 
             </div>
           )}
 
-          {/* Tarzan-Style Structured Itinerary Breakdown Chips */}
+          {/* Clean Pluralization Itemized Chips */}
           <div className="flex flex-wrap gap-1.5 pt-1">
             {stayCount > 0 && (
               <span className="inline-flex items-center space-x-1 px-2.5 py-1 bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 text-[10px] font-extrabold rounded-lg border border-indigo-200 dark:border-indigo-800">
                 <Hotel className="w-3 h-3 text-indigo-500" />
-                <span>{stayCount} Stay{stayCount !== 1 ? 's' : ''}</span>
+                <span>{stayCount} {stayCount === 1 ? 'Stay' : 'Stays'}</span>
               </span>
             )}
 
             {transportCount > 0 && (
               <span className="inline-flex items-center space-x-1 px-2.5 py-1 bg-teal-50 dark:bg-teal-950/60 text-[#00A09D] dark:text-teal-300 text-[10px] font-extrabold rounded-lg border border-teal-200 dark:border-teal-800">
                 <Navigation className="w-3 h-3 text-[#00A09D]" />
-                <span>{transportCount} Transfer{transportCount !== 1 ? 's' : ''}</span>
+                <span>{transportCount} {transportCount === 1 ? 'Transfer' : 'Transfers'}</span>
               </span>
             )}
 
             {activityCount > 0 && (
               <span className="inline-flex items-center space-x-1 px-2.5 py-1 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 text-[10px] font-extrabold rounded-lg border border-emerald-200 dark:border-emerald-800">
                 <Ticket className="w-3 h-3 text-[#10B981]" />
-                <span>{activityCount} Activit{activityCount !== 1 ? 'ies' : 'y'}</span>
+                <span>{activityCount} {activityCount === 1 ? 'Activity' : 'Activities'}</span>
               </span>
             )}
 
-            {/* Warm Ochre / Amber Meal Badge (Request 1: #E2A03F) */}
             {mealCount > 0 && (
               <span className="inline-flex items-center space-x-1 px-2.5 py-1 bg-amber-50 dark:bg-amber-950/60 text-[#E2A03F] dark:text-amber-300 text-[10px] font-extrabold rounded-lg border border-amber-200 dark:border-amber-800">
                 <Utensils className="w-3 h-3 text-[#E2A03F]" />
-                <span>{mealCount} Meal{mealCount !== 1 ? 's' : ''}</span>
+                <span>{mealCount} {mealCount === 1 ? 'Meal' : 'Meals'}</span>
               </span>
             )}
           </div>
 
-          {/* Card Metrics with Pax Selector Dropdown in #0F172A background & #E2E8F0 text (Request 2) */}
+          {/* Card Metrics with Clean Pluralization City Stops */}
           <div className="space-y-2.5 text-xs text-slate-600 dark:text-slate-300 pt-2.5 border-t border-slate-100 dark:border-white/10">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
@@ -339,12 +339,12 @@ export const TripCard: React.FC<TripCardProps> = ({ trip, onDelete, onDuplicate 
               <div className="flex items-center space-x-2">
                 <MapPin className="w-4 h-4 text-[#00A09D] shrink-0" />
                 <span className="font-bold text-slate-800 dark:text-slate-200">
-                  {destinationCount} City Stop{destinationCount !== 1 ? 's' : ''}
+                  {destinationCount} {destinationCount === 1 ? 'City Stop' : 'City Stops'}
                 </span>
               </div>
             </div>
 
-            {/* Pax Selector Dropdown in Odoo Enterprise Control Style */}
+            {/* Pax Selector Dropdown in Odoo Control Style */}
             {trip.totalBudget > 0 && (
               <div className="bg-slate-100 dark:bg-[#0F172A] p-2.5 rounded-xl border border-slate-200 dark:border-white/10 space-y-2">
                 <div className="flex items-center justify-between gap-2">
@@ -367,6 +367,7 @@ export const TripCard: React.FC<TripCardProps> = ({ trip, onDelete, onDuplicate 
                   </span>
                 </div>
 
+                {/* Clean Budget Label Spacing without Rogue Spaces */}
                 <div className="flex items-center justify-between text-[10px] text-slate-500 dark:text-slate-400 border-t border-slate-200 dark:border-white/10 pt-1.5">
                   <div className="flex items-center space-x-1">
                     <span>Total Group Budget ({count} pax):</span>
@@ -393,14 +394,15 @@ export const TripCard: React.FC<TripCardProps> = ({ trip, onDelete, onDuplicate 
         </div>
       </div>
 
-      {/* Primary & Secondary Action Buttons Footer (Request 2: Budget Button in #334155, Open Itinerary in Odoo Purple #714B67) */}
+      {/* Primary & Secondary Action Buttons Footer */}
       <div className="px-5 py-3.5 bg-slate-50 dark:bg-[#0F172A]/80 border-t border-slate-100 dark:border-white/10 flex items-center justify-between gap-2">
         <Link
           to={`/trips/${trip.id}`}
-          className="px-3.5 py-2 bg-[#714B67] hover:bg-[#613E57] text-white rounded-xl text-xs font-bold transition flex items-center space-x-1.5 shadow-sm"
+          className="px-3.5 py-2 bg-[#714B67] hover:bg-[#613E57] text-white rounded-xl text-xs font-bold transition flex items-center space-x-1.5 shadow-sm group/btn"
         >
           <Eye className="w-3.5 h-3.5" />
           <span>Open Itinerary</span>
+          <ArrowRight className="w-3.5 h-3.5 group-hover/btn:translate-x-0.5 transition-transform" />
         </Link>
 
         <Link

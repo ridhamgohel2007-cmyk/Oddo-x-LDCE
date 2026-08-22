@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { MapPin, Plus, Star, Heart } from 'lucide-react';
+import { MapPin, Plus, Star, Heart, Sun } from 'lucide-react';
 
 export interface CityData {
   id: string;
@@ -17,8 +17,11 @@ interface CityCardProps {
   onSelect?: (city: CityData) => void;
 }
 
+const FALLBACK_CITY_IMAGE = 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=800&q=80';
+
 export const CityCard: React.FC<CityCardProps> = ({ city, onSelect }) => {
   const [isSaved, setIsSaved] = useState(false);
+  const [imageSrc, setImageSrc] = useState(city.imageUrl || FALLBACK_CITY_IMAGE);
 
   const getCostBadge = (cost: string) => {
     switch (cost?.toUpperCase()) {
@@ -32,12 +35,13 @@ export const CityCard: React.FC<CityCardProps> = ({ city, onSelect }) => {
   };
 
   return (
-    <div className="bg-white dark:bg-[#111E2E] rounded-2xl border border-slate-200 dark:border-[#1E2D42] overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col justify-between group">
+    <div className="bg-white dark:bg-[#1E293B] dark:hover:bg-[#334155] rounded-2xl border border-slate-200 dark:border-white/10 overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col justify-between group">
       <div>
-        <div className="relative h-44 w-full overflow-hidden bg-slate-100 dark:bg-[#162235]">
+        <div className="relative h-44 w-full overflow-hidden bg-slate-100 dark:bg-[#0F172A]">
           <img
-            src={city.imageUrl || 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=600&q=80'}
+            src={imageSrc}
             alt={city.name}
+            onError={() => setImageSrc(FALLBACK_CITY_IMAGE)}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           />
           <div className="absolute top-3 left-3 flex items-center space-x-1">
@@ -73,26 +77,32 @@ export const CityCard: React.FC<CityCardProps> = ({ city, onSelect }) => {
             <h4 className="text-base font-extrabold text-slate-900 dark:text-white line-clamp-1">
               {city.name}
             </h4>
-            <span className="text-xs font-bold text-slate-400">{city.region}</span>
+            <span className="text-xs font-bold text-[#00A09D] dark:text-[#38BDF8]">{city.region}</span>
           </div>
 
-          <div className="flex items-center space-x-1 text-xs text-emerald-600 dark:text-emerald-400 font-bold">
-            <MapPin className="w-3.5 h-3.5 shrink-0" />
+          <div className="flex items-center space-x-1 text-xs text-[#10B981] font-bold">
+            <MapPin className="w-3.5 h-3.5 shrink-0 text-[#00A09D]" />
             <span>{city.country}</span>
           </div>
 
           <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed pt-1">
             {city.description}
           </p>
+
+          {/* Time to Visit Tag (Request 4) */}
+          <div className="flex items-center space-x-1.5 pt-1 text-[10px] font-extrabold text-[#00A09D] dark:text-[#38BDF8]">
+            <Sun className="w-3.5 h-3.5 text-[#E2A03F] shrink-0" />
+            <span>Best Time to Visit: Oct–Mar</span>
+          </div>
         </div>
       </div>
 
-      <div className="px-4 py-3 bg-slate-50 dark:bg-[#162235]/60 border-t border-slate-100 dark:border-[#1E2D42] flex justify-end">
+      <div className="px-4 py-3 bg-slate-50 dark:bg-[#0F172A]/80 border-t border-slate-100 dark:border-white/10 flex justify-end">
         {onSelect && (
           <button
             onClick={() => onSelect(city)}
             aria-label={`Add ${city.name} to trip`}
-            className="px-3.5 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-xs font-bold shadow-sm transition flex items-center space-x-1"
+            className="px-3.5 py-1.5 bg-[#714B67] hover:bg-[#613E57] text-white rounded-xl text-xs font-bold shadow-sm transition flex items-center space-x-1"
           >
             <Plus className="w-3.5 h-3.5" />
             <span>Add Destination</span>

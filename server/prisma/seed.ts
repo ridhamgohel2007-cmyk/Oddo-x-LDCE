@@ -152,7 +152,7 @@ async function main() {
       country: 'India',
       region: 'Asia',
       imageUrl: 'https://images.unsplash.com/photo-1609766857041-ed402ea8069a?auto=format&fit=crop&w=800&q=80',
-      description: 'India first UNESCO World Heritage City, famous for Sabarmati Ashram, Kankaria Lake, Adalaj Stepwell, and Gujarati cuisine.',
+      description: "India's first UNESCO World Heritage City, famous for Sabarmati Ashram, Kankaria Lake, Adalaj Stepwell, and Gujarati cuisine.",
       costIndex: 'LOW',
       popularityScore: 94,
     },
