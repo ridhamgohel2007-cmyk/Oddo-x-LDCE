@@ -11,13 +11,15 @@ import {
   Plus,
   X,
   CheckCircle2,
-  Clock,
   Tag,
   Flame,
   Heart,
   Mountain,
   Landmark,
   Car,
+  Globe2,
+  Filter,
+  Globe,
 } from 'lucide-react';
 
 export const SearchPage: React.FC = () => {
@@ -31,6 +33,7 @@ export const SearchPage: React.FC = () => {
   const [activities, setActivities] = useState<ActivityData[]>([]);
 
   const [searchQuery, setSearchQuery] = useState(initialQuery);
+  const [selectedContinent, setSelectedContinent] = useState('ALL');
   const [selectedVibe, setSelectedVibe] = useState('ALL');
   const [selectedCost, setSelectedCost] = useState('ALL');
   const [selectedCategory, setSelectedCategory] = useState('ALL');
@@ -92,6 +95,87 @@ export const SearchPage: React.FC = () => {
     fetchTripDetails();
   }, [targetTripId]);
 
+  // Helper to resolve city continent dynamically
+  const getCityContinent = (city: CityData): string => {
+    const country = (city.country || '').toLowerCase();
+    const region = (city.region || '').toLowerCase();
+    const name = (city.name || '').toLowerCase();
+
+    if (
+      country.includes('india') ||
+      country.includes('japan') ||
+      country.includes('thailand') ||
+      country.includes('indonesia') ||
+      country.includes('uae') ||
+      country.includes('singapore') ||
+      country.includes('china') ||
+      region.includes('asia') ||
+      name.includes('delhi') || name.includes('agra') || name.includes('jaipur') || name.includes('goa') || name.includes('manali') || name.includes('shimla') || name.includes('varanasi') || name.includes('srinagar') || name.includes('ladakh') || name.includes('kerala') || name.includes('tokyo') || name.includes('bali') || name.includes('dubai') || name.includes('bangkok')
+    ) {
+      return 'Asia';
+    }
+
+    if (
+      country.includes('france') ||
+      country.includes('italy') ||
+      country.includes('spain') ||
+      country.includes('uk') ||
+      country.includes('united kingdom') ||
+      country.includes('netherlands') ||
+      country.includes('switzerland') ||
+      country.includes('greece') ||
+      country.includes('germany') ||
+      country.includes('austria') ||
+      country.includes('czech') ||
+      region.includes('europe') ||
+      name.includes('paris') || name.includes('rome') || name.includes('london') || name.includes('barcelona') || name.includes('amsterdam') || name.includes('venice') || name.includes('prague')
+    ) {
+      return 'Europe';
+    }
+
+    if (
+      country.includes('usa') ||
+      country.includes('united states') ||
+      country.includes('canada') ||
+      country.includes('mexico') ||
+      region.includes('north america') ||
+      name.includes('new york') || name.includes('los angeles') || name.includes('vancouver')
+    ) {
+      return 'North America';
+    }
+
+    if (
+      country.includes('brazil') ||
+      country.includes('peru') ||
+      country.includes('argentina') ||
+      region.includes('south america') ||
+      name.includes('rio') || name.includes('machu picchu') || name.includes('buenos aires')
+    ) {
+      return 'South America';
+    }
+
+    if (
+      country.includes('egypt') ||
+      country.includes('south africa') ||
+      country.includes('morocco') ||
+      region.includes('africa') ||
+      name.includes('cairo') || name.includes('cape town') || name.includes('marrakech')
+    ) {
+      return 'Africa';
+    }
+
+    if (
+      country.includes('australia') ||
+      country.includes('new zealand') ||
+      region.includes('oceania') ||
+      name.includes('sydney') || name.includes('auckland') || name.includes('melbourne')
+    ) {
+      return 'Oceania';
+    }
+
+    return 'Asia';
+  };
+
   // Travel Vibe / Theme Filtering Logic for Cities
   const matchesVibe = (city: CityData, vibe: string) => {
     if (vibe === 'ALL') return true;
@@ -123,7 +207,8 @@ export const SearchPage: React.FC = () => {
       city.region.toLowerCase().includes(searchQuery.toLowerCase()) ||
       city.description.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCost = selectedCost === 'ALL' || city.costIndex === selectedCost;
-    return matchesSearch && matchesCost && matchesVibe(city, selectedVibe);
+    const matchesContinent = selectedContinent === 'ALL' || getCityContinent(city) === selectedContinent;
+    return matchesSearch && matchesCost && matchesContinent && matchesVibe(city, selectedVibe);
   });
 
   const filteredActivities = activities.filter((act) => {
@@ -181,8 +266,18 @@ export const SearchPage: React.FC = () => {
     }
   };
 
+  const continentOptions = [
+    { id: 'ALL', label: '🌍 All Continents' },
+    { id: 'Asia', label: '🇮🇳 Asia & India' },
+    { id: 'Europe', label: '🇪🇺 Europe' },
+    { id: 'North America', label: '🇺🇸 North America' },
+    { id: 'South America', label: '🇧🇷 South America' },
+    { id: 'Africa', label: '🌍 Africa' },
+    { id: 'Oceania', label: '🇦🇺 Oceania' },
+  ];
+
   const vibeOptions = [
-    { id: 'ALL', label: 'All Destinations', icon: Flame },
+    { id: 'ALL', label: 'All Vibe Filters', icon: Flame },
     { id: 'ROMANTIC', label: 'Romantic Escapes', icon: Heart },
     { id: 'ADVENTURE', label: 'Adventure & Outdoors', icon: Mountain },
     { id: 'HERITAGE', label: 'Heritage & Culture', icon: Landmark },
@@ -200,7 +295,7 @@ export const SearchPage: React.FC = () => {
             <span>Discovery & Catalog Search</span>
           </h1>
           <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mt-1">
-            Discover 31+ Indian destinations by Travel Vibe (Honeymoon, Adventure, Heritage, Road Trips) or search activities
+            Discover 31+ Indian and Global destinations by Continent & Travel Vibe
           </p>
         </div>
 
@@ -231,7 +326,7 @@ export const SearchPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Filter Controls Bar with Travel Vibe */}
+      {/* Filter Controls Bar with Continent & Travel Vibe Menu */}
       <div className="bg-white dark:bg-[#1E293B] p-4 sm:p-6 rounded-3xl shadow-sm border border-slate-200 dark:border-white/10 space-y-4">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="relative flex-1 w-full">
@@ -242,12 +337,30 @@ export const SearchPage: React.FC = () => {
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder={
                 activeTab === 'CITIES'
-                  ? 'Search by city name, country, or region (e.g. Manali, Goa, Shimla, Varanasi)...'
+                  ? 'Search by city name, country, or region (e.g. Manali, Goa, Paris)...'
                   : 'Search activities by title or category (e.g. Taj Mahal, Paragliding, Rafting)...'
               }
               className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-[#0F172A] border border-slate-200 dark:border-white/10 rounded-xl text-xs font-semibold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#7C3AED]"
             />
           </div>
+
+          {/* Continent Dropdown Menu Selector (User Request) */}
+          {activeTab === 'CITIES' && (
+            <div className="relative w-full sm:w-56 shrink-0">
+              <Globe className="w-4 h-4 text-[#00A09D] absolute left-3 top-3.5 pointer-events-none" />
+              <select
+                value={selectedContinent}
+                onChange={(e) => setSelectedContinent(e.target.value)}
+                className="w-full h-[42px] pl-9 pr-8 bg-slate-50 dark:bg-[#0F172A] border border-slate-200 dark:border-white/10 rounded-xl text-xs font-extrabold text-slate-900 dark:text-[#E2E8F0] cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#7C3AED]"
+              >
+                {continentOptions.map((c) => (
+                  <option key={c.id} value={c.id} className="bg-white dark:bg-[#0F172A]">
+                    {c.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
 
           <div className="flex items-center space-x-2 w-full sm:w-auto">
             {activeTab === 'CITIES' ? (
@@ -278,13 +391,38 @@ export const SearchPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Travel Vibe Selector Buttons */}
+        {/* Travel Vibe & Continent Selector Buttons */}
         {activeTab === 'CITIES' && (
-          <div className="pt-2 border-t border-slate-100 dark:border-white/10">
-            <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 block mb-2">
-              Filter Destinations by Travel Vibe:
-            </span>
+          <div className="pt-2 border-t border-slate-100 dark:border-white/10 space-y-2">
             <div className="flex items-center space-x-2 overflow-x-auto pb-1 scrollbar-none">
+              <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 shrink-0 mr-1 flex items-center space-x-1">
+                <Filter className="w-3.5 h-3.5 text-[#00A09D]" />
+                <span>Continents:</span>
+              </span>
+              {continentOptions.map((cont) => {
+                const isSelected = selectedContinent === cont.id;
+                return (
+                  <button
+                    key={cont.id}
+                    type="button"
+                    onClick={() => setSelectedContinent(cont.id)}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all border shrink-0 ${
+                      isSelected
+                        ? 'bg-[#00A09D] text-white border-cyan-400 shadow-sm'
+                        : 'bg-slate-50 dark:bg-[#0F172A] text-slate-700 dark:text-slate-300 border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-[#334155]'
+                    }`}
+                  >
+                    <span>{cont.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="flex items-center space-x-2 overflow-x-auto pb-1 scrollbar-none pt-1">
+              <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 shrink-0 mr-1 flex items-center space-x-1">
+                <Flame className="w-3.5 h-3.5 text-[#E2A03F]" />
+                <span>Travel Vibe:</span>
+              </span>
               {vibeOptions.map((vibe) => {
                 const Icon = vibe.icon;
                 const isSelected = selectedVibe === vibe.id;
@@ -292,7 +430,7 @@ export const SearchPage: React.FC = () => {
                   <button
                     key={vibe.id}
                     onClick={() => setSelectedVibe(vibe.id)}
-                    className={`flex items-center space-x-2 px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all border ${
+                    className={`flex items-center space-x-2 px-3.5 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all border ${
                       isSelected
                         ? 'bg-[#714B67] dark:bg-[#7C3AED] text-white border-purple-400 shadow-sm'
                         : 'bg-slate-50 dark:bg-[#0F172A] text-slate-700 dark:text-slate-300 border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-[#334155]'
@@ -318,8 +456,8 @@ export const SearchPage: React.FC = () => {
       ) : activeTab === 'CITIES' ? (
         filteredCities.length === 0 ? (
           <div className="p-12 bg-white dark:bg-[#1E293B] rounded-3xl border border-slate-200 dark:border-white/10 text-center space-y-2">
-            <h3 className="text-base font-bold text-slate-700 dark:text-slate-300">No destinations found matching your filters</h3>
-            <p className="text-xs text-slate-400">Try searching for popular Indian destinations like <strong>Manali, Goa, Shimla, Varanasi, Kerala, Jaipur</strong>...</p>
+            <h3 className="text-base font-bold text-slate-700 dark:text-slate-300">No destinations found matching selected continent / filters</h3>
+            <p className="text-xs text-slate-400">Try selecting <strong>🌍 All Continents</strong> or <strong>🇮🇳 Asia & India</strong>...</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">

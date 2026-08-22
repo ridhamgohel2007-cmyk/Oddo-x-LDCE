@@ -36,6 +36,8 @@ import {
   Receipt,
   FileText,
   ExternalLink,
+  Globe,
+  Filter,
 } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 
@@ -47,19 +49,22 @@ export const Dashboard: React.FC = () => {
   const [trips, setTrips] = useState<TripData[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   
+  // Continent Selector Menu State (User Request)
+  const [selectedContinent, setSelectedContinent] = useState('ALL');
+
   // "Travel by Vibe" / Theme Filter State
   const [selectedVibe, setSelectedVibe] = useState('ALL');
   const [loading, setLoading] = useState(true);
   const [vibeLoading, setVibeLoading] = useState(false);
   const [demoLoading, setDemoLoading] = useState(false);
 
-  // Dynamic Currency Switcher State (INR / USD) (Request 2)
+  // Dynamic Currency Switcher State (INR / USD)
   const [currencyMode, setCurrencyMode] = useState<'INR' | 'USD'>('INR');
 
   // Floating Toast Feedback State
   const [toastMsg, setToastMsg] = useState<string | null>(null);
 
-  // Export Modal State (Request 4)
+  // Export Modal State
   const [showExportModal, setShowExportModal] = useState(false);
 
   // Dynamic Metrics & Countdown States
@@ -200,13 +205,93 @@ export const Dashboard: React.FC = () => {
     setTimeout(() => setVibeLoading(false), 200);
   };
 
-  // Format monetary values dynamically according to active currency mode (Request 2)
   const formatMoney = (val: number) => {
     if (currencyMode === 'USD') {
       const usdVal = Math.round(val / 83);
       return `$${usdVal.toLocaleString('en-US')}`;
     }
     return `₹${val.toLocaleString('en-IN')}`;
+  };
+
+  // Helper to resolve city continent dynamically
+  const getCityContinent = (city: CityData): string => {
+    const country = (city.country || '').toLowerCase();
+    const region = (city.region || '').toLowerCase();
+    const name = (city.name || '').toLowerCase();
+
+    if (
+      country.includes('india') ||
+      country.includes('japan') ||
+      country.includes('thailand') ||
+      country.includes('indonesia') ||
+      country.includes('uae') ||
+      country.includes('singapore') ||
+      country.includes('china') ||
+      region.includes('asia') ||
+      name.includes('delhi') || name.includes('agra') || name.includes('jaipur') || name.includes('goa') || name.includes('manali') || name.includes('shimla') || name.includes('varanasi') || name.includes('srinagar') || name.includes('ladakh') || name.includes('kerala') || name.includes('tokyo') || name.includes('bali') || name.includes('dubai') || name.includes('bangkok')
+    ) {
+      return 'Asia';
+    }
+
+    if (
+      country.includes('france') ||
+      country.includes('italy') ||
+      country.includes('spain') ||
+      country.includes('uk') ||
+      country.includes('united kingdom') ||
+      country.includes('netherlands') ||
+      country.includes('switzerland') ||
+      country.includes('greece') ||
+      country.includes('germany') ||
+      country.includes('austria') ||
+      country.includes('czech') ||
+      region.includes('europe') ||
+      name.includes('paris') || name.includes('rome') || name.includes('london') || name.includes('barcelona') || name.includes('amsterdam') || name.includes('venice') || name.includes('prague')
+    ) {
+      return 'Europe';
+    }
+
+    if (
+      country.includes('usa') ||
+      country.includes('united states') ||
+      country.includes('canada') ||
+      country.includes('mexico') ||
+      region.includes('north america') ||
+      name.includes('new york') || name.includes('los angeles') || name.includes('vancouver')
+    ) {
+      return 'North America';
+    }
+
+    if (
+      country.includes('brazil') ||
+      country.includes('peru') ||
+      country.includes('argentina') ||
+      region.includes('south america') ||
+      name.includes('rio') || name.includes('machu picchu') || name.includes('buenos aires')
+    ) {
+      return 'South America';
+    }
+
+    if (
+      country.includes('egypt') ||
+      country.includes('south africa') ||
+      country.includes('morocco') ||
+      region.includes('africa') ||
+      name.includes('cairo') || name.includes('cape town') || name.includes('marrakech')
+    ) {
+      return 'Africa';
+    }
+
+    if (
+      country.includes('australia') ||
+      country.includes('new zealand') ||
+      region.includes('oceania') ||
+      name.includes('sydney') || name.includes('auckland') || name.includes('melbourne')
+    ) {
+      return 'Oceania';
+    }
+
+    return 'Asia';
   };
 
   // Travel Vibe / Theme Filtering Logic
@@ -238,11 +323,25 @@ export const Dashboard: React.FC = () => {
       city.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       city.country.toLowerCase().includes(searchQuery.toLowerCase()) ||
       city.description.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesSearch && matchesVibe(city, selectedVibe);
+
+    const matchesContinent =
+      selectedContinent === 'ALL' || getCityContinent(city) === selectedContinent;
+
+    return matchesSearch && matchesContinent && matchesVibe(city, selectedVibe);
   });
 
+  const continentOptions = [
+    { id: 'ALL', label: '🌍 All Continents' },
+    { id: 'Asia', label: '🇮🇳 Asia & India' },
+    { id: 'Europe', label: '🇪🇺 Europe' },
+    { id: 'North America', label: '🇺🇸 North America' },
+    { id: 'South America', label: '🇧🇷 South America' },
+    { id: 'Africa', label: '🌍 Africa' },
+    { id: 'Oceania', label: '🇦🇺 Oceania' },
+  ];
+
   const vibeOptions = [
-    { id: 'ALL', label: 'All Destinations', icon: Globe2 },
+    { id: 'ALL', label: 'All Vibe Filters', icon: Globe2 },
     { id: 'ROMANTIC', label: 'Romantic Escapes', icon: Heart },
     { id: 'ADVENTURE', label: 'Adventure & Outdoors', icon: Mountain },
     { id: 'HERITAGE', label: 'Heritage & Culture', icon: Landmark },
@@ -250,7 +349,7 @@ export const Dashboard: React.FC = () => {
     { id: 'BUDGET', label: 'Budget Escapes', icon: Tag },
   ];
 
-  // Donut Chart Data with Centered Donut Text
+  // Donut Chart Data
   const totalCatSum = budgetMetrics.categoryTotals.STAY + budgetMetrics.categoryTotals.TRANSPORT + budgetMetrics.categoryTotals.ACTIVITIES + budgetMetrics.categoryTotals.MEALS;
   
   const pieChartData = totalCatSum > 0 ? [
@@ -415,7 +514,7 @@ export const Dashboard: React.FC = () => {
               Welcome back, <span className="text-[#38BDF8]">{user?.name}</span>!
             </h1>
             <p className="text-xs sm:text-sm text-slate-300">
-              Track active trip countdowns, discover destinations by travel vibe, and manage multi-city budgets.
+              Track active trip countdowns, discover destinations by continent & travel vibe, and manage multi-city budgets.
             </p>
 
             <div className="pt-2 flex flex-wrap gap-3">
@@ -427,7 +526,6 @@ export const Dashboard: React.FC = () => {
                 <span>Plan New Trip</span>
               </Link>
               
-              {/* Export Modal Trigger (Request 4) */}
               <button
                 onClick={() => setShowExportModal(true)}
                 className="px-5 py-3 bg-white/10 hover:bg-white/20 text-white border border-white/20 rounded-2xl font-bold text-xs backdrop-blur-md transition flex items-center space-x-2"
@@ -552,7 +650,7 @@ export const Dashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* Budget Highlights with Dynamic Currency Switcher State (Request 2) */}
+      {/* Budget Highlights with Dynamic Currency Switcher State */}
       <section className="space-y-4">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
           <h2 className="text-lg font-black text-slate-900 dark:text-white flex items-center space-x-2">
@@ -561,7 +659,6 @@ export const Dashboard: React.FC = () => {
           </h2>
 
           <div className="flex items-center space-x-3 self-end sm:self-auto">
-            {/* Dynamic Currency Toggle Switch with High-Contrast Active Pill Styling (Request 2) */}
             <div className="flex items-center bg-slate-200 dark:bg-[#1E293B] p-1 rounded-xl border border-slate-300 dark:border-white/10">
               <button
                 type="button"
@@ -745,33 +842,87 @@ export const Dashboard: React.FC = () => {
         </div>
       </section>
 
-      {/* "Travel by Vibe" Filter Section with Wired Search Input */}
+      {/* "Travel by Vibe" & Continent Selector Menu Section (User Request) */}
       <div className="bg-white dark:bg-[#1E293B] p-6 sm:p-8 rounded-3xl shadow-sm border border-slate-200 dark:border-white/10 space-y-5">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 dark:border-white/10 pb-4">
           <div>
             <h2 className="text-xl font-extrabold text-slate-900 dark:text-white flex items-center space-x-2">
               <Flame className="w-5 h-5 text-[#E2A03F]" />
-              <span>Travel by Vibe — Search Indian & Global Destinations</span>
+              <span>Travel by Continent & Vibe</span>
             </h2>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-              Search any popular city in India (Shimla, Manali, Goa, Kerala, Varanasi, Jaipur, Srinagar, Ladakh, Coorg, Ooty...)
+              Select a continent from the menu below to filter destinations in real-time
             </p>
           </div>
 
-          <div className="relative w-full md:w-80 shrink-0">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search Indian cities (e.g. Manali, Goa)..."
-              className="w-full h-[42px] pl-10 pr-3 py-2 bg-slate-50 dark:bg-[#0F172A] border border-slate-200 dark:border-white/10 rounded-xl text-xs font-semibold text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#7C3AED] dark:focus:border-[#00A09D] transition"
-            />
+          <div className="flex items-center space-x-3 w-full md:w-auto">
+            {/* Continent Selector Dropdown Menu (User Request) */}
+            <div className="relative w-full sm:w-56 shrink-0">
+              <Globe className="w-4 h-4 text-[#00A09D] absolute left-3 top-3.5 pointer-events-none" />
+              <select
+                value={selectedContinent}
+                onChange={(e) => {
+                  setSelectedContinent(e.target.value);
+                  showToast(`✓ Continent set to ${e.target.value === 'ALL' ? 'All Continents' : e.target.value}`);
+                }}
+                className="w-full h-[42px] pl-9 pr-8 bg-slate-50 dark:bg-[#0F172A] border border-slate-200 dark:border-white/10 rounded-xl text-xs font-extrabold text-slate-900 dark:text-white cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#7C3AED]"
+              >
+                {continentOptions.map((c) => (
+                  <option key={c.id} value={c.id} className="bg-white dark:bg-[#0F172A] font-bold">
+                    {c.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* City Search Bar */}
+            <div className="relative w-full md:w-72 shrink-0">
+              <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search cities (e.g. Manali, Goa, Paris)..."
+                className="w-full h-[42px] pl-10 pr-3 py-2 bg-slate-50 dark:bg-[#0F172A] border border-slate-200 dark:border-white/10 rounded-xl text-xs font-semibold text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#7C3AED] dark:focus:border-[#00A09D] transition"
+              />
+            </div>
           </div>
         </div>
 
+        {/* Continent Quick Filter Bar (User Request) */}
+        <div className="flex items-center space-x-2 overflow-x-auto pb-1 scrollbar-none whitespace-nowrap">
+          <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 shrink-0 mr-1 flex items-center space-x-1">
+            <Filter className="w-3.5 h-3.5 text-[#00A09D]" />
+            <span>Continent:</span>
+          </span>
+          {continentOptions.map((cont) => {
+            const isSelected = selectedContinent === cont.id;
+            return (
+              <button
+                key={cont.id}
+                type="button"
+                onClick={() => {
+                  setSelectedContinent(cont.id);
+                  showToast(`✓ Filtered cities to ${cont.label}`);
+                }}
+                className={`px-3.5 py-1.5 rounded-xl text-xs font-extrabold whitespace-nowrap transition-all border shrink-0 ${
+                  isSelected
+                    ? 'bg-[#00A09D] text-white border-cyan-400 shadow-md scale-105'
+                    : 'bg-slate-100 dark:bg-[#0F172A] text-slate-700 dark:text-slate-300 border-slate-200 dark:border-white/10 hover:bg-slate-200 dark:hover:bg-[#334155]'
+                }`}
+              >
+                <span>{cont.label}</span>
+              </button>
+            );
+          })}
+        </div>
+
         {/* Smooth Horizontally Scrollable Unclipped Vibe Pills */}
-        <div className="flex items-center space-x-2.5 overflow-x-auto pb-2 pr-6 scrollbar-none whitespace-nowrap">
+        <div className="flex items-center space-x-2.5 overflow-x-auto pb-2 pr-6 scrollbar-none whitespace-nowrap pt-2 border-t border-slate-100 dark:border-white/10">
+          <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 shrink-0 mr-1 flex items-center space-x-1">
+            <Flame className="w-3.5 h-3.5 text-[#E2A03F]" />
+            <span>Vibe Filter:</span>
+          </span>
           {vibeOptions.map((vibe) => {
             const Icon = vibe.icon;
             const isSelected = selectedVibe === vibe.id;
@@ -793,20 +944,21 @@ export const Dashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* Regional / Vibe Selections Grid with Real-Time Counter Feedback (Request 3) */}
+      {/* Regional / Vibe / Continent Selections Grid */}
       <section className="space-y-4">
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-xl font-black text-slate-900 dark:text-white flex items-center space-x-2">
               <Globe2 className="w-5 h-5 text-[#00A09D]" />
               <span>
-                Popular Destination Catalog ({filteredCities.length}
-                {selectedVibe !== 'ALL' ? ` ${vibeOptions.find((v) => v.id === selectedVibe)?.label}` : ''})
+                Popular Destination Catalog ({filteredCities.length} Cities
+                {selectedContinent !== 'ALL' ? ` in ${selectedContinent}` : ''}
+                {selectedVibe !== 'ALL' ? ` • ${vibeOptions.find((v) => v.id === selectedVibe)?.label}` : ''})
               </span>
             </h2>
             <p className="text-xs text-slate-500 dark:text-slate-400">
-              {selectedVibe !== 'ALL'
-                ? `Showing ${filteredCities.length} destinations matching "${vibeOptions.find((v) => v.id === selectedVibe)?.label}"`
+              {selectedContinent !== 'ALL' || selectedVibe !== 'ALL'
+                ? `Showing ${filteredCities.length} destinations matching selected continent & travel vibe filters`
                 : 'Explore popular cities in India and top destinations worldwide'}
             </p>
           </div>
@@ -824,12 +976,12 @@ export const Dashboard: React.FC = () => {
           </div>
         ) : filteredCities.length === 0 ? (
           <div className="p-8 bg-white dark:bg-[#1E293B] rounded-3xl border border-slate-200 dark:border-white/10 text-center text-xs text-slate-400 space-y-2">
-            <p className="font-bold text-slate-700 dark:text-slate-300 text-sm">No matching destinations found</p>
-            <p>Try searching for popular Indian cities like <strong>Goa, Jaipur, Manali, Shimla, Varanasi, Kerala, Srinagar, Coorg, Ooty</strong>...</p>
+            <p className="font-bold text-slate-700 dark:text-slate-300 text-sm">No destinations found for selected continent / search query</p>
+            <p>Try switching continent to <strong>🌍 All Continents</strong> or <strong>🇮🇳 Asia & India</strong>...</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 transition-all duration-300">
-            {(searchQuery.trim() !== '' || selectedVibe !== 'ALL' ? filteredCities : filteredCities.slice(0, 12)).map((city) => (
+            {(searchQuery.trim() !== '' || selectedContinent !== 'ALL' || selectedVibe !== 'ALL' ? filteredCities : filteredCities.slice(0, 12)).map((city) => (
               <CityCard
                 key={city.id}
                 city={city}
@@ -910,7 +1062,7 @@ export const Dashboard: React.FC = () => {
         )}
       </section>
 
-      {/* Interactive Export Modal with Options A, B, C (Request 4) */}
+      {/* Interactive Export Modal with Options A, B, C */}
       {showExportModal && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white dark:bg-[#1E293B] max-w-md w-full p-6 rounded-3xl shadow-2xl border border-slate-200 dark:border-white/10 space-y-4 relative">
