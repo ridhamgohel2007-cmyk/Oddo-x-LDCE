@@ -387,7 +387,7 @@ export const Dashboard: React.FC = () => {
           title: `Stop: ${selectedCityToAdd.name}`,
           budget: 15000,
         });
-        showToast(`✓ ${selectedCityToAdd.name} added to ${targetTrip?.title || 'itinerary'}`);
+        showToast(`✓ Added ${selectedCityToAdd.name} to ${targetTrip?.title || 'itinerary'}`);
         await loadData();
         setShowAddCityModal(false);
       } else {
@@ -865,7 +865,7 @@ export const Dashboard: React.FC = () => {
               <span>Travel by Continent & Vibe</span>
             </h2>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-              Select a continent from the menu below to filter destinations in real-time
+              Select a continent or vibe filter to explore destinations without truncation
             </p>
           </div>
 
@@ -903,8 +903,8 @@ export const Dashboard: React.FC = () => {
           </div>
         </div>
 
-        {/* Continent Quick Filter Bar */}
-        <div className="flex items-center space-x-2 overflow-x-auto pb-1 scrollbar-none whitespace-nowrap">
+        {/* Continent Quick Filter Bar with Flex-Wrap (Request 2) */}
+        <div className="flex flex-wrap items-center gap-2 pb-1">
           <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 shrink-0 mr-1 flex items-center space-x-1">
             <Filter className="w-3.5 h-3.5 text-[#00A09D]" />
             <span>Continent:</span>
@@ -931,8 +931,8 @@ export const Dashboard: React.FC = () => {
           })}
         </div>
 
-        {/* Smooth Horizontally Scrollable Unclipped Vibe Pills */}
-        <div className="flex items-center space-x-2.5 overflow-x-auto pb-2 pr-6 scrollbar-none whitespace-nowrap pt-2 border-t border-slate-100 dark:border-white/10">
+        {/* Fully Flex-Wrapped Unclipped Vibe Filter Pills Bar (Request 2) */}
+        <div className="flex flex-wrap items-center gap-2 sm:gap-2.5 pt-2 border-t border-slate-100 dark:border-white/10">
           <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 shrink-0 mr-1 flex items-center space-x-1">
             <Flame className="w-3.5 h-3.5 text-[#E2A03F]" />
             <span>Vibe Filter:</span>
@@ -944,7 +944,7 @@ export const Dashboard: React.FC = () => {
               <button
                 key={vibe.id}
                 onClick={() => handleVibeClick(vibe.id)}
-                className={`flex items-center space-x-2 px-4 py-2.5 rounded-2xl text-xs font-extrabold whitespace-nowrap transition-all duration-200 border shrink-0 ${
+                className={`flex items-center space-x-2 px-3.5 py-2 rounded-2xl text-xs font-extrabold whitespace-nowrap transition-all duration-200 border shrink-0 ${
                   isSelected
                     ? 'bg-[#714B67] dark:bg-[#7C3AED] text-white border-purple-400 shadow-md shadow-purple-500/25 scale-105'
                     : 'bg-slate-100 dark:bg-[#0F172A] text-slate-700 dark:text-slate-300 border-slate-200 dark:border-white/10 hover:bg-slate-200 dark:hover:bg-[#334155]'
@@ -994,7 +994,7 @@ export const Dashboard: React.FC = () => {
             <p>Try switching continent to <strong>🌍 All Continents</strong> or <strong>🇮🇳 Asia & India</strong>...</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 transition-all duration-300">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 transition-all duration-300 items-stretch">
             {(searchQuery.trim() !== '' || selectedContinent !== 'ALL' || selectedVibe !== 'ALL' ? filteredCities : filteredCities.slice(0, 12)).map((city) => (
               <CityCard
                 key={city.id}
@@ -1164,7 +1164,7 @@ export const Dashboard: React.FC = () => {
         </div>
       )}
 
-      {/* Direct Add Destination to Itinerary Quick Action Modal */}
+      {/* Direct Add Destination to Itinerary Quick Action Modal (Request 3) */}
       {showAddCityModal && selectedCityToAdd && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white dark:bg-[#1E293B] max-w-md w-full p-6 rounded-3xl shadow-2xl border border-slate-200 dark:border-white/10 space-y-4 relative">

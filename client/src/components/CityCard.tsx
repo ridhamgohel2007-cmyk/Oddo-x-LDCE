@@ -35,20 +35,21 @@ export const CityCard: React.FC<CityCardProps> = ({ city, onSelect }) => {
   };
 
   return (
-    <div className="bg-white dark:bg-[#1E293B] dark:hover:bg-[#334155] rounded-2xl border border-slate-200 dark:border-white/10 overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col justify-between group">
-      <div>
-        <div className="relative h-44 w-full overflow-hidden bg-slate-100 dark:bg-[#0F172A]">
+    <div className="bg-white dark:bg-[#1E293B] dark:hover:bg-[#334155] rounded-2xl border border-slate-200 dark:border-white/10 overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col justify-between h-full group">
+      <div className="flex flex-col flex-1">
+        {/* Aspect Ratio 16/9 Image Container with Fallback & Hover Zoom (Request 4) */}
+        <div className="relative aspect-[16/9] w-full overflow-hidden bg-slate-100 dark:bg-[#0F172A] shrink-0">
           <img
             src={imageSrc}
             alt={city.name}
             onError={() => setImageSrc(FALLBACK_CITY_IMAGE)}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           />
           <div className="absolute top-3 left-3 flex items-center space-x-1">
             {getCostBadge(city.costIndex)}
           </div>
           
-          {/* Quick Heart / Save to Wishlist Icon Button */}
+          {/* Wishlist Heart & Rating Star Badge */}
           <div className="absolute top-3 right-3 flex items-center space-x-1.5">
             <button
               type="button"
@@ -72,24 +73,27 @@ export const CityCard: React.FC<CityCardProps> = ({ city, onSelect }) => {
           </div>
         </div>
 
-        <div className="p-4 space-y-2">
-          <div className="flex items-center justify-between">
-            <h4 className="text-base font-extrabold text-slate-900 dark:text-white line-clamp-1">
-              {city.name}
-            </h4>
-            <span className="text-xs font-bold text-[#00A09D] dark:text-[#38BDF8]">{city.region}</span>
+        {/* Content Container with Proper Flex & Padding (Request 1) */}
+        <div className="p-4 sm:p-5 flex-1 flex flex-col justify-between space-y-3">
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <h4 className="text-base font-extrabold text-slate-900 dark:text-white line-clamp-1">
+                {city.name}
+              </h4>
+              <span className="text-xs font-bold text-[#00A09D] dark:text-[#38BDF8] shrink-0 ml-2">{city.region}</span>
+            </div>
+
+            <div className="flex items-center space-x-1 text-xs text-[#10B981] font-bold">
+              <MapPin className="w-3.5 h-3.5 shrink-0 text-[#00A09D]" />
+              <span>{city.country}</span>
+            </div>
+
+            <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed">
+              {city.description}
+            </p>
           </div>
 
-          <div className="flex items-center space-x-1 text-xs text-[#10B981] font-bold">
-            <MapPin className="w-3.5 h-3.5 shrink-0 text-[#00A09D]" />
-            <span>{city.country}</span>
-          </div>
-
-          <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed pt-1">
-            {city.description}
-          </p>
-
-          {/* Time to Visit Tag (Request 4) */}
+          {/* Best Time to Visit Tag */}
           <div className="flex items-center space-x-1.5 pt-1 text-[10px] font-extrabold text-[#00A09D] dark:text-[#38BDF8]">
             <Sun className="w-3.5 h-3.5 text-[#E2A03F] shrink-0" />
             <span>Best Time to Visit: Oct–Mar</span>
@@ -97,12 +101,14 @@ export const CityCard: React.FC<CityCardProps> = ({ city, onSelect }) => {
         </div>
       </div>
 
-      <div className="px-4 py-3 bg-slate-50 dark:bg-[#0F172A]/80 border-t border-slate-100 dark:border-white/10 flex justify-end">
+      {/* Card Action Footer Button (Request 1 & 3) */}
+      <div className="px-4 py-3 pb-4 bg-slate-50 dark:bg-[#0F172A]/80 border-t border-slate-100 dark:border-white/10 flex items-center justify-between mt-auto">
+        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Multi-City Stop</span>
         {onSelect && (
           <button
             onClick={() => onSelect(city)}
             aria-label={`Add ${city.name} to trip`}
-            className="px-3.5 py-1.5 bg-[#714B67] hover:bg-[#613E57] text-white rounded-xl text-xs font-bold shadow-sm transition flex items-center space-x-1"
+            className="px-3.5 py-1.5 bg-[#714B67] hover:bg-[#613E57] text-white rounded-xl text-xs font-extrabold shadow-sm transition-all duration-200 hover:-translate-y-0.5 flex items-center space-x-1.5 shrink-0"
           >
             <Plus className="w-3.5 h-3.5" />
             <span>Add Destination</span>
