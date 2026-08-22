@@ -9,8 +9,6 @@ import {
   X,
   Search,
   ChevronRight,
-  Sun,
-  Moon,
 } from 'lucide-react';
 
 export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -19,26 +17,11 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [globalSearch, setGlobalSearch] = useState('');
-  
-  // Theme Toggle State (Sun / Moon)
-  const [isDark, setIsDark] = useState(() => {
-    return document.documentElement.classList.contains('dark') ||
-      localStorage.getItem('theme') === 'dark';
-  });
 
+  // Ensure dark class is always active on HTML document root for crisp Odoo dark mode
   useEffect(() => {
-    if (isDark) {
-      document.documentElement.classList.add('dark');
-      localStorage.setItem('theme', 'dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-      localStorage.setItem('theme', 'light');
-    }
-  }, [isDark]);
-
-  const toggleTheme = () => {
-    setIsDark(!isDark);
-  };
+    document.documentElement.classList.add('dark');
+  }, []);
 
   const navLinks = [
     { name: 'Dashboard', path: '/dashboard' },
@@ -123,7 +106,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
               </nav>
             )}
 
-            {/* Right Side User Profile, Theme Switcher & Actions */}
+            {/* Right Side User Profile & Actions (Theme Toggle Removed as Requested) */}
             {user ? (
               <div className="flex items-center space-x-2.5 shrink-0">
                 <Link
@@ -134,18 +117,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                   <span className="whitespace-nowrap">Plan New Trip</span>
                 </Link>
 
-                {/* Theme Toggle Button (Sun / Moon - Request 2) */}
-                <button
-                  type="button"
-                  onClick={toggleTheme}
-                  className="p-2 rounded-xl bg-slate-100 dark:bg-[#1E293B] hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-amber-400 border border-slate-200 dark:border-white/10 transition shadow-xs"
-                  title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
-                  aria-label="Toggle Theme Mode"
-                >
-                  {isDark ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-slate-600" />}
-                </button>
-
-                {/* User Profile Avatar Pill (Request 2: Well-Padded & Unclipped) */}
+                {/* User Profile Avatar Pill */}
                 <Link
                   to="/profile"
                   className="flex items-center space-x-2.5 px-3 py-1.5 rounded-2xl bg-slate-100 dark:bg-[#1E293B] hover:bg-slate-200 dark:hover:bg-slate-700 transition border border-slate-200 dark:border-white/10 shrink-0"
@@ -184,15 +156,6 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
               </div>
             ) : (
               <div className="flex items-center space-x-2">
-                {/* Theme Toggle Button when Logged Out */}
-                <button
-                  type="button"
-                  onClick={toggleTheme}
-                  className="p-2 rounded-xl bg-slate-100 dark:bg-[#1E293B] text-slate-700 dark:text-amber-400 border border-slate-200 dark:border-white/10 transition"
-                  title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
-                >
-                  {isDark ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-slate-600" />}
-                </button>
                 <Link
                   to="/login"
                   className="px-4 py-2 text-xs font-bold text-slate-700 dark:text-slate-200 hover:text-[#7C3AED]"
@@ -227,7 +190,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                   }`}
                 >
                   <span>{link.name}</span>
-                  <ChevronRight className="w-4 h-4 text-slate-400" />
+                  <ChevronRight className="w-4 h-4 text-[#7C3AED]" />
                 </Link>
               );
             })}
