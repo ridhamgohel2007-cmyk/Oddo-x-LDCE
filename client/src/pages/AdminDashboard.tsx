@@ -17,6 +17,7 @@ import {
   UserCheck,
   UserX,
   FileText,
+  User,
 } from 'lucide-react';
 import {
   AreaChart,
@@ -220,7 +221,7 @@ export const AdminDashboard: React.FC = () => {
 
       {activeTab === 'ANALYTICS' ? (
         <div className="space-y-8">
-          {/* Analytics Control Bar: Export Options & Date-Range Picker (PS Requirement) */}
+          {/* Analytics Control Bar */}
           <div className="bg-white dark:bg-[#111E2E] p-4 sm:p-6 rounded-3xl shadow-sm border border-slate-200 dark:border-[#1E2D42] flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="flex items-center space-x-3 w-full sm:w-auto">
               <Calendar className="w-4 h-4 text-emerald-500 shrink-0" />
@@ -341,7 +342,7 @@ export const AdminDashboard: React.FC = () => {
           </div>
         </div>
       ) : (
-        /* Actionable User Management Data Table (PS Requirement) */
+        /* Actionable User Management Data Table */
         <div className="bg-white dark:bg-[#111E2E] p-6 sm:p-8 rounded-3xl shadow-sm border border-slate-200 dark:border-[#1E2D42] space-y-5">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 border-b border-slate-100 dark:border-[#1E2D42] pb-4">
             <div>
@@ -401,20 +402,21 @@ export const AdminDashboard: React.FC = () => {
                       <td className="p-3">
                         <button
                           onClick={() => handleRoleToggle(u.id, u.role)}
-                          className={`px-3 py-1 rounded-xl text-[11px] font-extrabold transition flex items-center space-x-1 ${
+                          className={`px-3 py-1 rounded-xl text-[11px] font-extrabold transition flex items-center space-x-1.5 ${
                             u.role === 'ADMIN'
                               ? 'bg-purple-100 dark:bg-purple-950/80 text-purple-700 dark:text-purple-300 border border-purple-300 dark:border-purple-800'
                               : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700'
                           }`}
-                          title="Click to toggle role (Admin <-> Traveler)"
+                          title="Click to toggle role"
                         >
-                          <span>{u.role === 'ADMIN' ? '👑 Admin' : '✈️ Traveler'}</span>
+                          <User className="w-3 h-3" />
+                          <span>{u.role === 'ADMIN' ? 'Administrator' : 'Traveler'}</span>
                         </button>
                       </td>
                       <td className="p-3 font-black text-emerald-500">{u._count?.trips || 0} Trips</td>
                       <td className="p-3">
                         <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
-                          Active 🟢
+                          Active Account
                         </span>
                       </td>
                       <td className="p-3 text-right">

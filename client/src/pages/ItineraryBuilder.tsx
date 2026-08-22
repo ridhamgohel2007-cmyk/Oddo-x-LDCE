@@ -236,7 +236,7 @@ export const ItineraryBuilder: React.FC = () => {
         </div>
       </div>
 
-      {/* View Switcher: Timeline / Flowchart View vs. Day-by-Day View (PS Requirement) */}
+      {/* View Switcher */}
       <div className="bg-white dark:bg-[#111E2E] p-4 rounded-2xl shadow-sm border border-slate-200 dark:border-[#1E2D42] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div className="flex items-center space-x-2">
           <Layers className="w-5 h-5 text-emerald-500" />
@@ -378,7 +378,7 @@ export const ItineraryBuilder: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* Render based on View Mode (Timeline vs. Day-by-Day) */}
+                  {/* Render based on View Mode */}
                   {viewMode === 'TIMELINE' ? (
                     <div className="space-y-4">
                       <h4 className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider">
@@ -451,7 +451,7 @@ export const ItineraryBuilder: React.FC = () => {
                       )}
                     </div>
                   ) : (
-                    /* DAY-BY-DAY GROUPED VIEW (PS Requirement) */
+                    /* DAY-BY-DAY GROUPED VIEW */
                     <div className="space-y-4">
                       <h4 className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider">
                         Day-by-Day Categorized Schedule
@@ -562,7 +562,7 @@ export const ItineraryBuilder: React.FC = () => {
         </div>
       )}
 
-      {/* Add Item Modal */}
+      {/* Add Item Modal without Emojis */}
       {showAddItemModal && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white dark:bg-[#111E2E] max-w-md w-full p-6 rounded-3xl shadow-2xl border border-slate-200 dark:border-[#1E2D42] space-y-4">
@@ -576,7 +576,7 @@ export const ItineraryBuilder: React.FC = () => {
                   value={newItemTitle}
                   onChange={(e) => setNewItemTitle(e.target.value)}
                   className="w-full px-3 py-2 bg-slate-50 dark:bg-[#162235] border border-slate-200 dark:border-[#1E2D42] rounded-xl text-xs text-slate-900 dark:text-white font-bold"
-                  placeholder="e.g. Flight to Rome / Louvre Museum Ticket / Breakfast at Cafe"
+                  placeholder="e.g. Flight to Rome / Louvre Museum Ticket / Dinner"
                 />
               </div>
 
@@ -587,10 +587,10 @@ export const ItineraryBuilder: React.FC = () => {
                   onChange={(e: any) => setNewItemType(e.target.value)}
                   className="w-full px-3 py-2 bg-slate-50 dark:bg-[#162235] border border-slate-200 dark:border-[#1E2D42] rounded-xl text-xs text-slate-900 dark:text-white font-bold"
                 >
-                  <option value="ACTIVITY">🎟️ Activity / Sightseeing</option>
-                  <option value="TRANSPORT">🚗 Transport / Flight / Train / Cab</option>
-                  <option value="STAY">🏨 Stay / Hotel / Resort</option>
-                  <option value="MEAL">🍽️ Meal / Dining / Breakfast</option>
+                  <option value="ACTIVITY">Activity / Sightseeing</option>
+                  <option value="TRANSPORT">Transport / Flight / Train / Cab</option>
+                  <option value="STAY">Stay / Hotel / Resort</option>
+                  <option value="MEAL">Meal / Dining / Breakfast</option>
                 </select>
               </div>
 

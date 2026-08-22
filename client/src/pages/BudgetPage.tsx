@@ -161,7 +161,7 @@ export const BudgetPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Detailed Financial Analytics Charts (Pie + Bar Chart PS Requirement) */}
+      {/* Detailed Financial Analytics Charts */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Pie Chart */}
         <div className="bg-white dark:bg-[#111E2E] p-6 rounded-3xl shadow-sm border border-slate-200 dark:border-[#1E2D42] space-y-4">
@@ -276,7 +276,7 @@ export const BudgetPage: React.FC = () => {
         )}
       </div>
 
-      {/* Add Expense Modal */}
+      {/* Add Expense Modal without Emojis */}
       {showAddExpenseModal && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white dark:bg-[#111E2E] max-w-md w-full p-6 rounded-3xl shadow-2xl border border-slate-200 dark:border-[#1E2D42] space-y-4">
@@ -289,10 +289,10 @@ export const BudgetPage: React.FC = () => {
                   onChange={(e) => setCategory(e.target.value)}
                   className="w-full px-3 py-2 bg-slate-50 dark:bg-[#162235] border border-slate-200 dark:border-[#1E2D42] rounded-xl text-xs text-slate-900 dark:text-white font-bold"
                 >
-                  <option value="STAY">🏨 Stay / Accommodation</option>
-                  <option value="TRANSPORT">🚗 Transport / Flights / Train</option>
-                  <option value="ACTIVITIES">🎟️ Activities & Tickets</option>
-                  <option value="MEALS">🍽️ Meals & Dining</option>
+                  <option value="STAY">Stay / Accommodation</option>
+                  <option value="TRANSPORT">Transport / Flights / Train</option>
+                  <option value="ACTIVITIES">Activities & Tickets</option>
+                  <option value="MEALS">Meals & Dining</option>
                   <option value="OTHER">Other Expenses</option>
                 </select>
               </div>

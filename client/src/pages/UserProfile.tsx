@@ -59,7 +59,7 @@ export const UserProfile: React.FC = () => {
   const fetchSavedCities = async () => {
     try {
       const res = await api.get('/cities?popular=true');
-      setSavedCities(res.data.slice(0, 3)); // Display top bookmarked destinations
+      setSavedCities(res.data.slice(0, 3));
     } catch (err) {
       console.error('Error fetching saved cities:', err);
     }
@@ -213,7 +213,7 @@ export const UserProfile: React.FC = () => {
                 </div>
               </div>
 
-              {/* Language Preference (PS Requirement) */}
+              {/* Language Preference */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">
@@ -273,7 +273,7 @@ export const UserProfile: React.FC = () => {
         </form>
       </div>
 
-      {/* Screen 7: Preplanned Trips with Duration Badges & Privacy Pills */}
+      {/* Screen 7: Preplanned Trips */}
       <section className="space-y-4">
         <div className="border-b border-slate-200 dark:border-[#1E2D42] pb-2 flex items-center justify-between">
           <div>
@@ -299,7 +299,7 @@ export const UserProfile: React.FC = () => {
                     {calculateDurationDays(trip.startDate, trip.endDate)}
                   </span>
                   <span className="px-2 py-0.5 bg-emerald-500/90 text-white text-[10px] font-extrabold rounded-full backdrop-blur-md">
-                    {trip.isPublic ? 'Public 🌐' : 'Private 🔒'}
+                    {trip.isPublic ? 'Public' : 'Private'}
                   </span>
                 </div>
               </div>
@@ -308,7 +308,7 @@ export const UserProfile: React.FC = () => {
         )}
       </section>
 
-      {/* Screen 7: Saved & Bookmarked Destinations (PS Requirement) */}
+      {/* Screen 7: Saved & Bookmarked Destinations */}
       <section className="space-y-4">
         <div className="border-b border-slate-200 dark:border-[#1E2D42] pb-2 flex items-center justify-between">
           <div>
