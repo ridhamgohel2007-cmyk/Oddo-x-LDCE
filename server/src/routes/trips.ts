@@ -94,13 +94,6 @@ router.post('/', authenticateToken, async (req: AuthenticatedRequest, res: Respo
   try {
     const { title, description, coverImage, startDate, endDate, totalBudget, isPublic, cityId, stops } = req.body;
 
-    const sanitizedTitle = (title || 'My Customized Trip').trim();
-    if (!sanitizedTitle) {
-      return res.status(400).json({ message: 'Trip title is required.' });
-    }
-
-    const parsedBudget = Math.max(0, parseFloat(totalBudget || 0));
-
     if (!title || !startDate || !endDate) {
       return res.status(400).json({ message: 'Title, start date, and end date are required.' });
     }
