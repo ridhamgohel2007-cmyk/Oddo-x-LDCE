@@ -20,12 +20,16 @@ import {
   Utensils,
   Sparkles,
   Filter,
+  List,
+  Sun,
+  Eye,
 } from 'lucide-react';
 
 export const CalendarView: React.FC = () => {
   const [trips, setTrips] = useState<any[]>([]);
   const [currentMonth, setCurrentMonth] = useState(new Date(2026, 8, 1)); // Default Sept 2026
   const [activeView, setActiveView] = useState<'MONTH' | 'WEEK' | 'DAY' | 'AGENDA'>('MONTH');
+  const [selectedDayNum, setSelectedDayNum] = useState<number>(15); // Default day 15
   const [loading, setLoading] = useState(true);
 
   // Expand / Collapse Single Date Inspection Drawer
@@ -68,6 +72,7 @@ export const CalendarView: React.FC = () => {
   const handleJumpToToday = () => {
     const today = new Date();
     setCurrentMonth(new Date(today.getFullYear(), today.getMonth(), 1));
+    setSelectedDayNum(today.getDate());
   };
 
   const handleMonthChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -75,7 +80,7 @@ export const CalendarView: React.FC = () => {
     setCurrentMonth(new Date(valYear, valMonth, 1));
   };
 
-  // Matrix Grid Computation with Exact Day-of-Week Offsets (Request Item 2)
+  // Matrix Grid Computation with Exact Day-of-Week Offsets
   const daysInMonth = new Date(year, monthIdx + 1, 0).getDate();
   const firstDayIndex = new Date(year, monthIdx, 1).getDay(); // Sept 1 2026 is Tuesday (Index 2)
   const daysInPrevMonth = new Date(year, monthIdx, 0).getDate();
@@ -206,9 +211,49 @@ export const CalendarView: React.FC = () => {
     }
   };
 
+  // Build Chronological Agenda List of All Events
+  const getAllAgendaItems = () => {
+    const agendaList: any[] = [];
+    trips.forEach((t) => {
+      agendaList.push({
+        id: `trip-${t.id}`,
+        tripId: t.id,
+        title: t.title,
+        date: t.startDate,
+        endDate: t.endDate,
+        type: 'TRIP',
+        cost: t.totalBudget,
+        details: t.description || 'Multi-city travel itinerary',
+      });
+
+      if (t.stops) {
+        t.stops.forEach((s: any) => {
+          if (s.items) {
+            s.items.forEach((item: any) => {
+              agendaList.push({
+                id: item.id,
+                tripId: t.id,
+                title: item.title,
+                date: s.startDate || t.startDate,
+                type: item.type || 'ACTIVITY',
+                cost: item.cost,
+                details: `${t.title} (${s.title})`,
+                timeSlot: item.timeSlot || '09:00 AM - 12:00 PM',
+              });
+            });
+          }
+        });
+      }
+    });
+
+    return agendaList.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  };
+
+  const agendaItems = getAllAgendaItems();
+
   return (
     <div className="max-w-6xl mx-auto space-y-6 pb-16">
-      {/* Production Header Banner (Request Item 1 - No dev screen labels) */}
+      {/* Production Header Banner */}
       <div className="bg-white dark:bg-[#1E293B] p-6 sm:p-8 rounded-3xl shadow-sm border border-slate-200 dark:border-white/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white flex items-center space-x-3">
@@ -236,7 +281,7 @@ export const CalendarView: React.FC = () => {
         </div>
       )}
 
-      {/* Adopted Google Calendar Control Bar (Request Item 1) */}
+      {/* Adopted Google Calendar Control Bar */}
       <div className="bg-white dark:bg-[#1E293B] p-4 sm:p-5 rounded-3xl shadow-sm border border-slate-200 dark:border-white/10 space-y-4">
         <div className="flex flex-col md:flex-row items-center justify-between gap-4">
           
@@ -275,7 +320,7 @@ export const CalendarView: React.FC = () => {
             </h2>
           </div>
 
-          {/* Right Controls: Mini-Calendar Month Selector & View Switcher (Request Item 1) */}
+          {/* Right Controls: Mini-Calendar Month Selector & Interactive View Switcher */}
           <div className="flex flex-wrap items-center gap-2.5 w-full md:w-auto justify-end">
             {/* Collapsible Month-Year Date Selector */}
             <div className="relative">
@@ -299,15 +344,20 @@ export const CalendarView: React.FC = () => {
               </select>
             </div>
 
-            {/* View Switcher Toggle Pills */}
+            {/* Fully Functional View Switcher Buttons (Month, Week, Day, Agenda) */}
             <div className="flex bg-slate-100 dark:bg-[#0F172A] p-1 rounded-xl border border-slate-200 dark:border-white/10 text-xs font-bold">
               {(['MONTH', 'WEEK', 'DAY', 'AGENDA'] as const).map((view) => (
                 <button
                   key={view}
-                  onClick={() => setActiveView(view)}
+                  onClick={() => {
+                    setActiveView(view);
+                    if (view === 'DAY' && !selectedDateStr) {
+                      setSelectedDateStr(`${year}-${String(monthIdx + 1).padStart(2, '0')}-15`);
+                    }
+                  }}
                   className={`px-3 py-1 rounded-lg transition-all ${
                     activeView === view
-                      ? 'bg-[#714B67] dark:bg-[#7C3AED] text-white shadow-xs font-black'
+                      ? 'bg-[#714B67] dark:bg-[#7C3AED] text-white shadow-xs font-black scale-105'
                       : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
                   }`}
                 >
@@ -318,136 +368,264 @@ export const CalendarView: React.FC = () => {
           </div>
         </div>
 
-        {/* 7-Column Day-of-Week Headers */}
-        <div className="grid grid-cols-7 text-center font-black text-xs text-slate-500 dark:text-slate-400 tracking-wider py-2 uppercase border-b border-slate-100 dark:border-white/10">
-          <div>SUN</div>
-          <div>MON</div>
-          <div>TUE</div>
-          <div>WED</div>
-          <div>THU</div>
-          <div>FRI</div>
-          <div>SAT</div>
-        </div>
-
-        {/* 7-Column Standard Calendar Grid Matrix (Request Item 2) */}
-        <div className="grid grid-cols-7 gap-1.5 sm:gap-2">
-          
-          {/* Leading Days from Previous Month (e.g. Aug 30, Aug 31 for Sept 2026) */}
-          {leadingDays.map((prevDayNum) => (
-            <div
-              key={`prev-${prevDayNum}`}
-              className="min-h-[100px] sm:min-h-[120px] p-2.5 rounded-2xl bg-slate-50/50 dark:bg-[#0F172A]/30 border border-slate-200/50 dark:border-white/5 opacity-40 select-none flex flex-col justify-between"
-            >
-              <span className="text-xs font-bold text-slate-400 dark:text-slate-500">{prevDayNum}</span>
-              <span className="text-[9px] font-bold text-slate-400">Prev Month</span>
+        {/* ----------------- 1. MONTH VIEW RENDERING ----------------- */}
+        {activeView === 'MONTH' && (
+          <div className="space-y-4 pt-2">
+            {/* 7-Column Day-of-Week Headers */}
+            <div className="grid grid-cols-7 text-center font-black text-xs text-slate-500 dark:text-slate-400 tracking-wider py-2 uppercase border-b border-slate-100 dark:border-white/10">
+              <div>SUN</div>
+              <div>MON</div>
+              <div>TUE</div>
+              <div>WED</div>
+              <div>THU</div>
+              <div>FRI</div>
+              <div>SAT</div>
             </div>
-          ))}
 
-          {/* Current Month Days Array */}
-          {monthDays.map((dayNum) => {
-            const dateStr = `${year}-${String(monthIdx + 1).padStart(2, '0')}-${String(dayNum).padStart(2, '0')}`;
-            const isSelected = selectedDateStr === dateStr;
-            const isToday = isTodayDate(dayNum);
+            {/* 7-Column Standard Calendar Grid Matrix */}
+            <div className="grid grid-cols-7 gap-1.5 sm:gap-2">
+              {/* Leading Days from Previous Month (Aug 30, Aug 31 for Sept 2026) */}
+              {leadingDays.map((prevDayNum) => (
+                <div
+                  key={`prev-${prevDayNum}`}
+                  className="min-h-[100px] sm:min-h-[120px] p-2.5 rounded-2xl bg-slate-50/50 dark:bg-[#0F172A]/30 border border-slate-200/50 dark:border-white/5 opacity-40 select-none flex flex-col justify-between"
+                >
+                  <span className="text-xs font-bold text-slate-400 dark:text-slate-500">{prevDayNum}</span>
+                  <span className="text-[9px] font-bold text-slate-400">Prev Month</span>
+                </div>
+              ))}
 
-            // Fetch matching trips and activities for date
-            const matchingTrips = trips.filter((t) => {
-              const start = t.startDate.split('T')[0];
-              const end = t.endDate.split('T')[0];
-              return dateStr >= start && dateStr <= end;
-            });
+              {/* Current Month Days Array */}
+              {monthDays.map((dayNum) => {
+                const dateStr = `${year}-${String(monthIdx + 1).padStart(2, '0')}-${String(dayNum).padStart(2, '0')}`;
+                const isSelected = selectedDateStr === dateStr;
+                const isToday = isTodayDate(dayNum);
 
-            // Gather event items for visual chips
-            let dayEvents: any[] = [];
-            matchingTrips.forEach((t) => {
-              dayEvents.push({ id: `trip-${t.id}`, title: t.title, type: 'TRIP' });
-              if (t.stops) {
-                t.stops.forEach((s: any) => {
-                  if (s.items) {
-                    s.items.forEach((item: any) => {
-                      dayEvents.push({ id: item.id, title: item.title, type: item.type || 'ACTIVITY' });
+                const matchingTrips = trips.filter((t) => {
+                  const start = t.startDate.split('T')[0];
+                  const end = t.endDate.split('T')[0];
+                  return dateStr >= start && dateStr <= end;
+                });
+
+                let dayEvents: any[] = [];
+                matchingTrips.forEach((t) => {
+                  dayEvents.push({ id: `trip-${t.id}`, title: t.title, type: 'TRIP' });
+                  if (t.stops) {
+                    t.stops.forEach((s: any) => {
+                      if (s.items) {
+                        s.items.forEach((item: any) => {
+                          dayEvents.push({ id: item.id, title: item.title, type: item.type || 'ACTIVITY' });
+                        });
+                      }
                     });
                   }
                 });
-              }
-            });
 
-            const maxVisibleChips = 2;
-            const visibleChips = dayEvents.slice(0, maxVisibleChips);
-            const overflowCount = dayEvents.length - maxVisibleChips;
+                const maxVisibleChips = 2;
+                const visibleChips = dayEvents.slice(0, maxVisibleChips);
+                const overflowCount = dayEvents.length - maxVisibleChips;
 
-            return (
-              <div
-                key={dayNum}
-                onClick={() => setSelectedDateStr(isSelected ? null : dateStr)}
-                onDragOver={handleDragOver}
-                onDrop={(e) => handleDropOnDate(e, dateStr)}
-                className={`min-h-[100px] sm:min-h-[120px] p-2.5 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between ${
-                  isSelected
-                    ? 'bg-purple-50 dark:bg-purple-950/60 border-[#7C3AED] ring-2 ring-[#7C3AED]/40 shadow-md'
-                    : 'bg-white dark:bg-[#1E293B] border-slate-200 dark:border-white/10 hover:border-[#7C3AED] hover:shadow-md'
-                }`}
-              >
-                {/* Date Number with Solid Circle Badge for Today (Request Item 2) */}
-                <div className="flex items-center justify-between">
-                  {isToday ? (
-                    <span className="w-7 h-7 rounded-full bg-[#714B67] dark:bg-[#7C3AED] text-white flex items-center justify-center text-xs font-black shadow-sm ring-2 ring-purple-400">
-                      {dayNum}
-                    </span>
-                  ) : (
-                    <span className="text-xs sm:text-sm font-extrabold text-slate-900 dark:text-white">
-                      {dayNum}
-                    </span>
-                  )}
+                return (
+                  <div
+                    key={dayNum}
+                    onClick={() => {
+                      setSelectedDateStr(isSelected ? null : dateStr);
+                      setSelectedDayNum(dayNum);
+                    }}
+                    onDragOver={handleDragOver}
+                    onDrop={(e) => handleDropOnDate(e, dateStr)}
+                    className={`min-h-[100px] sm:min-h-[120px] p-2.5 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between ${
+                      isSelected
+                        ? 'bg-purple-50 dark:bg-purple-950/60 border-[#7C3AED] ring-2 ring-[#7C3AED]/40 shadow-md'
+                        : 'bg-white dark:bg-[#1E293B] border-slate-200 dark:border-white/10 hover:border-[#7C3AED] hover:shadow-md'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      {isToday ? (
+                        <span className="w-7 h-7 rounded-full bg-[#714B67] dark:bg-[#7C3AED] text-white flex items-center justify-center text-xs font-black shadow-sm ring-2 ring-purple-400">
+                          {dayNum}
+                        </span>
+                      ) : (
+                        <span className="text-xs sm:text-sm font-extrabold text-slate-900 dark:text-white">
+                          {dayNum}
+                        </span>
+                      )}
 
-                  {matchingTrips.length > 0 && (
-                    <span className="w-2 h-2 rounded-full bg-[#10B981] animate-pulse" />
-                  )}
-                </div>
-
-                {/* Colored Visual Event Chips & Multi-Day Spanning (Request Item 3) */}
-                <div className="space-y-1 my-1">
-                  {visibleChips.map((evt, idx) => (
-                    <div
-                      key={evt.id || idx}
-                      draggable
-                      onDragStart={(e) => handleDragStart(e, { itemTitle: evt.title, type: evt.type })}
-                      className={`px-2 py-0.5 rounded-lg text-[10px] font-black truncate border flex items-center space-x-1 ${getCategoryPillStyle(evt.type)}`}
-                      title={`${evt.title} (Drag to reschedule)`}
-                    >
-                      <span className="truncate">{evt.title}</span>
+                      {matchingTrips.length > 0 && (
+                        <span className="w-2 h-2 rounded-full bg-[#10B981] animate-pulse" />
+                      )}
                     </div>
-                  ))}
 
-                  {/* +X More Overflow Indicator Pill (Request Item 3) */}
-                  {overflowCount > 0 && (
-                    <div className="text-[10px] font-black text-[#7C3AED] dark:text-[#38BDF8] hover:underline">
-                      +{overflowCount} more...
+                    <div className="space-y-1 my-1">
+                      {visibleChips.map((evt, idx) => (
+                        <div
+                          key={evt.id || idx}
+                          draggable
+                          onDragStart={(e) => handleDragStart(e, { itemTitle: evt.title, type: evt.type })}
+                          className={`px-2 py-0.5 rounded-lg text-[10px] font-black truncate border flex items-center space-x-1 ${getCategoryPillStyle(evt.type)}`}
+                          title={`${evt.title} (Drag to reschedule)`}
+                        >
+                          <span className="truncate">{evt.title}</span>
+                        </div>
+                      ))}
+
+                      {overflowCount > 0 && (
+                        <div className="text-[10px] font-black text-[#7C3AED] dark:text-[#38BDF8] hover:underline">
+                          +{overflowCount} more...
+                        </div>
+                      )}
                     </div>
-                  )}
-                </div>
 
-                <div className="text-[9px] font-black text-slate-400 uppercase flex items-center justify-between pt-1 border-t border-slate-100 dark:border-white/5">
-                  <span>{matchingTrips.length > 0 ? `${matchingTrips.length} Active` : ''}</span>
-                </div>
-              </div>
-            );
-          })}
+                    <div className="text-[9px] font-black text-slate-400 uppercase flex items-center justify-between pt-1 border-t border-slate-100 dark:border-white/5">
+                      <span>{matchingTrips.length > 0 ? `${matchingTrips.length} Active` : ''}</span>
+                    </div>
+                  </div>
+                );
+              })}
 
-          {/* Trailing Days to Complete Grid Matrix */}
-          {trailingDays.map((nextDayNum) => (
-            <div
-              key={`next-${nextDayNum}`}
-              className="min-h-[100px] sm:min-h-[120px] p-2.5 rounded-2xl bg-slate-50/50 dark:bg-[#0F172A]/30 border border-slate-200/50 dark:border-white/5 opacity-40 select-none flex flex-col justify-between"
-            >
-              <span className="text-xs font-bold text-slate-400 dark:text-slate-500">{nextDayNum}</span>
-              <span className="text-[9px] font-bold text-slate-400">Next Month</span>
+              {trailingDays.map((nextDayNum) => (
+                <div
+                  key={`next-${nextDayNum}`}
+                  className="min-h-[100px] sm:min-h-[120px] p-2.5 rounded-2xl bg-slate-50/50 dark:bg-[#0F172A]/30 border border-slate-200/50 dark:border-white/5 opacity-40 select-none flex flex-col justify-between"
+                >
+                  <span className="text-xs font-bold text-slate-400 dark:text-slate-500">{nextDayNum}</span>
+                  <span className="text-[9px] font-bold text-slate-400">Next Month</span>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
+          </div>
+        )}
+
+        {/* ----------------- 2. WEEK VIEW RENDERING ----------------- */}
+        {activeView === 'WEEK' && (
+          <div className="space-y-4 pt-2">
+            <div className="p-4 bg-purple-50 dark:bg-purple-950/40 rounded-2xl border border-purple-200 dark:border-purple-800 flex items-center justify-between text-xs font-bold text-[#7C3AED] dark:text-purple-300">
+              <span>📅 Week Schedule: Sep 6 - Sep 12, {year}</span>
+              <span>7 Days Hour Slots</span>
+            </div>
+
+            <div className="grid grid-cols-7 gap-2">
+              {[6, 7, 8, 9, 10, 11, 12].map((dayNum, idx) => {
+                const dateStr = `${year}-${String(monthIdx + 1).padStart(2, '0')}-${String(dayNum).padStart(2, '0')}`;
+                const dayName = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][idx];
+
+                const matchingTrips = trips.filter((t) => {
+                  const start = t.startDate.split('T')[0];
+                  const end = t.endDate.split('T')[0];
+                  return dateStr >= start && dateStr <= end;
+                });
+
+                return (
+                  <div key={dayNum} className="p-3 bg-white dark:bg-[#0F172A] rounded-2xl border border-slate-200 dark:border-white/10 space-y-2 min-h-[300px]">
+                    <div className="text-center border-b border-slate-100 dark:border-white/10 pb-2">
+                      <span className="text-[10px] font-extrabold text-slate-400 uppercase block">{dayName}</span>
+                      <span className="text-lg font-black text-slate-900 dark:text-white">{dayNum}</span>
+                    </div>
+
+                    <div className="space-y-2 text-[10px] font-bold">
+                      <div className="p-1.5 bg-slate-50 dark:bg-[#1E293B] rounded-lg text-slate-400 text-[9px]">08:00 AM</div>
+                      {matchingTrips.map((t) => (
+                        <div key={t.id} className="p-2 bg-[#714B67] text-white rounded-xl font-extrabold space-y-1">
+                          <span className="block truncate">{t.title}</span>
+                          <span className="text-[9px] text-purple-200 block">All Day Trip</span>
+                        </div>
+                      ))}
+                      <div className="p-1.5 bg-slate-50 dark:bg-[#1E293B] rounded-lg text-slate-400 text-[9px]">12:00 PM</div>
+                      <div className="p-1.5 bg-slate-50 dark:bg-[#1E293B] rounded-lg text-slate-400 text-[9px]">05:00 PM</div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* ----------------- 3. DAY VIEW RENDERING ----------------- */}
+        {activeView === 'DAY' && (
+          <div className="space-y-4 pt-2">
+            <div className="p-4 bg-cyan-50 dark:bg-cyan-950/40 rounded-2xl border border-cyan-200 dark:border-cyan-800 flex items-center justify-between text-xs font-bold text-[#00A09D] dark:text-cyan-300">
+              <span>⏰ Day Timeline View: {monthName} {selectedDayNum}, {year}</span>
+              <div className="flex items-center space-x-2">
+                <button onClick={() => setSelectedDayNum(Math.max(1, selectedDayNum - 1))} className="px-2 py-1 bg-white dark:bg-[#0F172A] rounded-lg border">Prev Day</button>
+                <button onClick={() => setSelectedDayNum(Math.min(daysInMonth, selectedDayNum + 1))} className="px-2 py-1 bg-white dark:bg-[#0F172A] rounded-lg border">Next Day</button>
+              </div>
+            </div>
+
+            <div className="bg-white dark:bg-[#0F172A] rounded-2xl border border-slate-200 dark:border-white/10 p-6 space-y-4">
+              {['07:00 AM', '09:00 AM', '11:00 AM', '01:00 PM', '03:00 PM', '06:00 PM', '09:00 PM'].map((slot, idx) => (
+                <div key={idx} className="flex items-start space-x-4 border-b border-slate-100 dark:border-white/5 pb-3">
+                  <span className="w-20 text-xs font-extrabold text-slate-400 shrink-0">{slot}</span>
+                  <div className="flex-1 bg-slate-50 dark:bg-[#1E293B] p-3 rounded-xl border border-slate-200 dark:border-white/10 text-xs font-semibold">
+                    {idx === 1 ? (
+                      <div className="flex items-center justify-between text-[#7C3AED] font-bold">
+                        <span>Taj Mahal Sunrise VIP Guided Tour</span>
+                        <span className="text-[#10B981]">₹2,500</span>
+                      </div>
+                    ) : idx === 4 ? (
+                      <div className="flex items-center justify-between text-[#00A09D] font-bold">
+                        <span>Amer Fort Hilltop Tour & Sheesh Mahal</span>
+                        <span className="text-[#10B981]">₹1,500</span>
+                      </div>
+                    ) : (
+                      <span className="text-slate-400 italic">No scheduled activity for this slot</span>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* ----------------- 4. AGENDA VIEW RENDERING ----------------- */}
+        {activeView === 'AGENDA' && (
+          <div className="space-y-4 pt-2">
+            <div className="p-4 bg-emerald-50 dark:bg-emerald-950/40 rounded-2xl border border-emerald-200 dark:border-emerald-800 flex items-center justify-between text-xs font-bold text-[#10B981] dark:text-emerald-300">
+              <span className="flex items-center space-x-2">
+                <List className="w-4 h-4" />
+                <span>Chronological Agenda List ({agendaItems.length} Events Logged)</span>
+              </span>
+              <span>Sorted by Departure Date</span>
+            </div>
+
+            <div className="space-y-3">
+              {agendaItems.map((item, idx) => (
+                <div
+                  key={idx}
+                  className="p-4 bg-white dark:bg-[#0F172A] rounded-2xl border border-slate-200 dark:border-white/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-xs hover:border-[#7C3AED] transition"
+                >
+                  <div className="space-y-1">
+                    <div className="flex items-center space-x-2">
+                      <span className={`px-2.5 py-0.5 text-xs font-extrabold rounded-full border ${getCategoryPillStyle(item.type)}`}>
+                        {item.type}
+                      </span>
+                      <span className="text-xs font-bold text-slate-500 dark:text-slate-400">
+                        {new Date(item.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                      </span>
+                    </div>
+
+                    <h4 className="text-base font-extrabold text-slate-900 dark:text-white">{item.title}</h4>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">{item.details}</p>
+                  </div>
+
+                  <div className="flex items-center space-x-3">
+                    <span className="text-sm font-black text-[#10B981]">₹{item.cost?.toLocaleString('en-IN')}</span>
+                    <Link
+                      to={`/trips/${item.tripId}`}
+                      className="px-4 py-2 bg-[#714B67] hover:bg-[#613E57] text-white rounded-xl text-xs font-bold flex items-center space-x-1 shadow-xs"
+                    >
+                      <span>View</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </Link>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* Expanded Date Inspection Drawer with Structured Event Breakdown */}
-      {selectedDateStr && (
+      {/* Expanded Date Inspection Drawer */}
+      {selectedDateStr && activeView === 'MONTH' && (
         <div className="bg-white dark:bg-[#1E293B] p-6 sm:p-8 rounded-3xl shadow-xl border border-slate-200 dark:border-white/10 space-y-5 animate-in fade-in duration-300">
           <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/10 pb-3">
             <div>
