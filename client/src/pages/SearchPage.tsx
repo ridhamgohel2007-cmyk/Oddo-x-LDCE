@@ -61,33 +61,33 @@ export const SearchPage: React.FC = () => {
   return (
     <div className="space-y-8 pb-16">
       {/* Header Banner */}
-      <div className="bg-white p-6 sm:p-8 rounded-3xl shadow-sm border border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-3xl shadow-sm border border-gray-100 dark:border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-extrabold text-gray-900 flex items-center space-x-3">
-            <Compass className="w-8 h-8 text-emerald-600" />
+          <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white flex items-center space-x-3">
+            <Compass className="w-8 h-8 text-emerald-600 dark:text-emerald-400" />
             <span>Explore Destinations & Activities</span>
           </h1>
-          <p className="text-xs text-gray-500 mt-1">Screen 8: Search cities and categorized activities with cost filters</p>
+          <p className="text-xs font-medium text-gray-600 dark:text-slate-400 mt-1">Screen 8: Search cities and categorized activities with cost filters</p>
         </div>
 
         {/* Tab Toggle (Cities vs Activities) */}
-        <div className="flex bg-gray-100 p-1.5 rounded-2xl">
+        <div className="flex bg-gray-100 dark:bg-slate-800 p-1.5 rounded-2xl border border-gray-200 dark:border-slate-700">
           <button
             onClick={() => setActiveTab('CITIES')}
-            className={`px-5 py-2 rounded-xl text-xs font-extrabold transition ${
+            className={`px-5 py-2 rounded-xl text-xs font-black transition ${
               activeTab === 'CITIES'
-                ? 'bg-white text-emerald-700 shadow-sm'
-                : 'text-gray-600 hover:text-gray-900'
+                ? 'bg-white dark:bg-slate-900 text-emerald-800 dark:text-emerald-300 shadow-sm'
+                : 'text-gray-700 dark:text-slate-300 hover:text-gray-900 dark:hover:text-white'
             }`}
           >
             City Catalog
           </button>
           <button
             onClick={() => setActiveTab('ACTIVITIES')}
-            className={`px-5 py-2 rounded-xl text-xs font-extrabold transition ${
+            className={`px-5 py-2 rounded-xl text-xs font-black transition ${
               activeTab === 'ACTIVITIES'
-                ? 'bg-white text-emerald-700 shadow-sm'
-                : 'text-gray-600 hover:text-gray-900'
+                ? 'bg-white dark:bg-slate-900 text-emerald-800 dark:text-emerald-300 shadow-sm'
+                : 'text-gray-700 dark:text-slate-300 hover:text-gray-900 dark:hover:text-white'
             }`}
           >
             Activity Experiences
@@ -96,10 +96,10 @@ export const SearchPage: React.FC = () => {
       </div>
 
       {/* Screen 8 Wireframe Search Bar with Group By, Filter, Sort By */}
-      <div className="bg-white p-4 sm:p-6 rounded-3xl shadow-sm border border-gray-100 space-y-4">
+      <div className="bg-white dark:bg-slate-900 p-4 sm:p-6 rounded-3xl shadow-sm border border-gray-100 dark:border-slate-800 space-y-4">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="relative flex-1 w-full">
-            <Search className="w-4 h-4 text-gray-400 absolute left-3.5 top-3" />
+            <Search className="w-4 h-4 text-gray-400 dark:text-slate-500 absolute left-3.5 top-3.5" />
             <input
               type="text"
               value={searchQuery}
@@ -109,7 +109,7 @@ export const SearchPage: React.FC = () => {
                   ? 'Search city name or country (e.g. Paris, Japan)...'
                   : 'Search activities (e.g. Paragliding, Museum, Eiffel Tower)...'
               }
-              className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="w-full pl-10 pr-4 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-700 rounded-xl text-sm text-gray-900 dark:text-slate-100 font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500"
             />
           </div>
 
@@ -118,36 +118,36 @@ export const SearchPage: React.FC = () => {
               <select
                 value={selectedRegion}
                 onChange={(e) => setSelectedRegion(e.target.value)}
-                className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs font-semibold"
+                className="px-3.5 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-700 rounded-xl text-xs font-extrabold text-gray-900 dark:text-slate-100"
               >
-                <option value="ALL">Group by: All Regions</option>
-                <option value="Europe">Europe</option>
-                <option value="Asia">Asia</option>
-                <option value="North America">North America</option>
+                <option value="ALL" className="bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-100">Group by: All Regions</option>
+                <option value="Europe" className="bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-100">Europe</option>
+                <option value="Asia" className="bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-100">Asia</option>
+                <option value="North America" className="bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-100">North America</option>
               </select>
             ) : (
               <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
-                className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs font-semibold"
+                className="px-3.5 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-700 rounded-xl text-xs font-extrabold text-gray-900 dark:text-slate-100"
               >
-                <option value="ALL">Category: All</option>
-                <option value="Sightseeing">Sightseeing</option>
-                <option value="Culture">Culture</option>
-                <option value="Food">Food</option>
-                <option value="Adventure">Adventure</option>
+                <option value="ALL" className="bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-100">Category: All</option>
+                <option value="Sightseeing" className="bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-100">Sightseeing</option>
+                <option value="Culture" className="bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-100">Culture</option>
+                <option value="Food" className="bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-100">Food</option>
+                <option value="Adventure" className="bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-100">Adventure</option>
               </select>
             )}
 
             <select
               value={selectedCost}
               onChange={(e) => setSelectedCost(e.target.value)}
-              className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs font-semibold"
+              className="px-3.5 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-700 rounded-xl text-xs font-extrabold text-gray-900 dark:text-slate-100"
             >
-              <option value="ALL">Filter: Any Cost</option>
-              <option value="LOW">$ Low Cost</option>
-              <option value="MEDIUM">$$ Moderate</option>
-              <option value="HIGH">$$$ Luxury</option>
+              <option value="ALL" className="bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-100">Filter: Any Cost</option>
+              <option value="LOW" className="bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-100">$ Low Cost</option>
+              <option value="MEDIUM" className="bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-100">$$ Moderate</option>
+              <option value="HIGH" className="bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-100">$$$ Luxury</option>
             </select>
           </div>
         </div>
@@ -155,10 +155,12 @@ export const SearchPage: React.FC = () => {
 
       {/* Wireframe Screen 8 Results List */}
       <div className="space-y-4">
-        <h2 className="text-base font-extrabold text-gray-900">Results ({activeTab === 'CITIES' ? filteredCities.length : filteredActivities.length})</h2>
+        <h2 className="text-lg font-black bg-gradient-to-r from-emerald-700 via-teal-700 to-slate-900 dark:from-emerald-400 dark:to-white bg-clip-text text-transparent">
+          Results ({activeTab === 'CITIES' ? filteredCities.length : filteredActivities.length})
+        </h2>
 
         {loading ? (
-          <div className="text-center py-12 text-gray-500 font-semibold">Searching catalog...</div>
+          <div className="text-center py-12 text-gray-500 dark:text-slate-400 font-semibold">Searching catalog...</div>
         ) : activeTab === 'CITIES' ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredCities.map((city) => (

@@ -48,12 +48,12 @@ export const CityCard: React.FC<CityCardProps> = ({ city, onSelect }) => {
         </div>
 
         <div className="p-4">
-          <div className="flex items-center space-x-1 text-emerald-600 dark:text-emerald-400 text-xs font-medium">
+          <div className="flex items-center space-x-1 text-emerald-700 dark:text-emerald-400 text-xs font-bold">
             <MapPin className="w-3.5 h-3.5" />
             <span>{city.country} • {city.region}</span>
           </div>
-          <h3 className="text-lg font-bold text-gray-900 dark:text-slate-100 mt-1">{city.name}</h3>
-          <p className="text-xs text-gray-500 dark:text-slate-400 mt-1 line-clamp-2">{city.description}</p>
+          <h3 className="text-lg font-extrabold text-gray-900 dark:text-white mt-1">{city.name}</h3>
+          <p className="text-xs font-medium text-gray-700 dark:text-slate-300 mt-1 line-clamp-2">{city.description}</p>
         </div>
       </div>
 
@@ -61,7 +61,7 @@ export const CityCard: React.FC<CityCardProps> = ({ city, onSelect }) => {
         <div className="p-4 pt-0">
           <button
             onClick={() => onSelect(city)}
-            className="w-full py-2 bg-emerald-50 dark:bg-emerald-950/60 hover:bg-emerald-600 text-emerald-700 dark:text-emerald-300 hover:text-white rounded-xl text-xs font-semibold transition-colors flex items-center justify-center space-x-1.5"
+            className="w-full py-2 bg-emerald-50 dark:bg-emerald-950/60 hover:bg-emerald-600 text-emerald-800 dark:text-emerald-300 hover:text-white rounded-xl text-xs font-bold transition-colors flex items-center justify-center space-x-1.5"
           >
             <Plus className="w-4 h-4" />
             <span>Add to Trip</span>

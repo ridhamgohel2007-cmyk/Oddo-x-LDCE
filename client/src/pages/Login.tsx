@@ -31,13 +31,13 @@ export const Login: React.FC = () => {
 
   return (
     <div className="min-h-[80vh] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-3xl shadow-xl border border-gray-100">
+      <div className="max-w-md w-full space-y-8 bg-white dark:bg-slate-900 p-8 rounded-3xl shadow-xl border border-gray-100 dark:border-slate-800">
         <div className="text-center">
           <div className="mx-auto w-14 h-14 rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center shadow-lg shadow-emerald-500/30">
             <Globe className="w-8 h-8 text-white" />
           </div>
-          <h2 className="mt-4 text-3xl font-extrabold text-gray-900 tracking-tight">Welcome Back</h2>
-          <p className="mt-2 text-sm text-gray-500">Sign in to manage your personalized travel itineraries</p>
+          <h2 className="mt-4 text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">Welcome Back</h2>
+          <p className="mt-2 text-sm text-gray-500 dark:text-slate-400">Sign in to manage your personalized travel itineraries</p>
         </div>
 
         {error && (
@@ -48,7 +48,7 @@ export const Login: React.FC = () => {
 
         <form className="mt-8 space-y-5" onSubmit={handleSubmit}>
           <div>
-            <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-bold text-gray-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
               Email Address
             </label>
             <div className="relative">
@@ -58,7 +58,7 @@ export const Login: React.FC = () => {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full pl-11 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition"
+                className="w-full pl-11 pr-4 py-2.5 bg-gray-50 dark:bg-slate-800/80 border border-gray-200 dark:border-slate-700 rounded-xl text-sm text-gray-900 dark:text-slate-100 font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white dark:focus:bg-slate-800 transition"
                 placeholder="you@example.com"
               />
             </div>
@@ -66,10 +66,10 @@ export const Login: React.FC = () => {
 
           <div>
             <div className="flex items-center justify-between mb-1.5">
-              <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider">
+              <label className="block text-xs font-bold text-gray-700 dark:text-slate-300 uppercase tracking-wider">
                 Password
               </label>
-              <a href="#" className="text-xs font-semibold text-emerald-600 hover:underline">Forgot password?</a>
+              <a href="#" className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:underline">Forgot password?</a>
             </div>
             <div className="relative">
               <Lock className="w-5 h-5 text-gray-400 absolute left-3.5 top-3" />
@@ -78,7 +78,7 @@ export const Login: React.FC = () => {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full pl-11 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition"
+                className="w-full pl-11 pr-4 py-2.5 bg-gray-50 dark:bg-slate-800/80 border border-gray-200 dark:border-slate-700 rounded-xl text-sm text-gray-900 dark:text-slate-100 font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white dark:focus:bg-slate-800 transition"
                 placeholder="••••••••"
               />
             </div>

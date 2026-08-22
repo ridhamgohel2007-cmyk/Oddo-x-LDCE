@@ -63,14 +63,14 @@ export const TripCard: React.FC<TripCardProps> = ({ trip, onDelete }) => {
 
         {/* Content */}
         <div className="p-5">
-          <h3 className="text-lg font-bold text-gray-900 dark:text-slate-100 line-clamp-1 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+          <h3 className="text-lg font-extrabold text-gray-900 dark:text-white line-clamp-1 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
             {trip.title}
           </h3>
-          <p className="text-xs text-gray-500 dark:text-slate-400 mt-1 line-clamp-2">
+          <p className="text-xs font-medium text-gray-700 dark:text-slate-300 mt-1 line-clamp-2">
             {trip.description || 'Customized travel itinerary.'}
           </p>
 
-          <div className="mt-4 space-y-2 text-xs text-gray-600 dark:text-slate-300">
+          <div className="mt-4 space-y-2 text-xs font-semibold text-gray-800 dark:text-slate-200">
             <div className="flex items-center space-x-2">
               <Calendar className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
               <span>{formattedStart} - {formattedEnd}</span>
@@ -82,7 +82,7 @@ export const TripCard: React.FC<TripCardProps> = ({ trip, onDelete }) => {
             {trip.totalBudget > 0 && (
               <div className="flex items-center space-x-2">
                 <DollarSign className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-                <span className="font-semibold text-gray-800 dark:text-slate-200">${trip.totalBudget.toLocaleString()} Budget</span>
+                <span className="font-bold text-gray-900 dark:text-slate-100">${trip.totalBudget.toLocaleString()} Budget</span>
               </div>
             )}
           </div>
@@ -93,14 +93,14 @@ export const TripCard: React.FC<TripCardProps> = ({ trip, onDelete }) => {
       <div className="px-5 py-3.5 bg-gray-50 dark:bg-slate-800/50 border-t border-gray-100 dark:border-slate-800 flex items-center justify-between">
         <Link
           to={`/trips/${trip.id}`}
-          className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 inline-flex items-center space-x-1"
+          className="text-xs font-bold text-emerald-700 dark:text-emerald-400 hover:text-emerald-800 inline-flex items-center space-x-1"
         >
           <span>View Itinerary</span>
           <ArrowRight className="w-3.5 h-3.5" />
         </Link>
         <Link
           to={`/trips/${trip.id}/budget`}
-          className="text-xs font-medium text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200"
+          className="text-xs font-bold text-gray-700 dark:text-slate-300 hover:text-gray-900 dark:hover:text-white"
         >
           Budget Breakdown
         </Link>

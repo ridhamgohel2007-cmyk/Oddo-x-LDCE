@@ -67,28 +67,28 @@ export const Community: React.FC = () => {
   return (
     <div className="max-w-5xl mx-auto space-y-8 pb-16">
       {/* Screen 10 Header */}
-      <div className="bg-white p-6 sm:p-8 rounded-3xl shadow-sm border border-gray-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div className="bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-3xl shadow-sm border border-gray-100 dark:border-slate-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-extrabold text-gray-900 flex items-center space-x-3">
-            <Users className="w-8 h-8 text-emerald-600" />
+          <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white flex items-center space-x-3">
+            <Users className="w-8 h-8 text-emerald-600 dark:text-emerald-400" />
             <span>Community Tab</span>
           </h1>
-          <p className="text-xs text-gray-500 mt-1 max-w-xl">
+          <p className="text-xs font-medium text-gray-600 dark:text-slate-400 mt-1 max-w-xl">
             Screen 10: Community section where users share their travel experiences. Use search, filter, and sort to find inspiration or copy trips!
           </p>
         </div>
       </div>
 
       {/* Screen 10 Control Bar: Search bar, Group by, Filter, Sort by */}
-      <div className="bg-white p-4 sm:p-6 rounded-3xl shadow-sm border border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-3">
+      <div className="bg-white dark:bg-slate-900 p-4 sm:p-6 rounded-3xl shadow-sm border border-gray-100 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3">
         <div className="relative flex-1 w-full">
-          <Search className="w-4 h-4 text-gray-400 absolute left-3.5 top-3" />
+          <Search className="w-4 h-4 text-gray-400 dark:text-slate-500 absolute left-3.5 top-3.5" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search bar...... (e.g. Europe romance, Tokyo ramen, Bali budget)"
-            className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            className="w-full pl-10 pr-4 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-700 rounded-xl text-sm text-gray-900 dark:text-slate-100 font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500"
           />
         </div>
 
@@ -96,11 +96,11 @@ export const Community: React.FC = () => {
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
-            className="px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-xs font-bold text-gray-700"
+            className="px-3.5 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-700 rounded-xl text-xs font-extrabold text-gray-900 dark:text-slate-100"
           >
-            <option value="newest">Sort By: Newest First</option>
-            <option value="likes">Sort By: Most Popular (Likes)</option>
-            <option value="clones">Sort By: Most Copied (Clones)</option>
+            <option value="newest" className="bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-100">Sort By: Newest First</option>
+            <option value="likes" className="bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-100">Sort By: Most Popular (Likes)</option>
+            <option value="clones" className="bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-100">Sort By: Most Copied (Clones)</option>
           </select>
         </div>
       </div>
@@ -108,9 +108,9 @@ export const Community: React.FC = () => {
       {/* Public Itinerary Posts List (Screen 10 Wireframe) */}
       <div className="space-y-6">
         {loading ? (
-          <div className="text-center py-12 text-gray-500 font-semibold">Loading community posts...</div>
+          <div className="text-center py-12 text-gray-500 dark:text-slate-400 font-semibold">Loading community posts...</div>
         ) : filteredPosts.length === 0 ? (
-          <div className="p-10 bg-white rounded-3xl text-center text-xs text-gray-400">
+          <div className="p-10 bg-white dark:bg-slate-900 rounded-3xl text-center text-xs font-semibold text-gray-500 dark:text-slate-400 border border-gray-100 dark:border-slate-800">
             No public community itineraries found. Be the first to share your trip!
           </div>
         ) : (
@@ -121,7 +121,7 @@ export const Community: React.FC = () => {
             return (
               <div
                 key={post.id}
-                className="bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-gray-100 space-y-5 hover:shadow-md transition-all"
+                className="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 shadow-sm border border-gray-100 dark:border-slate-800 space-y-5 hover:shadow-md transition-all"
               >
                 {/* Author Header */}
                 <div className="flex items-center justify-between">
@@ -132,37 +132,37 @@ export const Community: React.FC = () => {
                       className="w-10 h-10 rounded-full object-cover border border-emerald-500"
                     />
                     <div>
-                      <h4 className="text-sm font-bold text-gray-900">{author?.name}</h4>
-                      <p className="text-[11px] text-gray-400">
+                      <h4 className="text-sm font-bold text-gray-900 dark:text-white">{author?.name}</h4>
+                      <p className="text-[11px] font-medium text-gray-500 dark:text-slate-400">
                         {author?.city ? `${author.city}, ${author.country}` : 'GlobeTrotter Explorer'} • Shared {new Date(post.createdAt).toLocaleDateString()}
                       </p>
                     </div>
                   </div>
 
-                  <span className="px-3 py-1 bg-emerald-50 text-emerald-700 text-xs font-bold rounded-full border border-emerald-200">
+                  <span className="px-3 py-1 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 text-xs font-extrabold rounded-full border border-emerald-200 dark:border-emerald-800">
                     Shared Itinerary
                   </span>
                 </div>
 
                 {/* Post Content */}
                 <div className="space-y-2">
-                  <h3 className="text-xl font-extrabold text-gray-900">{post.title}</h3>
-                  <p className="text-xs text-gray-600 leading-relaxed">{post.description}</p>
+                  <h3 className="text-xl font-black text-gray-900 dark:text-white">{post.title}</h3>
+                  <p className="text-xs font-medium text-gray-700 dark:text-slate-300 leading-relaxed">{post.description}</p>
                 </div>
 
                 {/* Trip Preview Banner & Stop Badges */}
                 {trip && (
-                  <div className="bg-gray-50 p-4 rounded-2xl border border-gray-200 space-y-3">
-                    <div className="flex flex-wrap items-center justify-between text-xs text-gray-600 gap-2">
+                  <div className="bg-gray-50 dark:bg-slate-800/80 p-4 rounded-2xl border border-gray-200 dark:border-slate-700 space-y-3">
+                    <div className="flex flex-wrap items-center justify-between text-xs font-semibold text-gray-800 dark:text-slate-200 gap-2">
                       <div className="flex items-center space-x-2">
-                        <Calendar className="w-4 h-4 text-emerald-600" />
+                        <Calendar className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                         <span>
                           {new Date(trip.startDate).toLocaleDateString()} - {new Date(trip.endDate).toLocaleDateString()}
                         </span>
                       </div>
 
-                      <div className="flex items-center space-x-2 font-bold text-gray-800">
-                        <DollarSign className="w-4 h-4 text-amber-600" />
+                      <div className="flex items-center space-x-2 font-bold text-gray-900 dark:text-slate-100">
+                        <DollarSign className="w-4 h-4 text-amber-600 dark:text-amber-400" />
                         <span>${trip.totalBudget} Budget</span>
                       </div>
                     </div>
@@ -172,9 +172,9 @@ export const Community: React.FC = () => {
                         {trip.stops.map((stop: any) => (
                           <span
                             key={stop.id}
-                            className="px-2.5 py-1 bg-white border border-gray-200 rounded-lg text-xs font-semibold text-gray-700 flex items-center space-x-1"
+                            className="px-2.5 py-1 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg text-xs font-bold text-gray-800 dark:text-slate-200 flex items-center space-x-1"
                           >
-                            <MapPin className="w-3 h-3 text-emerald-600" />
+                            <MapPin className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
                             <span>{stop.city ? stop.city.name : stop.title}</span>
                           </span>
                         ))}
@@ -188,14 +188,14 @@ export const Community: React.FC = () => {
                   <div className="flex items-center space-x-4">
                     <button
                       onClick={() => handleLike(post.id)}
-                      className="flex items-center space-x-1.5 px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-xl text-xs font-bold transition"
+                      className="flex items-center space-x-1.5 px-3 py-1.5 bg-rose-50 dark:bg-rose-950/60 hover:bg-rose-100 dark:hover:bg-rose-900 text-rose-700 dark:text-rose-300 rounded-xl text-xs font-extrabold transition"
                     >
                       <Heart className="w-4 h-4 fill-rose-500 text-rose-500" />
                       <span>{post.likesCount} Likes</span>
                     </button>
 
-                    <span className="text-xs font-semibold text-gray-500 flex items-center space-x-1">
-                      <Copy className="w-3.5 h-3.5 text-blue-500" />
+                    <span className="text-xs font-bold text-gray-600 dark:text-slate-300 flex items-center space-x-1">
+                      <Copy className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
                       <span>{post.clonesCount} Times Copied</span>
                     </span>
                   </div>

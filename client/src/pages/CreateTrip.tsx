@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import api from '../lib/api';
-import { CityData } from '../components/CityCard';
+import { CityData, CityCard } from '../components/CityCard';
 import { ActivityData, ActivityCard } from '../components/ActivityCard';
 import { Calendar, MapPin, DollarSign, Sparkles, ArrowRight, Image as ImageIcon } from 'lucide-react';
 
@@ -43,6 +43,7 @@ export const CreateTrip: React.FC = () => {
     fetchCities();
   }, []);
 
+  // Fetch suggested activities when selected city changes
   useEffect(() => {
     if (!selectedCityId) return;
 
@@ -75,6 +76,7 @@ export const CreateTrip: React.FC = () => {
         cityId: selectedCityId,
       });
 
+      // Redirect directly to the Itinerary Builder for this new trip
       navigate(`/trips/${res.data.id}`);
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to create trip.');
@@ -86,26 +88,26 @@ export const CreateTrip: React.FC = () => {
   return (
     <div className="max-w-4xl mx-auto space-y-8 pb-12">
       {/* Header */}
-      <div className="bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-3xl shadow-sm border border-slate-200/80 dark:border-slate-800 space-y-2">
-        <div className="inline-flex items-center space-x-2 px-3 py-1 bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 rounded-full text-xs font-bold border border-indigo-200/60 dark:border-indigo-800/60">
-          <Sparkles className="w-4 h-4 text-amber-500" />
+      <div className="bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-3xl shadow-sm border border-gray-100 dark:border-slate-800 space-y-2">
+        <div className="inline-flex items-center space-x-2 px-3 py-1 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 rounded-full text-xs font-bold">
+          <Sparkles className="w-4 h-4" />
           <span>Screen 4: Initiate New Trip</span>
         </div>
-        <h1 className="text-3xl font-black text-slate-900 dark:text-slate-100">Plan a New Trip</h1>
-        <p className="text-xs text-slate-500 dark:text-slate-400">Provide basic details to kick off your day-wise itinerary builder</p>
+        <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white">Plan a New Trip</h1>
+        <p className="text-sm font-medium text-gray-600 dark:text-slate-400">Provide basic details to kick off your day-wise itinerary builder</p>
       </div>
 
       {error && (
-        <div className="p-4 bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300 text-xs font-semibold rounded-2xl">
+        <div className="p-4 bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold rounded-2xl">
           {error}
         </div>
       )}
 
       {/* Form */}
-      <form onSubmit={handleSubmit} className="bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-3xl shadow-sm border border-slate-200/80 dark:border-slate-800 space-y-6">
+      <form onSubmit={handleSubmit} className="bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-3xl shadow-sm border border-gray-100 dark:border-slate-800 space-y-6">
         <div className="space-y-4">
           <div>
-            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
+            <label className="block text-xs font-bold text-gray-900 dark:text-slate-200 uppercase tracking-wider mb-1.5">
               Trip Title *
             </label>
             <input
@@ -113,40 +115,40 @@ export const CreateTrip: React.FC = () => {
               required
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 rounded-2xl text-xs font-bold text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              placeholder="e.g. Incredible Rajasthan Tour (Delhi, Agra, Jaipur)"
+              className="w-full px-4 py-3 bg-gray-50 dark:bg-slate-800/90 border border-gray-300 dark:border-slate-700 rounded-2xl text-sm text-gray-900 dark:text-slate-100 font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white dark:focus:bg-slate-800 transition"
+              placeholder="e.g. Summer Vacation in Paris & Rome"
             />
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
+              <label className="block text-xs font-bold text-gray-900 dark:text-slate-200 uppercase tracking-wider mb-1.5">
                 Start Date *
               </label>
               <div className="relative">
-                <Calendar className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
+                <Calendar className="w-4 h-4 text-gray-400 dark:text-slate-500 absolute left-3.5 top-3.5" />
                 <input
                   type="date"
                   required
                   value={startDate}
                   onChange={(e) => setStartDate(e.target.value)}
-                  className="w-full pl-11 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 rounded-xl text-xs font-semibold text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full pl-11 pr-4 py-2.5 bg-gray-50 dark:bg-slate-800/90 border border-gray-300 dark:border-slate-700 rounded-xl text-sm text-gray-900 dark:text-slate-100 font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500 transition"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
+              <label className="block text-xs font-bold text-gray-900 dark:text-slate-200 uppercase tracking-wider mb-1.5">
                 End Date *
               </label>
               <div className="relative">
-                <Calendar className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
+                <Calendar className="w-4 h-4 text-gray-400 dark:text-slate-500 absolute left-3.5 top-3.5" />
                 <input
                   type="date"
                   required
                   value={endDate}
                   onChange={(e) => setEndDate(e.target.value)}
-                  className="w-full pl-11 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 rounded-xl text-xs font-semibold text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full pl-11 pr-4 py-2.5 bg-gray-50 dark:bg-slate-800/90 border border-gray-300 dark:border-slate-700 rounded-xl text-sm text-gray-900 dark:text-slate-100 font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500 transition"
                 />
               </div>
             </div>
@@ -154,19 +156,19 @@ export const CreateTrip: React.FC = () => {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
+              <label className="block text-xs font-bold text-gray-900 dark:text-slate-200 uppercase tracking-wider mb-1.5">
                 Primary Destination City
               </label>
               <div className="relative">
-                <MapPin className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
+                <MapPin className="w-4 h-4 text-gray-400 dark:text-slate-500 absolute left-3.5 top-3.5" />
                 <select
                   value={selectedCityId}
                   onChange={(e) => setSelectedCityId(e.target.value)}
-                  className="w-full pl-11 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 rounded-xl text-xs font-bold text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full pl-11 pr-4 py-2.5 bg-gray-50 dark:bg-slate-800/90 border border-gray-300 dark:border-slate-700 rounded-xl text-sm text-gray-900 dark:text-slate-100 font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500 transition"
                 >
-                  <option value="">Select Primary Destination</option>
+                  <option value="" className="text-gray-900 dark:text-slate-100 bg-white dark:bg-slate-800">Select Primary Destination</option>
                   {cities.map((city) => (
-                    <option key={city.id} value={city.id}>
+                    <option key={city.id} value={city.id} className="text-gray-900 dark:text-slate-100 bg-white dark:bg-slate-800">
                       {city.name}, {city.country}
                     </option>
                   ))}
@@ -175,16 +177,16 @@ export const CreateTrip: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
+              <label className="block text-xs font-bold text-gray-900 dark:text-slate-200 uppercase tracking-wider mb-1.5">
                 Estimated Total Budget ($)
               </label>
               <div className="relative">
-                <DollarSign className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
+                <DollarSign className="w-4 h-4 text-gray-400 dark:text-slate-500 absolute left-3.5 top-3.5" />
                 <input
                   type="number"
                   value={totalBudget}
                   onChange={(e) => setTotalBudget(e.target.value)}
-                  className="w-full pl-11 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 rounded-xl text-xs font-semibold text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full pl-11 pr-4 py-2.5 bg-gray-50 dark:bg-slate-800/90 border border-gray-300 dark:border-slate-700 rounded-xl text-sm text-gray-900 dark:text-slate-100 font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500 transition"
                   placeholder="2000"
                 />
               </div>
@@ -192,30 +194,30 @@ export const CreateTrip: React.FC = () => {
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
+            <label className="block text-xs font-bold text-gray-900 dark:text-slate-200 uppercase tracking-wider mb-1.5">
               Cover Image URL (Optional)
             </label>
             <div className="relative">
-              <ImageIcon className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
+              <ImageIcon className="w-4 h-4 text-gray-400 dark:text-slate-500 absolute left-3.5 top-3.5" />
               <input
                 type="url"
                 value={coverImage}
                 onChange={(e) => setCoverImage(e.target.value)}
-                className="w-full pl-11 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 rounded-xl text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full pl-11 pr-4 py-2.5 bg-gray-50 dark:bg-slate-800/90 border border-gray-300 dark:border-slate-700 rounded-xl text-sm text-gray-900 dark:text-slate-100 font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500 transition"
                 placeholder="https://images.unsplash.com/..."
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
+            <label className="block text-xs font-bold text-gray-900 dark:text-slate-200 uppercase tracking-wider mb-1.5">
               Trip Description / Notes
             </label>
             <textarea
               rows={3}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 rounded-2xl text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full px-4 py-3 bg-gray-50 dark:bg-slate-800/90 border border-gray-300 dark:border-slate-700 rounded-2xl text-sm text-gray-900 dark:text-slate-100 font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500 transition"
               placeholder="Outline your trip objectives, preferred travel style, or places of interest..."
             />
           </div>
@@ -226,22 +228,22 @@ export const CreateTrip: React.FC = () => {
               id="isPublic"
               checked={isPublic}
               onChange={(e) => setIsPublic(e.target.checked)}
-              className="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500"
+              className="w-4 h-4 text-emerald-600 rounded focus:ring-emerald-500"
             />
-            <label htmlFor="isPublic" className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+            <label htmlFor="isPublic" className="text-xs font-bold text-gray-800 dark:text-slate-200">
               Share publicly in Community Hub so others can view or copy your itinerary
             </label>
           </div>
         </div>
 
-        {/* Suggested Places / Activities Grid */}
+        {/* Suggested Places / Activities Grid (Wireframe Screen 4) */}
         {suggestedActivities.length > 0 && (
-          <div className="pt-6 border-t border-slate-200/80 dark:border-slate-800 space-y-4">
+          <div className="pt-6 border-t border-gray-100 space-y-4">
             <div>
-              <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">
+              <h3 className="text-base font-bold text-gray-900">
                 Suggestion for Places to Visit / Activities to perform
               </h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400">Popular experiences available in your selected destination</p>
+              <p className="text-xs text-gray-500">Popular experiences available in your selected destination</p>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -252,11 +254,11 @@ export const CreateTrip: React.FC = () => {
           </div>
         )}
 
-        <div className="pt-4 border-t border-slate-200/80 dark:border-slate-800 flex justify-end">
+        <div className="pt-4 border-t border-gray-100 flex justify-end">
           <button
             type="submit"
             disabled={loading}
-            className="px-8 py-3.5 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white rounded-2xl font-bold text-xs shadow-lg shadow-indigo-600/30 flex items-center space-x-2 transition hover:-translate-y-0.5"
+            className="px-8 py-3.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white rounded-2xl font-bold text-sm shadow-lg shadow-emerald-600/30 flex items-center space-x-2 transition hover:scale-105"
           >
             <span>{loading ? 'Creating Trip...' : 'Save & Build Itinerary'}</span>
             <ArrowRight className="w-4 h-4" />
