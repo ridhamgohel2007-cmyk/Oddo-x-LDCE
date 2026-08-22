@@ -11,32 +11,30 @@ export default {
         sans: ['Plus Jakarta Sans', 'Inter', 'system-ui', 'sans-serif'],
       },
       colors: {
-        // Primary & Brand Colors
-        emeraldTeal: {
+        // Odoo-Inspired Enterprise Palette
+        odooPurple: {
+          DEFAULT: '#714B67',
+          violet: '#7C3AED',
+          hover: '#613E57',
+        },
+        odooTeal: {
+          DEFAULT: '#00A09D',
+          cyan: '#06B6D4',
+        },
+        enterpriseEmerald: {
           DEFAULT: '#10B981',
-          dark: '#0D9488',
-          light: '#059669',
+          dark: '#059669',
         },
-        electricCyan: {
-          DEFAULT: '#06B6D4',
-          sky: '#38BDF8',
+        warmOchre: {
+          DEFAULT: '#E2A03F',
+          amber: '#F59E0B',
         },
-        sunsetAmber: {
-          DEFAULT: '#F59E0B',
-        },
-        coralRed: {
-          DEFAULT: '#EF4444',
-        },
-        travelBlue: {
-          DEFAULT: '#3B82F6',
-        },
-        // Dark Mode Palette
-        darkBg: '#080E18',
-        darkSurface: '#0B1320',
-        darkCard: '#111C2E',
-        darkCardHover: '#16243A',
-        darkBorder: '#1E293B',
-        // Light Mode Palette
+        // Dark Mode Enterprise Surface Structure
+        darkBg: '#0F172A',
+        darkCard: '#1E293B',
+        darkCardHover: '#334155',
+        darkBorder: 'rgba(255, 255, 255, 0.08)',
+        // Light Mode Structure
         lightBg: '#F8FAFC',
         lightCard: '#FFFFFF',
         lightBorder: '#E2E8F0',
