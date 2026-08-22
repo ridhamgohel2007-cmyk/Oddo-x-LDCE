@@ -506,11 +506,6 @@ export const Dashboard: React.FC = () => {
         <div className="relative z-10 p-6 sm:p-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
           
           <div className="space-y-4 max-w-2xl">
-            <div className="inline-flex items-center space-x-2 px-3.5 py-1 bg-white/10 dark:bg-[#1E293B]/80 backdrop-blur-md rounded-full text-xs font-bold text-[#38BDF8] border border-white/15">
-              <Sparkles className="w-4 h-4 text-[#E2A03F]" />
-              <span>Odoo Enterprise Edition</span>
-            </div>
-
             {/* Uploaded 3D Compass Emblem Container */}
             <div className="flex items-center space-x-4">
               <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-3xl overflow-hidden shadow-2xl ring-4 ring-[#7C3AED]/50 bg-black shrink-0 hover:scale-105 transition-transform duration-300">
