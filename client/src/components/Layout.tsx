@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import {
@@ -9,8 +9,6 @@ import {
   X,
   Search,
   ChevronRight,
-  Sun,
-  Moon,
 } from 'lucide-react';
 
 export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -19,22 +17,6 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [globalSearch, setGlobalSearch] = useState('');
-
-  // Dark/Light Theme Toggle State
-  const [darkMode, setDarkMode] = useState<boolean>(() => {
-    return localStorage.getItem('globetrotter_theme') === 'dark' ||
-      document.documentElement.classList.contains('dark');
-  });
-
-  useEffect(() => {
-    if (darkMode) {
-      document.documentElement.classList.add('dark');
-      localStorage.setItem('globetrotter_theme', 'dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-      localStorage.setItem('globetrotter_theme', 'light');
-    }
-  }, [darkMode]);
 
   const navLinks = [
     { name: 'Dashboard', path: '/dashboard' },
@@ -119,7 +101,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
               </nav>
             )}
 
-            {/* Right Action Controls Bar (Plan Trip + Theme Toggle + Profile + Logout) */}
+            {/* Right Action Controls Bar (Plan Trip + Profile + Logout) */}
             <div className="flex items-center space-x-2 sm:space-x-3 shrink-0">
               {user ? (
                 <>
@@ -130,20 +112,6 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                     <Plus className="w-4 h-4" />
                     <span className="whitespace-nowrap">Plan New Trip</span>
                   </Link>
-
-                  {/* Dark/Light Mode Theme Toggle Button next to Profile Avatar */}
-                  <button
-                    onClick={() => setDarkMode(!darkMode)}
-                    aria-label="Toggle dark and light mode"
-                    title={darkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
-                    className="p-2 rounded-xl text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-[#162235] hover:bg-slate-200 dark:hover:bg-[#1E2D42] border border-slate-200 dark:border-[#1E2D42] transition"
-                  >
-                    {darkMode ? (
-                      <Sun className="w-4 h-4 text-amber-400" />
-                    ) : (
-                      <Moon className="w-4 h-4 text-indigo-600" />
-                    )}
-                  </button>
 
                   {/* Profile Avatar Settings */}
                   <Link
@@ -171,15 +139,6 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                 </>
               ) : (
                 <div className="flex items-center space-x-2 shrink-0">
-                  {/* Theme Toggle for Unauthenticated Users */}
-                  <button
-                    onClick={() => setDarkMode(!darkMode)}
-                    aria-label="Toggle dark and light mode"
-                    title={darkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
-                    className="p-2 rounded-xl text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-[#162235] hover:bg-slate-200 dark:hover:bg-[#1E2D42] border border-slate-200 dark:border-[#1E2D42] transition"
-                  >
-                    {darkMode ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-indigo-600" />}
-                  </button>
                   <Link
                     to="/login"
                     className="px-4 py-2 text-xs font-extrabold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-[#162235] rounded-xl transition whitespace-nowrap"
