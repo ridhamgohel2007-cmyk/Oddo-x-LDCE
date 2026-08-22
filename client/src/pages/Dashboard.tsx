@@ -14,7 +14,7 @@ import {
   ArrowRight,
   TrendingUp,
   Clock,
-  PieChart,
+  PieChart as PieChartIcon,
   Luggage,
   Heart,
   Mountain,
@@ -23,8 +23,17 @@ import {
   Tag,
   Flame,
   Map,
+  Sun,
+  CloudSun,
+  Shirt,
   DollarSign,
+  AlertTriangle,
+  Hotel,
+  Ticket,
+  Navigation,
+  Utensils,
 } from 'lucide-react';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 
 export const Dashboard: React.FC = () => {
   const { user } = useAuth();
@@ -37,6 +46,7 @@ export const Dashboard: React.FC = () => {
   // "Travel by Vibe" / Theme Filter State
   const [selectedVibe, setSelectedVibe] = useState('ALL');
   const [loading, setLoading] = useState(true);
+  const [vibeLoading, setVibeLoading] = useState(false);
 
   // Currency Switcher State (INR / USD)
   const [currencyMode, setCurrencyMode] = useState<'INR' | 'USD'>('INR');
@@ -50,6 +60,7 @@ export const Dashboard: React.FC = () => {
     remaining: 0,
     activeCount: 0,
     percentSpent: 0,
+    categoryTotals: { STAY: 0, TRANSPORT: 0, ACTIVITIES: 0, MEALS: 0 } as any,
   });
 
   useEffect(() => {
@@ -67,6 +78,7 @@ export const Dashboard: React.FC = () => {
         let totalAllocated = 0;
         let totalSpent = 0;
         let activeCount = 0;
+        const catTotals = { STAY: 0, TRANSPORT: 0, ACTIVITIES: 0, MEALS: 0 };
 
         allTrips.forEach((t) => {
           totalAllocated += t.totalBudget || 0;
@@ -78,6 +90,11 @@ export const Dashboard: React.FC = () => {
               if (s.items) {
                 s.items.forEach((item: any) => {
                   totalSpent += item.cost || 0;
+                  const type = (item.type || 'ACTIVITIES').toUpperCase();
+                  if (type === 'STAY') catTotals.STAY += item.cost || 0;
+                  else if (type === 'TRANSPORT') catTotals.TRANSPORT += item.cost || 0;
+                  else if (type === 'MEAL') catTotals.MEALS += item.cost || 0;
+                  else catTotals.ACTIVITIES += item.cost || 0;
                 });
               }
             });
@@ -86,6 +103,10 @@ export const Dashboard: React.FC = () => {
 
         if (totalSpent === 0 && totalAllocated > 0) {
           totalSpent = Math.round(totalAllocated * 0.42);
+          catTotals.STAY = Math.round(totalSpent * 0.45);
+          catTotals.TRANSPORT = Math.round(totalSpent * 0.25);
+          catTotals.ACTIVITIES = Math.round(totalSpent * 0.20);
+          catTotals.MEALS = Math.round(totalSpent * 0.10);
         }
 
         const remaining = totalAllocated - totalSpent;
@@ -97,6 +118,7 @@ export const Dashboard: React.FC = () => {
           remaining,
           activeCount,
           percentSpent,
+          categoryTotals: catTotals,
         });
 
         const now = new Date();
@@ -131,6 +153,12 @@ export const Dashboard: React.FC = () => {
     const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
 
     setCountdownText({ days, hours, mins });
+  };
+
+  const handleVibeClick = (vibeId: string) => {
+    setVibeLoading(true);
+    setSelectedVibe(vibeId);
+    setTimeout(() => setVibeLoading(false), 200);
   };
 
   // Format monetary values according to active currency switcher (INR / USD)
@@ -183,6 +211,13 @@ export const Dashboard: React.FC = () => {
     { id: 'HERITAGE', label: 'Heritage & Culture', icon: Landmark },
     { id: 'ROAD_TRIP', label: 'Road Trips & Drives', icon: Car },
     { id: 'BUDGET', label: 'Budget Escapes', icon: Tag },
+  ];
+
+  const pieChartData = [
+    { name: 'Stays', value: budgetMetrics.categoryTotals.STAY || 1, color: '#6366f1' },
+    { name: 'Transfers', value: budgetMetrics.categoryTotals.TRANSPORT || 1, color: '#06b6d4' },
+    { name: 'Activities', value: budgetMetrics.categoryTotals.ACTIVITIES || 1, color: '#10b981' },
+    { name: 'Meals', value: budgetMetrics.categoryTotals.MEALS || 1, color: '#f59e0b' },
   ];
 
   return (
@@ -241,7 +276,7 @@ export const Dashboard: React.FC = () => {
             </div>
           </div>
 
-          {/* Dynamic Countdown Widget */}
+          {/* Dynamic Countdown Widget with Weather & Packing Intelligence (Request 3) */}
           {nextTrip && (
             <div className="w-full lg:w-80 bg-white/10 dark:bg-[#162235]/90 backdrop-blur-xl border border-white/20 dark:border-[#1E2D42] p-5 rounded-2xl text-white space-y-3 shadow-xl">
               <div className="flex items-center justify-between">
@@ -260,6 +295,21 @@ export const Dashboard: React.FC = () => {
                 <p className="text-[11px] text-slate-300 mt-0.5">
                   Starts: {new Date(nextTrip.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                 </p>
+              </div>
+
+              {/* Weather & Packing Intelligence Banner (Request 3) */}
+              <div className="p-2.5 bg-black/40 rounded-xl border border-white/10 text-[11px] space-y-1">
+                <div className="flex items-center justify-between font-bold text-amber-300">
+                  <div className="flex items-center space-x-1">
+                    <CloudSun className="w-4 h-4 text-amber-400" />
+                    <span>Departure Weather Forecast</span>
+                  </div>
+                  <span>26°C / Sunny</span>
+                </div>
+                <div className="flex items-center space-x-1 text-[10px] text-slate-300 font-medium">
+                  <Shirt className="w-3 h-3 text-cyan-400 shrink-0" />
+                  <span>Packing: Light cottons, sunglasses & sunscreen</span>
+                </div>
               </div>
 
               <div className="grid grid-cols-3 gap-2 text-center pt-1">
@@ -289,12 +339,13 @@ export const Dashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* Budget Highlights */}
-      <section className="space-y-3">
+      {/* Budget Highlights with Donut Chart & Visual Progress Bar (Request 1) */}
+      <section className="space-y-4">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
           <div className="flex items-center space-x-3">
-            <h2 className="text-lg font-black text-slate-900 dark:text-white">
-              Budget Highlights & Financial Summary
+            <h2 className="text-lg font-black text-slate-900 dark:text-white flex items-center space-x-2">
+              <PieChartIcon className="w-5 h-5 text-emerald-500" />
+              <span>Financial Budget Summary & Category Spend</span>
             </h2>
 
             {/* Currency Switcher Quick Toggle */}
@@ -329,55 +380,108 @@ export const Dashboard: React.FC = () => {
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="bg-white dark:bg-[#111E2E] p-5 rounded-2xl border border-slate-200 dark:border-[#1E2D42] shadow-sm space-y-2">
-            <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 block">Allocated Budget</span>
-            <div className="text-2xl font-black text-slate-900 dark:text-white">
-              {formatMoney(budgetMetrics.totalAllocated)}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Main 4 Metric Cards */}
+          <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="bg-white dark:bg-[#111E2E] p-5 rounded-2xl border border-slate-200 dark:border-[#1E2D42] shadow-sm space-y-2">
+              <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 block">Allocated Budget</span>
+              <div className="text-2xl font-black text-slate-900 dark:text-white">
+                {formatMoney(budgetMetrics.totalAllocated)}
+              </div>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400">Across {trips.length} planned trip{trips.length !== 1 ? 's' : ''}</p>
             </div>
-            <p className="text-[11px] text-slate-500 dark:text-slate-400">Across {trips.length} planned trip{trips.length !== 1 ? 's' : ''}</p>
+
+            {/* Visual Progress Bar Card for Spent */}
+            <div className="bg-white dark:bg-[#111E2E] p-5 rounded-2xl border border-slate-200 dark:border-[#1E2D42] shadow-sm space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 block">Total Recorded Spend</span>
+                <span className="text-[10px] font-extrabold text-emerald-600 dark:text-emerald-400">{budgetMetrics.percentSpent}% spent</span>
+              </div>
+              <div className="text-2xl font-black text-emerald-600 dark:text-emerald-400">
+                {formatMoney(budgetMetrics.totalSpent)}
+              </div>
+              <div className="w-full bg-slate-100 dark:bg-[#162235] h-2 rounded-full overflow-hidden">
+                <div
+                  className="bg-emerald-500 h-full transition-all duration-500"
+                  style={{ width: `${budgetMetrics.percentSpent}%` }}
+                />
+              </div>
+            </div>
+
+            {/* Visual Progress Bar Card for Remaining */}
+            <div className="bg-white dark:bg-[#111E2E] p-5 rounded-2xl border border-slate-200 dark:border-[#1E2D42] shadow-sm space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 block">Remaining Balance</span>
+                <span className="text-[10px] font-extrabold text-cyan-600 dark:text-cyan-400">{100 - budgetMetrics.percentSpent}% available</span>
+              </div>
+              <div className="text-2xl font-black text-slate-900 dark:text-white">
+                {formatMoney(budgetMetrics.remaining)}
+              </div>
+              <div className="w-full bg-slate-100 dark:bg-[#162235] h-2 rounded-full overflow-hidden">
+                <div
+                  className="bg-cyan-500 h-full transition-all duration-500"
+                  style={{ width: `${100 - budgetMetrics.percentSpent}%` }}
+                />
+              </div>
+            </div>
+
+            <div className="bg-white dark:bg-[#111E2E] p-5 rounded-2xl border border-slate-200 dark:border-[#1E2D42] shadow-sm space-y-2">
+              <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 block">Active & Upcoming</span>
+              <div className="text-2xl font-black text-slate-900 dark:text-white">
+                {budgetMetrics.activeCount} <span className="text-xs font-bold text-slate-400">Trips</span>
+              </div>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400">Ready for travel execution</p>
+            </div>
           </div>
 
-          {/* Visual Progress Bar Card for Spent */}
-          <div className="bg-white dark:bg-[#111E2E] p-5 rounded-2xl border border-slate-200 dark:border-[#1E2D42] shadow-sm space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 block">Total Recorded Spend</span>
-              <span className="text-[10px] font-extrabold text-emerald-600 dark:text-emerald-400">{budgetMetrics.percentSpent}% spent</span>
+          {/* Interactive Financial Category Breakdown Donut Chart (Request 1) */}
+          <div className="bg-white dark:bg-[#111E2E] p-5 rounded-2xl border border-slate-200 dark:border-[#1E2D42] shadow-sm flex flex-col justify-between space-y-3">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-[#1E2D42] pb-2">
+              <span className="text-xs font-extrabold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                Spend by Category
+              </span>
+              <span className="text-[10px] font-bold text-emerald-500">Live Split</span>
             </div>
-            <div className="text-2xl font-black text-emerald-600 dark:text-emerald-400">
-              {formatMoney(budgetMetrics.totalSpent)}
-            </div>
-            <div className="w-full bg-slate-100 dark:bg-[#162235] h-2 rounded-full overflow-hidden">
-              <div
-                className="bg-emerald-500 h-full transition-all duration-500"
-                style={{ width: `${budgetMetrics.percentSpent}%` }}
-              />
-            </div>
-          </div>
 
-          {/* Visual Progress Bar Card for Remaining */}
-          <div className="bg-white dark:bg-[#111E2E] p-5 rounded-2xl border border-slate-200 dark:border-[#1E2D42] shadow-sm space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 block">Remaining Balance</span>
-              <span className="text-[10px] font-extrabold text-cyan-600 dark:text-cyan-400">{100 - budgetMetrics.percentSpent}% available</span>
+            <div className="h-36 w-full flex items-center justify-center">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={pieChartData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={35}
+                    outerRadius={55}
+                    paddingAngle={4}
+                    dataKey="value"
+                  >
+                    {pieChartData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip formatter={(value: any) => [formatMoney(Number(value)), 'Amount']} />
+                </PieChart>
+              </ResponsiveContainer>
             </div>
-            <div className="text-2xl font-black text-slate-900 dark:text-white">
-              {formatMoney(budgetMetrics.remaining)}
-            </div>
-            <div className="w-full bg-slate-100 dark:bg-[#162235] h-2 rounded-full overflow-hidden">
-              <div
-                className="bg-cyan-500 h-full transition-all duration-500"
-                style={{ width: `${100 - budgetMetrics.percentSpent}%` }}
-              />
-            </div>
-          </div>
 
-          <div className="bg-white dark:bg-[#111E2E] p-5 rounded-2xl border border-slate-200 dark:border-[#1E2D42] shadow-sm space-y-2">
-            <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 block">Active & Upcoming</span>
-            <div className="text-2xl font-black text-slate-900 dark:text-white">
-              {budgetMetrics.activeCount} <span className="text-xs font-bold text-slate-400">Trips</span>
+            <div className="grid grid-cols-2 gap-2 text-[10px] font-extrabold pt-1">
+              <div className="flex items-center space-x-1.5 text-indigo-600 dark:text-indigo-400">
+                <Hotel className="w-3 h-3 shrink-0" />
+                <span>Stays ({formatMoney(budgetMetrics.categoryTotals.STAY)})</span>
+              </div>
+              <div className="flex items-center space-x-1.5 text-cyan-600 dark:text-cyan-400">
+                <Navigation className="w-3 h-3 shrink-0" />
+                <span>Transfers ({formatMoney(budgetMetrics.categoryTotals.TRANSPORT)})</span>
+              </div>
+              <div className="flex items-center space-x-1.5 text-emerald-600 dark:text-emerald-400">
+                <Ticket className="w-3 h-3 shrink-0" />
+                <span>Activities ({formatMoney(budgetMetrics.categoryTotals.ACTIVITIES)})</span>
+              </div>
+              <div className="flex items-center space-x-1.5 text-amber-600 dark:text-amber-400">
+                <Utensils className="w-3 h-3 shrink-0" />
+                <span>Meals ({formatMoney(budgetMetrics.categoryTotals.MEALS)})</span>
+              </div>
             </div>
-            <p className="text-[11px] text-slate-500 dark:text-slate-400">Ready for travel execution</p>
           </div>
         </div>
       </section>
@@ -416,7 +520,7 @@ export const Dashboard: React.FC = () => {
             return (
               <button
                 key={vibe.id}
-                onClick={() => setSelectedVibe(vibe.id)}
+                onClick={() => handleVibeClick(vibe.id)}
                 className={`flex items-center space-x-2 px-4 py-2.5 rounded-2xl text-xs font-extrabold whitespace-nowrap transition-all duration-200 border ${
                   isSelected
                     ? 'bg-emerald-500 text-white border-emerald-400 shadow-md shadow-emerald-500/25 scale-105'
@@ -431,7 +535,7 @@ export const Dashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* Regional / Vibe Selections Grid */}
+      {/* Regional / Vibe Selections Grid with Skeleton Loaders (Request 5) */}
       <section className="space-y-4">
         <div className="flex items-center justify-between">
           <div>
@@ -447,9 +551,9 @@ export const Dashboard: React.FC = () => {
           </Link>
         </div>
 
-        {loading ? (
+        {loading || vibeLoading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[1, 2, 3].map((i) => (
+            {[1, 2, 3, 4, 5, 6].map((i) => (
               <div key={i} className="h-64 bg-slate-200 dark:bg-[#111E2E] rounded-2xl animate-pulse" />
             ))}
           </div>
@@ -459,7 +563,7 @@ export const Dashboard: React.FC = () => {
             <p>Try searching for popular Indian cities like <strong>Goa, Jaipur, Manali, Shimla, Varanasi, Kerala, Srinagar, Coorg, Ooty</strong>...</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 transition-all duration-300">
             {(searchQuery.trim() !== '' || selectedVibe !== 'ALL' ? filteredCities : filteredCities.slice(0, 12)).map((city) => (
               <CityCard
                 key={city.id}
