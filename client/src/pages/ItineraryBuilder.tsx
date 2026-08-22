@@ -21,7 +21,6 @@ import {
   ListFilter,
   CalendarDays,
   PieChart,
-  Printer,
 } from 'lucide-react';
 
 export const ItineraryBuilder: React.FC = () => {
@@ -217,14 +216,6 @@ export const ItineraryBuilder: React.FC = () => {
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
-          <button
-            onClick={() => window.print()}
-            className="px-4 py-2.5 bg-slate-100 dark:bg-[#162235] hover:bg-slate-200 dark:hover:bg-[#1E2D42] text-slate-700 dark:text-slate-200 rounded-xl text-xs font-bold transition flex items-center space-x-1.5"
-            title="Print or Save as PDF"
-          >
-            <Printer className="w-4 h-4 text-blue-500" />
-            <span>Print / Export Guide</span>
-          </button>
           <button
             onClick={handleShareTrip}
             className="px-4 py-2.5 bg-slate-100 dark:bg-[#162235] hover:bg-slate-200 dark:hover:bg-[#1E2D42] text-slate-700 dark:text-slate-200 rounded-xl text-xs font-bold transition flex items-center space-x-1.5"
