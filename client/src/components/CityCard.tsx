@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { MapPin, Plus, Star, Heart, Sun } from 'lucide-react';
+import { MapPin, Plus, Star, Heart, Sun, Check } from 'lucide-react';
 
 export interface CityData {
   id: string;
@@ -15,13 +15,68 @@ export interface CityData {
 interface CityCardProps {
   city: CityData;
   onSelect?: (city: CityData) => void;
+  isAdded?: boolean;
 }
 
 const FALLBACK_CITY_IMAGE = 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=800&q=80';
 
-export const CityCard: React.FC<CityCardProps> = ({ city, onSelect }) => {
+// Harmonized Season-Accurate "Best Time to Visit" Resolver (Request Item 1)
+export const getBestTimeToVisit = (city: CityData): string => {
+  const name = (city.name || '').toLowerCase();
+  const country = (city.country || '').toLowerCase();
+  const region = (city.region || '').toLowerCase();
+
+  // Himalayan / High-altitude Hill stations
+  if (
+    name.includes('ladakh') || name.includes('leh') ||
+    name.includes('manali') || name.includes('shimla') ||
+    name.includes('srinagar') || name.includes('gangtok') ||
+    name.includes('shillong') || name.includes('darjeeling')
+  ) {
+    return 'May–Sep (Summer & Autumn)';
+  }
+
+  // European Cities
+  if (
+    region.includes('europe') || country.includes('france') ||
+    country.includes('italy') || country.includes('spain') ||
+    country.includes('uk') || country.includes('united kingdom') ||
+    country.includes('netherlands') || country.includes('switzerland') ||
+    country.includes('greece')
+  ) {
+    return 'Apr–Oct (Spring & Summer)';
+  }
+
+  // Tropical / Coastal destinations
+  if (
+    name.includes('goa') || name.includes('kerala') ||
+    name.includes('bali') || country.includes('indonesia') ||
+    country.includes('mexico') || name.includes('cancun') ||
+    country.includes('brazil') || name.includes('rio') ||
+    country.includes('australia') || name.includes('sydney')
+  ) {
+    return 'Nov–Apr (Dry Season)';
+  }
+
+  // East Asia & North America
+  if (
+    country.includes('japan') || name.includes('tokyo') ||
+    country.includes('usa') || country.includes('united states') ||
+    country.includes('canada') || name.includes('vancouver')
+  ) {
+    return 'Sep–May (Cherry Blossom / Autumn)';
+  }
+
+  // Default for Indian Plains & Heritage (Agra, Jaipur, Delhi, Varanasi, Ahmedabad, Amritsar, Udaipur)
+  return 'Oct–Mar (Pleasant Winter)';
+};
+
+export const CityCard: React.FC<CityCardProps> = ({ city, onSelect, isAdded = false }) => {
   const [isSaved, setIsSaved] = useState(false);
+  const [justAdded, setJustAdded] = useState(false);
   const [imageSrc, setImageSrc] = useState(city.imageUrl || FALLBACK_CITY_IMAGE);
+
+  const bestTimeStr = getBestTimeToVisit(city);
 
   const getCostBadge = (cost: string) => {
     switch (cost?.toUpperCase()) {
@@ -34,10 +89,16 @@ export const CityCard: React.FC<CityCardProps> = ({ city, onSelect }) => {
     }
   };
 
+  const handleSelectClick = () => {
+    setJustAdded(true);
+    if (onSelect) onSelect(city);
+    setTimeout(() => setJustAdded(false), 2500);
+  };
+
   return (
     <div className="bg-white dark:bg-[#1E293B] dark:hover:bg-[#334155] rounded-2xl border border-slate-200 dark:border-white/10 overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col justify-between h-full group">
       <div className="flex flex-col flex-1">
-        {/* Aspect Ratio 16/9 Image Container with Fallback & Hover Zoom (Request 4) */}
+        {/* Aspect Ratio 16/9 Image Container with Fallback & Hover Zoom */}
         <div className="relative aspect-[16/9] w-full overflow-hidden bg-slate-100 dark:bg-[#0F172A] shrink-0">
           <img
             src={imageSrc}
@@ -73,7 +134,7 @@ export const CityCard: React.FC<CityCardProps> = ({ city, onSelect }) => {
           </div>
         </div>
 
-        {/* Content Container with Proper Flex & Padding (Request 1) */}
+        {/* Content Container */}
         <div className="p-4 sm:p-5 flex-1 flex flex-col justify-between space-y-3">
           <div className="space-y-2">
             <div className="flex items-center justify-between">
@@ -93,25 +154,29 @@ export const CityCard: React.FC<CityCardProps> = ({ city, onSelect }) => {
             </p>
           </div>
 
-          {/* Best Time to Visit Tag */}
+          {/* Harmonized Season-Accurate "Best Time to Visit" Tag (Request 1) */}
           <div className="flex items-center space-x-1.5 pt-1 text-[10px] font-extrabold text-[#00A09D] dark:text-[#38BDF8]">
             <Sun className="w-3.5 h-3.5 text-[#E2A03F] shrink-0" />
-            <span>Best Time to Visit: Oct–Mar</span>
+            <span>Best Time: {bestTimeStr}</span>
           </div>
         </div>
       </div>
 
-      {/* Card Action Footer Button (Request 1 & 3) */}
+      {/* Card Action Footer Button with Active Feedback State (Request 6) */}
       <div className="px-4 py-3 pb-4 bg-slate-50 dark:bg-[#0F172A]/80 border-t border-slate-100 dark:border-white/10 flex items-center justify-between mt-auto">
         <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Multi-City Stop</span>
         {onSelect && (
           <button
-            onClick={() => onSelect(city)}
+            onClick={handleSelectClick}
             aria-label={`Add ${city.name} to trip`}
-            className="px-3.5 py-1.5 bg-[#714B67] hover:bg-[#613E57] text-white rounded-xl text-xs font-extrabold shadow-sm transition-all duration-200 hover:-translate-y-0.5 flex items-center space-x-1.5 shrink-0"
+            className={`px-3.5 py-1.5 rounded-xl text-xs font-extrabold shadow-sm transition-all duration-200 flex items-center space-x-1.5 shrink-0 ${
+              justAdded || isAdded
+                ? 'bg-[#10B981] text-white shadow-emerald-500/30 scale-105'
+                : 'bg-[#714B67] hover:bg-[#613E57] text-white hover:-translate-y-0.5'
+            }`}
           >
-            <Plus className="w-3.5 h-3.5" />
-            <span>Add Destination</span>
+            {justAdded || isAdded ? <Check className="w-3.5 h-3.5 text-white" /> : <Plus className="w-3.5 h-3.5" />}
+            <span>{justAdded || isAdded ? 'Added ✓' : 'Add Destination'}</span>
           </button>
         )}
       </div>

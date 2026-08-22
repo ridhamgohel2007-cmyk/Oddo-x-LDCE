@@ -287,7 +287,7 @@ export const SearchPage: React.FC = () => {
 
   return (
     <div className="space-y-6 pb-12">
-      {/* Header Banner featuring Uploaded 3D Compass Emblem */}
+      {/* Header Banner with Dynamic Count Sync (Request 3) */}
       <div className="bg-white dark:bg-[#1E293B] p-6 sm:p-8 rounded-3xl shadow-sm border border-slate-200 dark:border-white/10 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-center space-x-4">
           <div className="w-16 h-16 rounded-2xl overflow-hidden shadow-lg ring-2 ring-[#7C3AED]/40 bg-black shrink-0 hover:scale-105 transition-transform duration-300">
@@ -302,12 +302,12 @@ export const SearchPage: React.FC = () => {
               <span>Discovery & Catalog Search</span>
             </h1>
             <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mt-1">
-              Discover 31+ Indian and Global destinations by Continent & Travel Vibe
+              Discover <strong className="text-slate-800 dark:text-slate-200">{cities.length}</strong> Indian and Global destinations across 6 Continents
             </p>
           </div>
         </div>
 
-        {/* Tab Toggles */}
+        {/* Tab Toggles with Synchronized City Count (Request 3) */}
         <div className="flex bg-slate-100 dark:bg-[#0F172A] p-1.5 rounded-2xl border border-slate-200 dark:border-white/10">
           <button
             onClick={() => setActiveTab('CITIES')}
@@ -334,7 +334,7 @@ export const SearchPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Filter Controls Bar with Continent & Travel Vibe Menu */}
+      {/* Filter Controls Bar with Search Clear & Result Count (Request 4 & 7) */}
       <div className="bg-white dark:bg-[#1E293B] p-4 sm:p-6 rounded-3xl shadow-sm border border-slate-200 dark:border-white/10 space-y-4">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="relative flex-1 w-full">
@@ -348,27 +348,19 @@ export const SearchPage: React.FC = () => {
                   ? 'Search by city name, country, or region (e.g. Manali, Goa, Paris)...'
                   : 'Search activities by title or category (e.g. Taj Mahal, Paragliding, Rafting)...'
               }
-              className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-[#0F172A] border border-slate-200 dark:border-white/10 rounded-xl text-xs font-semibold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#7C3AED]"
+              className="w-full pl-10 pr-9 py-2.5 bg-slate-50 dark:bg-[#0F172A] border border-slate-200 dark:border-white/10 rounded-xl text-xs font-semibold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#7C3AED]"
             />
-          </div>
-
-          {/* Continent Dropdown Menu Selector */}
-          {activeTab === 'CITIES' && (
-            <div className="relative w-full sm:w-56 shrink-0">
-              <Globe className="w-4 h-4 text-[#00A09D] absolute left-3 top-3.5 pointer-events-none" />
-              <select
-                value={selectedContinent}
-                onChange={(e) => setSelectedContinent(e.target.value)}
-                className="w-full h-[42px] pl-9 pr-8 bg-slate-50 dark:bg-[#0F172A] border border-slate-200 dark:border-white/10 rounded-xl text-xs font-extrabold text-slate-900 dark:text-[#E2E8F0] cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#7C3AED]"
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery('')}
+                className="absolute right-3 top-3 text-slate-400 hover:text-slate-600 dark:hover:text-white p-0.5"
+                title="Clear search query"
               >
-                {continentOptions.map((c) => (
-                  <option key={c.id} value={c.id} className="bg-white dark:bg-[#0F172A]">
-                    {c.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
+                <X className="w-4 h-4" />
+              </button>
+            )}
+          </div>
 
           <div className="flex items-center space-x-2 w-full sm:w-auto">
             {activeTab === 'CITIES' ? (
@@ -399,10 +391,10 @@ export const SearchPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Travel Vibe & Continent Selector Buttons */}
+        {/* Streamlined Continent & Travel Vibe Pill Filters with Flex-Wrap (Request 4 & 5) */}
         {activeTab === 'CITIES' && (
-          <div className="pt-2 border-t border-slate-100 dark:border-white/10 space-y-2">
-            <div className="flex items-center space-x-2 overflow-x-auto pb-1 scrollbar-none">
+          <div className="pt-2 border-t border-slate-100 dark:border-white/10 space-y-2.5">
+            <div className="flex flex-wrap items-center gap-2">
               <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 shrink-0 mr-1 flex items-center space-x-1">
                 <Filter className="w-3.5 h-3.5 text-[#00A09D]" />
                 <span>Continents:</span>
@@ -426,7 +418,7 @@ export const SearchPage: React.FC = () => {
               })}
             </div>
 
-            <div className="flex items-center space-x-2 overflow-x-auto pb-1 scrollbar-none pt-1">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-2.5 pt-1">
               <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 shrink-0 mr-1 flex items-center space-x-1">
                 <Flame className="w-3.5 h-3.5 text-[#E2A03F]" />
                 <span>Travel Vibe:</span>
@@ -438,7 +430,7 @@ export const SearchPage: React.FC = () => {
                   <button
                     key={vibe.id}
                     onClick={() => setSelectedVibe(vibe.id)}
-                    className={`flex items-center space-x-2 px-3.5 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all border ${
+                    className={`flex items-center space-x-2 px-3.5 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all border shrink-0 ${
                       isSelected
                         ? 'bg-[#714B67] dark:bg-[#7C3AED] text-white border-purple-400 shadow-sm'
                         : 'bg-slate-50 dark:bg-[#0F172A] text-slate-700 dark:text-slate-300 border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-[#334155]'
@@ -451,6 +443,18 @@ export const SearchPage: React.FC = () => {
               })}
             </div>
           </div>
+        )}
+      </div>
+
+      {/* Active Result Count Feedback (Request 7) */}
+      <div className="flex items-center justify-between text-xs font-bold text-slate-500 dark:text-slate-400 px-1">
+        <span>
+          Showing <strong className="text-slate-900 dark:text-white">{activeTab === 'CITIES' ? filteredCities.length : filteredActivities.length}</strong> of <strong className="text-slate-900 dark:text-white">{activeTab === 'CITIES' ? cities.length : activities.length}</strong> {activeTab.toLowerCase()}
+        </span>
+        {searchQuery && (
+          <span className="text-[#7C3AED] dark:text-[#38BDF8]">
+            Filtered by "{searchQuery}"
+          </span>
         )}
       </div>
 
