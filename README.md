@@ -46,9 +46,12 @@
 - **KPI Metrics Dashboard**: Monitor total system users, active itineraries, logged community posts, and overall system activity.
 - **Role Escalation**: Upgrade users to Administrator status or perform administrative moderation.
 
-### 🎨 6. High-Contrast Premium UI/UX
+### 🎨 6. High-Contrast Premium UI/UX & Productivity Tools
 - **Vibrant Modern Aesthetics**: Crisp typography, high-contrast text styling, gradient headings, and smooth micro-interactions.
-- **Responsive Layout**: Seamless UI designed for desktop, tablet, and mobile browsers.
+- **Keyboard Shortcuts**: Press `Ctrl + K` (or `Cmd + K`) anywhere to instantly focus global destination search.
+- **PDF & Offline Print Guide**: 1-click **Print / Export Guide** button on the Itinerary Builder page for offline travel itineraries.
+- **Multi-Currency Analytics**: Toggle between **₹ INR**, **$ USD**, and **€ EUR** on the financial analytics page.
+- **Action Toast Notifications**: Real-time feedback for saving trips, deleting expenses, and cloning itineraries.
 
 ---
 
