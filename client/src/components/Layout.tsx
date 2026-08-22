@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import {
@@ -9,6 +9,8 @@ import {
   X,
   Search,
   ChevronRight,
+  Sun,
+  Moon,
 } from 'lucide-react';
 
 export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -17,6 +19,22 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [globalSearch, setGlobalSearch] = useState('');
+
+  // Dark/Light Theme Toggle State
+  const [darkMode, setDarkMode] = useState<boolean>(() => {
+    return localStorage.getItem('globetrotter_theme') === 'dark' ||
+      document.documentElement.classList.contains('dark');
+  });
+
+  useEffect(() => {
+    if (darkMode) {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('globetrotter_theme', 'dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('globetrotter_theme', 'light');
+    }
+  }, [darkMode]);
 
   const navLinks = [
     { name: 'Dashboard', path: '/dashboard' },
@@ -63,7 +81,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
               </div>
             </Link>
 
-            {/* Quick Header Search Bar */}
+            {/* Header Search Bar */}
             {user && (
               <form onSubmit={handleGlobalSearch} className="hidden xl:flex items-center flex-1 max-w-xs mx-2">
                 <div className="relative w-full">
@@ -79,7 +97,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
               </form>
             )}
 
-            {/* Desktop Navigation Links without Icons & Strictly Single Line */}
+            {/* Desktop Navigation Links with High-Contrast Active State */}
             {user && (
               <nav className="hidden md:flex items-center space-x-1.5 bg-slate-100/90 dark:bg-[#111E2E] p-1.5 rounded-2xl border border-slate-200 dark:border-[#1E2D42] shrink-0">
                 {navLinks.map((link) => {
@@ -90,8 +108,8 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                       to={link.path}
                       className={`whitespace-nowrap px-4 py-2 rounded-xl text-xs font-black tracking-wide transition-all duration-200 inline-block ${
                         isActive
-                          ? 'bg-white dark:bg-[#162235] text-emerald-600 dark:text-emerald-400 shadow-xs border border-slate-200 dark:border-[#1E2D42]'
-                          : 'text-slate-600 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-white/60 dark:hover:bg-[#162235]'
+                          ? 'bg-emerald-500 text-white shadow-md shadow-emerald-500/25 border border-emerald-400'
+                          : 'text-slate-700 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-slate-200/60 dark:hover:bg-[#162235]'
                       }`}
                     >
                       {link.name}
@@ -101,7 +119,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
               </nav>
             )}
 
-            {/* Right Action Controls Bar (Plan Trip + Profile + Logout - ThemeToggle Removed) */}
+            {/* Right Action Controls Bar (Plan Trip + Theme Toggle + Profile + Logout) */}
             <div className="flex items-center space-x-2 sm:space-x-3 shrink-0">
               {user ? (
                 <>
@@ -112,6 +130,20 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                     <Plus className="w-4 h-4" />
                     <span className="whitespace-nowrap">Plan New Trip</span>
                   </Link>
+
+                  {/* Dark/Light Mode Theme Toggle Button next to Profile Avatar */}
+                  <button
+                    onClick={() => setDarkMode(!darkMode)}
+                    aria-label="Toggle dark and light mode"
+                    title={darkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+                    className="p-2 rounded-xl text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-[#162235] hover:bg-slate-200 dark:hover:bg-[#1E2D42] border border-slate-200 dark:border-[#1E2D42] transition"
+                  >
+                    {darkMode ? (
+                      <Sun className="w-4 h-4 text-amber-400" />
+                    ) : (
+                      <Moon className="w-4 h-4 text-indigo-600" />
+                    )}
+                  </button>
 
                   {/* Profile Avatar Settings */}
                   <Link
@@ -139,6 +171,15 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                 </>
               ) : (
                 <div className="flex items-center space-x-2 shrink-0">
+                  {/* Theme Toggle for Unauthenticated Users */}
+                  <button
+                    onClick={() => setDarkMode(!darkMode)}
+                    aria-label="Toggle dark and light mode"
+                    title={darkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+                    className="p-2 rounded-xl text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-[#162235] hover:bg-slate-200 dark:hover:bg-[#1E2D42] border border-slate-200 dark:border-[#1E2D42] transition"
+                  >
+                    {darkMode ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-indigo-600" />}
+                  </button>
                   <Link
                     to="/login"
                     className="px-4 py-2 text-xs font-extrabold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-[#162235] rounded-xl transition whitespace-nowrap"
@@ -172,12 +213,17 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
         {mobileMenuOpen && user && (
           <div className="md:hidden border-t border-slate-200 dark:border-[#1E2D42] bg-white dark:bg-[#0B1320] px-4 pt-3 pb-5 space-y-2">
             {navLinks.map((link) => {
+              const isActive = location.pathname === link.path;
               return (
                 <Link
                   key={link.path}
                   to={link.path}
                   onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-black text-slate-700 dark:text-slate-200 hover:bg-emerald-50 dark:hover:bg-[#162235] hover:text-emerald-600 dark:hover:text-emerald-400 whitespace-nowrap"
+                  className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-black whitespace-nowrap ${
+                    isActive
+                      ? 'bg-emerald-500 text-white'
+                      : 'text-slate-700 dark:text-slate-200 hover:bg-emerald-50 dark:hover:bg-[#162235] hover:text-emerald-600'
+                  }`}
                 >
                   <span className="whitespace-nowrap">{link.name}</span>
                   <ChevronRight className="w-4 h-4 text-slate-400" />

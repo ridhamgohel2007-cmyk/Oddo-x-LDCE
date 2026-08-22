@@ -1,5 +1,5 @@
-import React from 'react';
-import { MapPin, Plus, Star } from 'lucide-react';
+import React, { useState } from 'react';
+import { MapPin, Plus, Star, Heart } from 'lucide-react';
 
 export interface CityData {
   id: string;
@@ -18,6 +18,8 @@ interface CityCardProps {
 }
 
 export const CityCard: React.FC<CityCardProps> = ({ city, onSelect }) => {
+  const [isSaved, setIsSaved] = useState(false);
+
   const getCostBadge = (cost: string) => {
     switch (cost?.toUpperCase()) {
       case 'LOW':
@@ -41,9 +43,28 @@ export const CityCard: React.FC<CityCardProps> = ({ city, onSelect }) => {
           <div className="absolute top-3 left-3 flex items-center space-x-1">
             {getCostBadge(city.costIndex)}
           </div>
-          <div className="absolute top-3 right-3 px-2 py-0.5 bg-black/60 text-amber-400 rounded-full text-[10px] font-extrabold backdrop-blur-md flex items-center space-x-1">
-            <Star className="w-3 h-3 fill-amber-400" />
-            <span>{city.popularityScore}</span>
+          
+          {/* Quick Heart / Save to Wishlist Icon Button */}
+          <div className="absolute top-3 right-3 flex items-center space-x-1.5">
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsSaved(!isSaved);
+              }}
+              title={isSaved ? 'Saved to Wishlist' : 'Save to Wishlist'}
+              className={`p-1.5 rounded-full backdrop-blur-md transition-all ${
+                isSaved
+                  ? 'bg-rose-500 text-white scale-110 shadow-md'
+                  : 'bg-black/40 hover:bg-black/60 text-white/80 hover:text-white'
+              }`}
+            >
+              <Heart className={`w-3.5 h-3.5 ${isSaved ? 'fill-white' : ''}`} />
+            </button>
+            <div className="px-2 py-0.5 bg-black/60 text-amber-400 rounded-full text-[10px] font-extrabold backdrop-blur-md flex items-center space-x-1">
+              <Star className="w-3 h-3 fill-amber-400" />
+              <span>{city.popularityScore}</span>
+            </div>
           </div>
         </div>
 

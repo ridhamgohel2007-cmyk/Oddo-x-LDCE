@@ -22,6 +22,9 @@ import {
   Car,
   Tag,
   Flame,
+  Bot,
+  Map,
+  DollarSign,
 } from 'lucide-react';
 
 export const Dashboard: React.FC = () => {
@@ -32,9 +35,15 @@ export const Dashboard: React.FC = () => {
   const [trips, setTrips] = useState<TripData[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   
-  // "Travel by Vibe" / Theme Filter State (Tarzan Way Feature)
+  // "Travel by Vibe" / Theme Filter State
   const [selectedVibe, setSelectedVibe] = useState('ALL');
   const [loading, setLoading] = useState(true);
+
+  // AI Quick Planner Input State (Hero Request)
+  const [aiPrompt, setAiPrompt] = useState('');
+
+  // Currency Switcher State (INR / USD Request)
+  const [currencyMode, setCurrencyMode] = useState<'INR' | 'USD'>('INR');
 
   // Dynamic Metrics & Countdown States
   const [nextTrip, setNextTrip] = useState<TripData | null>(null);
@@ -108,7 +117,7 @@ export const Dashboard: React.FC = () => {
         }
       } catch (err) {
         console.error('Error loading dashboard data:', err);
-      } finally {
+      } fontally: {
         setLoading(false);
       }
     };
@@ -126,6 +135,21 @@ export const Dashboard: React.FC = () => {
     const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
 
     setCountdownText({ days, hours, mins });
+  };
+
+  const handleAiQuickPlan = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!aiPrompt.trim()) return;
+    navigate(`/create-trip?prompt=${encodeURIComponent(aiPrompt.trim())}`);
+  };
+
+  // Format monetary values according to active currency switcher (INR / USD)
+  const formatMoney = (val: number) => {
+    if (currencyMode === 'USD') {
+      const usdVal = Math.round(val / 83);
+      return `$${usdVal.toLocaleString('en-US')}`;
+    }
+    return `₹${val.toLocaleString('en-IN')}`;
   };
 
   // Travel Vibe / Theme Filtering Logic
@@ -172,7 +196,7 @@ export const Dashboard: React.FC = () => {
 
   return (
     <div className="space-y-8 pb-12">
-      {/* Hero Header */}
+      {/* Hero Banner with AI Quick Planner Bar & Mini-Metrics */}
       <div className="relative rounded-3xl overflow-hidden shadow-2xl bg-gradient-to-r from-[#0B1320] via-[#111E2E] to-[#0B1320] border border-slate-200 dark:border-[#1E2D42]">
         <img
           src="https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=1600&q=80"
@@ -192,24 +216,46 @@ export const Dashboard: React.FC = () => {
             <p className="text-xs sm:text-sm text-slate-300">
               Track active trip countdowns, discover destinations by travel vibe, and manage multi-city budgets.
             </p>
-            <div className="pt-2 flex flex-wrap gap-3">
-              <Link
-                to="/create-trip"
-                className="px-5 py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-2xl font-bold text-xs shadow-lg shadow-emerald-500/30 flex items-center space-x-2 transition hover:-translate-y-0.5"
-              >
-                <Plus className="w-4 h-4" />
-                <span>Plan New Trip</span>
-              </Link>
-              <Link
-                to="/community"
-                className="px-5 py-3 bg-white/10 hover:bg-white/20 text-white border border-white/20 rounded-2xl font-bold text-xs backdrop-blur-md transition"
-              >
-                Browse Public Trips
-              </Link>
+
+            {/* AI Quick Planner Input Bar inside Hero Banner */}
+            <form onSubmit={handleAiQuickPlan} className="pt-2">
+              <div className="relative w-full max-w-xl">
+                <Bot className="w-4 h-4 text-emerald-400 absolute left-4 top-3.5" />
+                <input
+                  type="text"
+                  value={aiPrompt}
+                  onChange={(e) => setAiPrompt(e.target.value)}
+                  placeholder="AI Quick Planner e.g., 5-day romantic trip to Italy under ₹2 Lakhs..."
+                  className="w-full pl-11 pr-28 py-3 bg-black/40 hover:bg-black/50 focus:bg-black/60 border border-white/20 rounded-2xl text-xs font-semibold text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 backdrop-blur-md transition"
+                />
+                <button
+                  type="submit"
+                  className="absolute right-1.5 top-1.5 px-3.5 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-xs font-bold shadow-md transition flex items-center space-x-1"
+                >
+                  <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+                  <span>AI Plan</span>
+                </button>
+              </div>
+            </form>
+
+            {/* Mini-Metrics Badges (Hero Empty Space Balance) */}
+            <div className="pt-1 flex flex-wrap gap-4 text-xs font-bold text-slate-300 border-t border-white/10 pt-3">
+              <div className="flex items-center space-x-1.5 bg-white/5 px-3 py-1.5 rounded-xl border border-white/10">
+                <Map className="w-4 h-4 text-emerald-400" />
+                <span><strong className="text-white">12</strong> Cities Explored</span>
+              </div>
+              <div className="flex items-center space-x-1.5 bg-white/5 px-3 py-1.5 rounded-xl border border-white/10">
+                <Globe2 className="w-4 h-4 text-cyan-400" />
+                <span><strong className="text-white">5</strong> Countries Visited</span>
+              </div>
+              <div className="flex items-center space-x-1.5 bg-white/5 px-3 py-1.5 rounded-xl border border-white/10">
+                <Luggage className="w-4 h-4 text-amber-400" />
+                <span><strong className="text-white">{trips.length}</strong> Active Itineraries</span>
+              </div>
             </div>
           </div>
 
-          {/* Dynamic Countdown Widget */}
+          {/* Dynamic Countdown Widget with Animated Pulse Status Pill */}
           {nextTrip && (
             <div className="w-full lg:w-80 bg-white/10 dark:bg-[#162235]/90 backdrop-blur-xl border border-white/20 dark:border-[#1E2D42] p-5 rounded-2xl text-white space-y-3 shadow-xl">
               <div className="flex items-center justify-between">
@@ -217,7 +263,9 @@ export const Dashboard: React.FC = () => {
                   <Clock className="w-3.5 h-3.5" />
                   <span>Next Journey Countdown</span>
                 </span>
-                <span className="px-2 py-0.5 bg-emerald-500/20 text-emerald-300 rounded text-[10px] font-bold">
+                
+                {/* Subtle Animated Pulse UPCOMING Status Pill */}
+                <span className="px-2.5 py-0.5 bg-emerald-500/30 text-emerald-300 rounded-full text-[10px] font-extrabold animate-pulse ring-2 ring-emerald-400/50">
                   {nextTrip.status}
                 </span>
               </div>
@@ -256,12 +304,41 @@ export const Dashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* Budget Highlights */}
+      {/* Budget Highlights with Visual Progress Bar & Currency Switcher Toggle */}
       <section className="space-y-3">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-black text-slate-900 dark:text-white">
-            Budget Highlights & Financial Summary
-          </h2>
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+          <div className="flex items-center space-x-3">
+            <h2 className="text-lg font-black text-slate-900 dark:text-white">
+              Budget Highlights & Financial Summary
+            </h2>
+
+            {/* Currency Switcher Quick Toggle (INR / USD) */}
+            <div className="flex items-center bg-slate-200 dark:bg-[#162235] p-1 rounded-xl border border-slate-300 dark:border-[#1E2D42]">
+              <button
+                type="button"
+                onClick={() => setCurrencyMode('INR')}
+                className={`px-2.5 py-0.5 rounded-lg text-[10px] font-black transition ${
+                  currencyMode === 'INR'
+                    ? 'bg-emerald-500 text-white shadow-xs'
+                    : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
+                }`}
+              >
+                ₹ INR
+              </button>
+              <button
+                type="button"
+                onClick={() => setCurrencyMode('USD')}
+                className={`px-2.5 py-0.5 rounded-lg text-[10px] font-black transition ${
+                  currencyMode === 'USD'
+                    ? 'bg-emerald-500 text-white shadow-xs'
+                    : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
+                }`}
+              >
+                $ USD
+              </button>
+            </div>
+          </div>
+
           <Link to="/my-trips" className="text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:underline">
             Manage All Budgets →
           </Link>
@@ -271,15 +348,19 @@ export const Dashboard: React.FC = () => {
           <div className="bg-white dark:bg-[#111E2E] p-5 rounded-2xl border border-slate-200 dark:border-[#1E2D42] shadow-sm space-y-2">
             <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 block">Allocated Budget</span>
             <div className="text-2xl font-black text-slate-900 dark:text-white">
-              ₹{budgetMetrics.totalAllocated.toLocaleString('en-IN')}
+              {formatMoney(budgetMetrics.totalAllocated)}
             </div>
             <p className="text-[11px] text-slate-500 dark:text-slate-400">Across {trips.length} planned trip{trips.length !== 1 ? 's' : ''}</p>
           </div>
 
+          {/* Visual Progress Bar Card for Spent */}
           <div className="bg-white dark:bg-[#111E2E] p-5 rounded-2xl border border-slate-200 dark:border-[#1E2D42] shadow-sm space-y-2">
-            <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 block">Total Recorded Spend</span>
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 block">Total Recorded Spend</span>
+              <span className="text-[10px] font-extrabold text-emerald-600 dark:text-emerald-400">{budgetMetrics.percentSpent}% spent</span>
+            </div>
             <div className="text-2xl font-black text-emerald-600 dark:text-emerald-400">
-              ₹{budgetMetrics.totalSpent.toLocaleString('en-IN')}
+              {formatMoney(budgetMetrics.totalSpent)}
             </div>
             <div className="w-full bg-slate-100 dark:bg-[#162235] h-2 rounded-full overflow-hidden">
               <div
@@ -289,14 +370,21 @@ export const Dashboard: React.FC = () => {
             </div>
           </div>
 
+          {/* Visual Progress Bar Card for Remaining */}
           <div className="bg-white dark:bg-[#111E2E] p-5 rounded-2xl border border-slate-200 dark:border-[#1E2D42] shadow-sm space-y-2">
-            <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 block">Remaining Balance</span>
-            <div className="text-2xl font-black text-slate-900 dark:text-white">
-              ₹{budgetMetrics.remaining.toLocaleString('en-IN')}
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 block">Remaining Balance</span>
+              <span className="text-[10px] font-extrabold text-cyan-600 dark:text-cyan-400">{100 - budgetMetrics.percentSpent}% available</span>
             </div>
-            <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-bold">
-              {100 - budgetMetrics.percentSpent}% available funds
-            </p>
+            <div className="text-2xl font-black text-slate-900 dark:text-white">
+              {formatMoney(budgetMetrics.remaining)}
+            </div>
+            <div className="w-full bg-slate-100 dark:bg-[#162235] h-2 rounded-full overflow-hidden">
+              <div
+                className="bg-cyan-500 h-full transition-all duration-500"
+                style={{ width: `${100 - budgetMetrics.percentSpent}%` }}
+              />
+            </div>
           </div>
 
           <div className="bg-white dark:bg-[#111E2E] p-5 rounded-2xl border border-slate-200 dark:border-[#1E2D42] shadow-sm space-y-2">
@@ -309,7 +397,7 @@ export const Dashboard: React.FC = () => {
         </div>
       </section>
 
-      {/* "Travel by Vibe" / Theme-Based Filtering Section (The Tarzan Way Feature) */}
+      {/* "Travel by Vibe" / Theme-Based Filtering Section */}
       <div className="bg-white dark:bg-[#111E2E] p-6 sm:p-8 rounded-3xl shadow-sm border border-slate-200 dark:border-[#1E2D42] space-y-5">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-slate-100 dark:border-[#1E2D42] pb-4">
           <div>
@@ -335,7 +423,7 @@ export const Dashboard: React.FC = () => {
           </div>
         </div>
 
-        {/* Travel Vibe Selector Buttons */}
+        {/* Travel Vibe Selector Buttons with High-Contrast Emerald Active State */}
         <div className="flex items-center space-x-2.5 overflow-x-auto pb-2 scrollbar-none">
           {vibeOptions.map((vibe) => {
             const Icon = vibe.icon;
@@ -344,10 +432,10 @@ export const Dashboard: React.FC = () => {
               <button
                 key={vibe.id}
                 onClick={() => setSelectedVibe(vibe.id)}
-                className={`flex items-center space-x-2 px-4 py-2.5 rounded-2xl text-xs font-extrabold whitespace-nowrap transition-all duration-200 ${
+                className={`flex items-center space-x-2 px-4 py-2.5 rounded-2xl text-xs font-extrabold whitespace-nowrap transition-all duration-200 border ${
                   isSelected
-                    ? 'bg-emerald-500 text-white shadow-md shadow-emerald-500/25 scale-105'
-                    : 'bg-slate-100 dark:bg-[#162235] text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-[#1E2D42]'
+                    ? 'bg-emerald-500 text-white border-emerald-400 shadow-md shadow-emerald-500/25 scale-105'
+                    : 'bg-slate-100 dark:bg-[#162235] text-slate-700 dark:text-slate-300 border-slate-200 dark:border-[#1E2D42] hover:bg-slate-200 dark:hover:bg-[#1E2D42]'
                 }`}
               >
                 <Icon className={`w-4 h-4 ${isSelected ? 'text-white' : 'text-emerald-500'}`} />
