@@ -21,12 +21,12 @@ async function main() {
     data: {
       email: 'admin@globetrotter.com',
       passwordHash,
-      name: 'Alex Morgan',
+      name: 'Ridham Gohel',
       role: 'ADMIN',
-      phone: '+1 555 019 2831',
-      city: 'San Francisco',
-      country: 'USA',
-      bio: 'GlobeTrotter Administrator & Avid Backpacker',
+      phone: '+91 98765 43210',
+      city: 'Ahmedabad',
+      country: 'India',
+      bio: 'GlobeTrotter Lead Administrator & Travel Curator',
       profilePic: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
       language: 'English',
     },
@@ -36,13 +36,13 @@ async function main() {
     data: {
       email: 'traveler@globetrotter.com',
       passwordHash,
-      name: 'Elena Rostova',
+      name: 'Jiyan Mansuri',
       role: 'USER',
-      phone: '+1 415 882 1049',
-      city: 'Chicago',
-      country: 'USA',
-      bio: 'Wanderlust soul exploring Europe, Asia and Incredible India.',
-      profilePic: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=400&q=80',
+      phone: '+91 91234 56789',
+      city: 'Ahmedabad',
+      country: 'India',
+      bio: 'Avid traveler exploring India, Europe and Asia',
+      profilePic: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=400&q=80',
       language: 'English',
     },
   });
@@ -195,7 +195,7 @@ async function main() {
     },
   });
 
-  console.log('Seeding Activities for Indian and International Cities...');
+  console.log('Seeding Activities...');
 
   // Indian Activities
   const tajMahal = await prisma.activity.create({
@@ -204,7 +204,7 @@ async function main() {
       title: 'Taj Mahal Sunrise VIP Guided Tour',
       description: 'Witness the breathtaking marble monument of love bathed in golden dawn light with expert storytelling.',
       category: 'Sightseeing',
-      estimatedCost: 30,
+      estimatedCost: 2500,
       durationHours: 3.0,
       imageUrl: 'https://images.unsplash.com/photo-1564507592333-c60657eea523?auto=format&fit=crop&w=600&q=80',
     },
@@ -216,7 +216,7 @@ async function main() {
       title: 'Amer Fort Hilltop Tour & Sheesh Mahal',
       description: 'Explore the grand 16th-century fortress, mirror palace (Sheesh Mahal), and breathtaking Maota Lake views.',
       category: 'Culture',
-      estimatedCost: 20,
+      estimatedCost: 1500,
       durationHours: 3.5,
       imageUrl: 'https://images.unsplash.com/photo-1477587458883-47145ed94245?auto=format&fit=crop&w=600&q=80',
     },
@@ -228,7 +228,7 @@ async function main() {
       title: 'Hawa Mahal Palace of Winds & Johari Bazaar Walk',
       description: 'Iconic 953 honeycomb window facade tour followed by traditional Rajasthani jewelry and textile shopping.',
       category: 'Culture',
-      estimatedCost: 12,
+      estimatedCost: 1000,
       durationHours: 2.5,
       imageUrl: 'https://images.unsplash.com/photo-1599661046827-dacff0c0f09a?auto=format&fit=crop&w=600&q=80',
     },
@@ -240,7 +240,7 @@ async function main() {
       title: 'Gateway of India & Elephanta Caves Speedboat Tour',
       description: 'Iconic arch monument photo session followed by a scenic bay boat ride to 5th-century rock-cut cave temples.',
       category: 'Sightseeing',
-      estimatedCost: 25,
+      estimatedCost: 2000,
       durationHours: 4.0,
       imageUrl: 'https://images.unsplash.com/photo-1570168007204-dfb528c6958f?auto=format&fit=crop&w=600&q=80',
     },
@@ -252,7 +252,7 @@ async function main() {
       title: 'Marine Drive Queen’s Necklace Sunset & Street Food Trail',
       description: 'Stroll along the Arabian Sea promenade and savor authentic Vada Pav, Pav Bhaji, and Kulfi.',
       category: 'Food',
-      estimatedCost: 15,
+      estimatedCost: 1200,
       durationHours: 2.5,
       imageUrl: 'https://images.unsplash.com/photo-1566552881560-0be862a7c445?auto=format&fit=crop&w=600&q=80',
     },
@@ -264,7 +264,7 @@ async function main() {
       title: 'Sacred Dashashwamedh Ghat Evening Ganga Aarti Ceremony',
       description: 'Experience the mesmeric spiritual ritual of brass lamps, chants, and incense aboard a sunset river boat.',
       category: 'Culture',
-      estimatedCost: 15,
+      estimatedCost: 1200,
       durationHours: 2.5,
       imageUrl: 'https://images.unsplash.com/photo-1561361513-2d000a50f0dc?auto=format&fit=crop&w=600&q=80',
     },
@@ -276,7 +276,7 @@ async function main() {
       title: 'Alleppey Backwaters Luxury Kettuvallam Houseboat Cruise',
       description: 'Glide through tranquil palm-fringed canals, village lagoons, and enjoy fresh Karimeen fish curry meals.',
       category: 'Relaxation',
-      estimatedCost: 110,
+      estimatedCost: 8500,
       durationHours: 6.0,
       imageUrl: 'https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?auto=format&fit=crop&w=600&q=80',
     },
@@ -288,7 +288,7 @@ async function main() {
       title: 'Calangute Beach Parasailing, Jet Ski & Fort Aguada',
       description: 'Thrill-seeking ocean sports at North Goa beaches followed by 17th-century Portuguese lighthouse fort views.',
       category: 'Adventure',
-      estimatedCost: 35,
+      estimatedCost: 3000,
       durationHours: 4.0,
       imageUrl: 'https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?auto=format&fit=crop&w=600&q=80',
     },
@@ -300,7 +300,7 @@ async function main() {
       title: 'Lake Pichola Sunset Boat Cruise & City Palace Museum',
       description: 'Sail past Taj Lake Palace and Jag Mandir island, followed by Rajasthan largest royal palace complex.',
       category: 'Sightseeing',
-      estimatedCost: 28,
+      estimatedCost: 2200,
       durationHours: 3.5,
       imageUrl: 'https://images.unsplash.com/photo-1615836245337-f5b9b2303f10?auto=format&fit=crop&w=600&q=80',
     },
@@ -312,7 +312,7 @@ async function main() {
       title: 'Old Delhi Chandni Chowk Tuk-Tuk Food Trail & Red Fort',
       description: 'Navigate sensory spice markets, Paranthe Wali Gali delicacies, and UNESCO Red Fort heritage.',
       category: 'Food',
-      estimatedCost: 18,
+      estimatedCost: 1500,
       durationHours: 3.0,
       imageUrl: 'https://images.unsplash.com/photo-1587474260584-136574528ed5?auto=format&fit=crop&w=600&q=80',
     },
@@ -325,7 +325,7 @@ async function main() {
       title: 'Eiffel Tower Summit Access & Champagne',
       description: 'Ascend to the top of Paris for breathtaking panoramic views and a celebratory glass of champagne.',
       category: 'Sightseeing',
-      estimatedCost: 65,
+      estimatedCost: 5500,
       durationHours: 3.0,
       imageUrl: 'https://images.unsplash.com/photo-1511739001486-6bfe10ce785f?auto=format&fit=crop&w=600&q=80',
     },
@@ -337,7 +337,7 @@ async function main() {
       title: 'Louvre Museum Guided Masterpiece Tour',
       description: 'Explore the Mona Lisa, Venus de Milo, and Winged Victory with an expert art historian.',
       category: 'Culture',
-      estimatedCost: 45,
+      estimatedCost: 4000,
       durationHours: 3.5,
       imageUrl: 'https://images.unsplash.com/photo-1499856871958-5b9627545d1a?auto=format&fit=crop&w=600&q=80',
     },
@@ -349,13 +349,13 @@ async function main() {
       title: 'Senso-ji Temple & Asakusa Food Tasting',
       description: 'Discover Tokyo’s oldest Buddhist temple followed by traditional street food stalls.',
       category: 'Culture',
-      estimatedCost: 35,
+      estimatedCost: 3000,
       durationHours: 2.5,
       imageUrl: 'https://images.unsplash.com/photo-1542051841857-5f90071e7989?auto=format&fit=crop&w=600&q=80',
     },
   });
 
-  console.log('Seeding Sample Indian & International Trips...');
+  console.log('Seeding Sample Trips for Jiyan Mansuri...');
 
   // Indian Golden Triangle Trip
   const indiaTrip = await prisma.trip.create({
@@ -368,7 +368,7 @@ async function main() {
       endDate: new Date('2026-10-14'),
       status: 'UPCOMING',
       isPublic: true,
-      totalBudget: 1800,
+      totalBudget: 150000,
     },
   });
 
@@ -380,7 +380,7 @@ async function main() {
       stopOrder: 1,
       startDate: new Date('2026-10-05'),
       endDate: new Date('2026-10-07'),
-      budget: 450,
+      budget: 35000,
     },
   });
 
@@ -392,7 +392,7 @@ async function main() {
       stopOrder: 2,
       startDate: new Date('2026-10-07'),
       endDate: new Date('2026-10-09'),
-      budget: 400,
+      budget: 35000,
     },
   });
 
@@ -404,7 +404,7 @@ async function main() {
       stopOrder: 3,
       startDate: new Date('2026-10-09'),
       endDate: new Date('2026-10-14'),
-      budget: 650,
+      budget: 80000,
     },
   });
 
@@ -416,7 +416,7 @@ async function main() {
         title: 'Old Delhi Chandni Chowk Food Trail',
         dayNumber: 1,
         timeSlot: '04:00 PM - 07:00 PM',
-        cost: 18,
+        cost: 1500,
         type: 'MEAL',
         itemOrder: 1,
       },
@@ -426,7 +426,7 @@ async function main() {
         title: 'Taj Mahal Sunrise Guided Tour',
         dayNumber: 1,
         timeSlot: '05:45 AM - 09:00 AM',
-        cost: 30,
+        cost: 2500,
         type: 'ACTIVITY',
         itemOrder: 1,
       },
@@ -436,7 +436,7 @@ async function main() {
         title: 'Amer Fort Hilltop Tour & Sheesh Mahal',
         dayNumber: 1,
         timeSlot: '09:30 AM - 01:00 PM',
-        cost: 20,
+        cost: 1500,
         type: 'ACTIVITY',
         itemOrder: 1,
       },
@@ -446,7 +446,7 @@ async function main() {
         title: 'Hawa Mahal Palace & Johari Bazaar Walk',
         dayNumber: 2,
         timeSlot: '03:00 PM - 06:00 PM',
-        cost: 12,
+        cost: 1000,
         type: 'ACTIVITY',
         itemOrder: 2,
       },
@@ -458,21 +458,21 @@ async function main() {
       {
         tripId: indiaTrip.id,
         category: 'STAY',
-        amount: 600,
+        amount: 45000,
         notes: 'ITC Rajputana Jaipur & Oberoi Amarvilas Agra',
         date: new Date('2026-10-05'),
       },
       {
         tripId: indiaTrip.id,
         category: 'TRANSPORT',
-        amount: 250,
+        amount: 20000,
         notes: 'Private AC Car with Chauffeur Delhi-Agra-Jaipur',
         date: new Date('2026-10-05'),
       },
       {
         tripId: indiaTrip.id,
         category: 'MEALS',
-        amount: 220,
+        amount: 15000,
         notes: 'Dal Baati Churma, Mughlai dining, Lassi',
         date: new Date('2026-10-08'),
       },
@@ -490,7 +490,7 @@ async function main() {
       endDate: new Date('2026-09-20'),
       status: 'UPCOMING',
       isPublic: true,
-      totalBudget: 2800,
+      totalBudget: 220000,
     },
   });
 
@@ -502,7 +502,7 @@ async function main() {
       stopOrder: 1,
       startDate: new Date('2026-09-10'),
       endDate: new Date('2026-09-14'),
-      budget: 1200,
+      budget: 100000,
     },
   });
 
@@ -513,19 +513,19 @@ async function main() {
       title: 'Eiffel Tower Summit Access & Champagne',
       dayNumber: 1,
       timeSlot: '10:00 AM - 01:00 PM',
-      cost: 65,
+      cost: 5500,
       type: 'ACTIVITY',
       itemOrder: 1,
     },
   });
 
-  console.log('Seeding Community Posts for India and Global Trips...');
+  console.log('Seeding Community Posts...');
   await prisma.communityPost.create({
     data: {
       tripId: indiaTrip.id,
       authorId: demoUser.id,
       title: 'Golden Triangle India (Delhi, Agra, Jaipur) Complete 9-Day Itinerary',
-      description: 'Complete travel plan with sunrise Taj Mahal entry tips, private car hiring advice, and authentic Rajasthani food spots!',
+      description: 'Complete travel plan created by Jiyan Mansuri with sunrise Taj Mahal entry tips, private car hiring advice, and authentic Rajasthani food spots!',
       likesCount: 289,
       clonesCount: 84,
     },
@@ -536,13 +536,13 @@ async function main() {
       tripId: euroTrip.id,
       authorId: demoUser.id,
       title: '10 Days Ultimate European Romance (Paris, Rome, Barcelona)',
-      description: 'Detailed day-by-day budget friendly itinerary with museum passes and dinner cruise recommendations!',
+      description: 'Detailed day-by-day budget friendly itinerary created by Jiyan Mansuri with museum passes and dinner cruise recommendations!',
       likesCount: 142,
       clonesCount: 38,
     },
   });
 
-  console.log('Database seeding finished successfully with Indian destinations!');
+  console.log('Database seeding finished successfully with Jiyan Mansuri & Ridham Gohel!');
 }
 
 main()
