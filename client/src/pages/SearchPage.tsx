@@ -275,16 +275,6 @@ export const SearchPage: React.FC = () => {
                 <option value="Relaxation" className="bg-white dark:bg-[#0F172A]">Relaxation & Wellness</option>
               </select>
             )}
-            <select
-              value={selectedCost}
-              onChange={(e) => setSelectedCost(e.target.value)}
-              className="px-3.5 py-2.5 bg-slate-50 dark:bg-[#162235] border border-slate-200 dark:border-[#1E2D42] rounded-xl text-xs font-bold text-slate-900 dark:text-white"
-            >
-              <option value="ALL">Filter: Any Cost</option>
-              <option value="LOW">₹ Low Cost</option>
-              <option value="MEDIUM">₹₹ Moderate</option>
-              <option value="HIGH">₹₹₹ Luxury</option>
-            </select>
           </div>
         </div>
 
@@ -323,7 +313,6 @@ export const SearchPage: React.FC = () => {
             </button>
           </div>
         )}
-      </div>
 
         {/* Travel Vibe Selector Buttons */}
         {activeTab === 'CITIES' && (
