@@ -30,7 +30,6 @@ export const BudgetPage: React.FC = () => {
   const [category, setCategory] = useState('STAY');
   const [amount, setAmount] = useState('5000');
   const [notes, setNotes] = useState('');
-  const [selectedCurrency, setSelectedCurrency] = useState<'INR' | 'USD' | 'EUR'>('INR');
 
   useEffect(() => {
     fetchExpenses();
@@ -129,33 +128,13 @@ export const BudgetPage: React.FC = () => {
       </div>
 
       {/* Screen 9 Header */}
-      <div className="bg-white dark:bg-[#111E2E] p-6 sm:p-8 rounded-3xl shadow-sm border border-slate-200 dark:border-[#1E2D42] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div className="space-y-1">
-          <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white">
-            Financial View & Budget Breakdown
-          </h1>
-          <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
-            Screen 9: Detailed financial analytics for <span className="font-extrabold text-slate-900 dark:text-white">{trip?.title}</span>
-          </p>
-        </div>
-
-        {/* Currency Switcher Pill */}
-        <div className="flex items-center space-x-1.5 bg-slate-100 dark:bg-[#162235] p-1.5 rounded-2xl border border-slate-200 dark:border-[#1E2D42] text-xs font-bold">
-          <span className="text-[11px] text-slate-500 dark:text-slate-400 px-2 uppercase font-extrabold">Currency:</span>
-          {(['INR', 'USD', 'EUR'] as const).map((curr) => (
-            <button
-              key={curr}
-              onClick={() => setSelectedCurrency(curr)}
-              className={`px-3 py-1 rounded-xl text-xs font-black transition ${
-                selectedCurrency === curr
-                  ? 'bg-emerald-500 text-white shadow-xs'
-                  : 'text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-[#1E2D42]'
-              }`}
-            >
-              {curr === 'INR' ? '₹ INR' : curr === 'USD' ? '$ USD' : '€ EUR'}
-            </button>
-          ))}
-        </div>
+      <div className="bg-white dark:bg-[#111E2E] p-6 sm:p-8 rounded-3xl shadow-sm border border-slate-200 dark:border-[#1E2D42] space-y-2">
+        <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white">
+          Itinerary View & Financial Budget Breakdown (₹ INR)
+        </h1>
+        <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
+          Screen 9: Detailed financial analytics for <span className="font-extrabold text-slate-900 dark:text-white">{trip?.title}</span>
+        </p>
       </div>
 
       {/* Overbudget Warning Alert */}
