@@ -7,18 +7,18 @@ import { authenticateToken, AuthenticatedRequest } from '../middleware/authentic
 const router = Router();
 const prisma = new PrismaClient();
 
-// POST /api/auth/register
+// POST /api/auth/register - Simplified onboarding (Full Name, Email, Password)
 router.post('/register', async (req, res) => {
   try {
-    const { email, password, name, phone, city, country, bio, role } = req.body;
+    const { email, password, name, role } = req.body;
 
     if (!email || !password || !name) {
-      return res.status(400).json({ message: 'Email, password, and name are required.' });
+      return res.status(400).json({ message: 'Full Name, Email, and Password are required.' });
     }
 
     const existing = await prisma.user.findUnique({ where: { email } });
     if (existing) {
-      return res.status(400).json({ message: 'User with this email already exists.' });
+      return res.status(400).json({ message: 'A user account with this email already exists.' });
     }
 
     const passwordHash = await bcrypt.hash(password, 10);
@@ -29,10 +29,6 @@ router.post('/register', async (req, res) => {
         email,
         passwordHash,
         name,
-        phone,
-        city,
-        country,
-        bio,
         role: userRole,
       },
     });
@@ -71,12 +67,12 @@ router.post('/login', async (req, res) => {
 
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user) {
-      return res.status(401).json({ message: 'Invalid credentials.' });
+      return res.status(401).json({ message: 'Invalid email or password.' });
     }
 
     const isValid = await bcrypt.compare(password, user.passwordHash);
     if (!isValid) {
-      return res.status(401).json({ message: 'Invalid credentials.' });
+      return res.status(401).json({ message: 'Invalid email or password.' });
     }
 
     const token = generateToken({ userId: user.id, email: user.email, role: user.role });
@@ -99,6 +95,37 @@ router.post('/login', async (req, res) => {
   } catch (error) {
     console.error('Login error:', error);
     return res.status(500).json({ message: 'Server error during login.' });
+  }
+});
+
+// POST /api/auth/forgot-password - Password Reset Flow
+router.post('/forgot-password', async (req, res) => {
+  try {
+    const { email, newPassword } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ message: 'Email address is required.' });
+    }
+
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user) {
+      return res.status(404).json({ message: 'No account found with this email address.' });
+    }
+
+    const passwordToSet = newPassword || 'password123';
+    const passwordHash = await bcrypt.hash(passwordToSet, 10);
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { passwordHash },
+    });
+
+    return res.json({
+      message: `Password reset successfully for ${email}. You can now log in with your new password!`,
+    });
+  } catch (error) {
+    console.error('Forgot password error:', error);
+    return res.status(500).json({ message: 'Failed to process password reset request.' });
   }
 });
 
