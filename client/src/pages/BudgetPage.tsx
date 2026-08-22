@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import api from '../lib/api';
 import {
-  DollarSign,
   PieChart as PieChartIcon,
   BarChart3,
   AlertTriangle,
@@ -23,7 +22,7 @@ export const BudgetPage: React.FC = () => {
   // Form states for adding actual expense
   const [showAddExpenseModal, setShowAddExpenseModal] = useState(false);
   const [category, setCategory] = useState('STAY');
-  const [amount, setAmount] = useState('150');
+  const [amount, setAmount] = useState('5000');
   const [notes, setNotes] = useState('');
 
   useEffect(() => {
@@ -116,7 +115,7 @@ export const BudgetPage: React.FC = () => {
       {/* Screen 9 Header */}
       <div className="bg-white dark:bg-[#111E2E] p-6 sm:p-8 rounded-3xl shadow-sm border border-slate-200 dark:border-[#1E2D42] space-y-2">
         <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white">
-          Itinerary View & Financial Budget Breakdown
+          Itinerary View & Financial Budget Breakdown (₹ INR)
         </h1>
         <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
           Screen 9: Detailed financial analytics for <span className="font-extrabold text-slate-900 dark:text-white">{trip?.title}</span>
@@ -130,24 +129,24 @@ export const BudgetPage: React.FC = () => {
           <div>
             <p className="text-sm font-black text-amber-950 dark:text-amber-100">Overbudget Alert!</p>
             <p className="font-semibold text-amber-900 dark:text-amber-200">
-              Total expenses (${expenseData.totalSpent.toLocaleString()}) exceed your allocated budget (${expenseData.totalBudget.toLocaleString()}).
+              Total expenses (₹{expenseData.totalSpent?.toLocaleString('en-IN')}) exceed your allocated budget (₹{expenseData.totalBudget?.toLocaleString('en-IN')}).
             </p>
           </div>
         </div>
       )}
 
-      {/* Financial Metric Cards */}
+      {/* Financial Metric Cards with INR */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
         <div className="bg-white dark:bg-[#111E2E] p-6 rounded-3xl border border-slate-200 dark:border-[#1E2D42] shadow-sm space-y-1">
           <span className="text-xs font-extrabold text-slate-400 uppercase tracking-wider">Allocated Budget</span>
-          <div className="text-3xl font-black text-slate-900 dark:text-white">${expenseData?.totalBudget?.toLocaleString() || 0}</div>
+          <div className="text-3xl font-black text-slate-900 dark:text-white">₹{expenseData?.totalBudget?.toLocaleString('en-IN') || 0}</div>
           <span className="text-[11px] text-slate-500 dark:text-slate-400">Set during trip initiation</span>
         </div>
 
         <div className="bg-white dark:bg-[#111E2E] p-6 rounded-3xl border border-slate-200 dark:border-[#1E2D42] shadow-sm space-y-1">
           <span className="text-xs font-extrabold text-slate-400 uppercase tracking-wider">Total Recorded Spent</span>
           <div className={`text-3xl font-black ${expenseData?.isOverBudget ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-500'}`}>
-            ${expenseData?.totalSpent?.toLocaleString() || 0}
+            ₹{expenseData?.totalSpent?.toLocaleString('en-IN') || 0}
           </div>
           <span className="text-[11px] text-slate-500 dark:text-slate-400">Sum of logged expenses</span>
         </div>
@@ -155,15 +154,14 @@ export const BudgetPage: React.FC = () => {
         <div className="bg-white dark:bg-[#111E2E] p-6 rounded-3xl border border-slate-200 dark:border-[#1E2D42] shadow-sm space-y-1">
           <span className="text-xs font-extrabold text-slate-400 uppercase tracking-wider">Remaining Balance</span>
           <div className={`text-3xl font-black ${expenseData?.remainingBudget < 0 ? 'text-rose-600 dark:text-rose-400' : 'text-cyan-500'}`}>
-            ${expenseData?.remainingBudget?.toLocaleString() || 0}
+            ₹{expenseData?.remainingBudget?.toLocaleString('en-IN') || 0}
           </div>
           <span className="text-[11px] text-slate-500 dark:text-slate-400">Available funds</span>
         </div>
       </div>
 
-      {/* Detailed Financial Analytics Charts */}
+      {/* Analytics Charts */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Pie Chart */}
         <div className="bg-white dark:bg-[#111E2E] p-6 rounded-3xl shadow-sm border border-slate-200 dark:border-[#1E2D42] space-y-4">
           <div className="border-b border-slate-100 dark:border-[#1E2D42] pb-3">
             <h2 className="text-base font-extrabold text-slate-900 dark:text-white flex items-center space-x-2">
@@ -192,7 +190,7 @@ export const BudgetPage: React.FC = () => {
                       <Cell key={`cell-${index}`} fill={entry.color} />
                     ))}
                   </Pie>
-                  <Tooltip formatter={(value: any) => [`$${value}`, 'Amount']} />
+                  <Tooltip formatter={(value: any) => [`₹${Number(value).toLocaleString('en-IN')}`, 'Amount']} />
                   <Legend />
                 </PieChart>
               </ResponsiveContainer>
@@ -200,7 +198,6 @@ export const BudgetPage: React.FC = () => {
           )}
         </div>
 
-        {/* Bar Chart */}
         <div className="bg-white dark:bg-[#111E2E] p-6 rounded-3xl shadow-sm border border-slate-200 dark:border-[#1E2D42] space-y-4">
           <div className="border-b border-slate-100 dark:border-[#1E2D42] pb-3">
             <h2 className="text-base font-extrabold text-slate-900 dark:text-white flex items-center space-x-2">
@@ -216,7 +213,7 @@ export const BudgetPage: React.FC = () => {
                 <CartesianGrid strokeDasharray="3 3" opacity={0.1} />
                 <XAxis dataKey="category" stroke="#888888" fontSize={11} />
                 <YAxis stroke="#888888" fontSize={11} />
-                <Tooltip formatter={(val: any) => [`$${val}`, 'Spent']} />
+                <Tooltip formatter={(val: any) => [`₹${Number(val).toLocaleString('en-IN')}`, 'Spent']} />
                 <Bar dataKey="amount" fill="#10B981" radius={[8, 8, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
@@ -224,7 +221,7 @@ export const BudgetPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Logged Expenses Receipts Table */}
+      {/* Logged Expenses Table with INR */}
       <div className="bg-white dark:bg-[#111E2E] p-6 sm:p-8 rounded-3xl shadow-sm border border-slate-200 dark:border-[#1E2D42] space-y-4">
         <div className="flex items-center justify-between border-b border-slate-100 dark:border-[#1E2D42] pb-3">
           <h2 className="text-lg font-black text-slate-900 dark:text-white flex items-center space-x-2">
@@ -249,7 +246,7 @@ export const BudgetPage: React.FC = () => {
                   <th className="p-3">Category</th>
                   <th className="p-3">Notes / Description</th>
                   <th className="p-3">Date</th>
-                  <th className="p-3">Amount ($)</th>
+                  <th className="p-3">Amount (₹ INR)</th>
                   <th className="p-3 text-right">Action</th>
                 </tr>
               </thead>
@@ -259,7 +256,7 @@ export const BudgetPage: React.FC = () => {
                     <td className="p-3 font-bold text-slate-900 dark:text-white">{exp.category}</td>
                     <td className="p-3">{exp.notes || '—'}</td>
                     <td className="p-3">{new Date(exp.date).toLocaleDateString()}</td>
-                    <td className="p-3 font-black text-emerald-600 dark:text-emerald-400">${exp.amount}</td>
+                    <td className="p-3 font-black text-emerald-600 dark:text-emerald-400">₹{exp.amount?.toLocaleString('en-IN')}</td>
                     <td className="p-3 text-right">
                       <button
                         onClick={() => handleDeleteExpense(exp.id)}
@@ -276,7 +273,7 @@ export const BudgetPage: React.FC = () => {
         )}
       </div>
 
-      {/* Add Expense Modal without Emojis */}
+      {/* Add Expense Modal with INR */}
       {showAddExpenseModal && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white dark:bg-[#111E2E] max-w-md w-full p-6 rounded-3xl shadow-2xl border border-slate-200 dark:border-[#1E2D42] space-y-4">
@@ -298,15 +295,15 @@ export const BudgetPage: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Amount ($)</label>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Amount (₹ INR)</label>
                 <input
                   type="number"
                   required
-                  step="0.01"
+                  step="1"
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
                   className="w-full px-3 py-2 bg-slate-50 dark:bg-[#162235] border border-slate-200 dark:border-[#1E2D42] rounded-xl text-xs text-slate-900 dark:text-white"
-                  placeholder="150"
+                  placeholder="5000"
                 />
               </div>
 

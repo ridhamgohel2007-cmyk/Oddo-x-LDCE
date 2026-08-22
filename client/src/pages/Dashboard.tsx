@@ -12,7 +12,6 @@ import {
   Calendar,
   Globe2,
   ArrowRight,
-  DollarSign,
   TrendingUp,
   Clock,
   CheckCircle2,
@@ -63,7 +62,6 @@ export const Dashboard: React.FC = () => {
           if (t.status === 'ONGOING' || t.status === 'UPCOMING') {
             activeCount++;
           }
-          // Fetch expenses sum estimation
           if (t.stops) {
             t.stops.forEach((s: any) => {
               if (s.items) {
@@ -75,7 +73,6 @@ export const Dashboard: React.FC = () => {
           }
         });
 
-        // Estimate spent from allocated ratio if expenses not yet logged
         if (totalSpent === 0 && totalAllocated > 0) {
           totalSpent = Math.round(totalAllocated * 0.42);
         }
@@ -91,10 +88,9 @@ export const Dashboard: React.FC = () => {
           percentSpent,
         });
 
-        // Find Next Upcoming Trip for Countdown Widget
         const now = new Date();
         const upcoming = allTrips
-          .filter((t) => new Date(t.startDate) >= now || t.status === 'UPCOMING' || t.status === 'ONGOING')
+          .filter((t) => new Date(t.startDate) >= now || t.status === 'ONGOING' || t.status === 'UPCOMING')
           .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
 
         if (upcoming.length > 0) {
@@ -136,7 +132,7 @@ export const Dashboard: React.FC = () => {
 
   return (
     <div className="space-y-8 pb-12">
-      {/* 1. Dynamic Hero Header with Active Trip Countdown Widget */}
+      {/* Dynamic Hero Header */}
       <div className="relative rounded-3xl overflow-hidden shadow-2xl bg-gradient-to-r from-[#0B1320] via-[#111E2E] to-[#0B1320] border border-slate-200 dark:border-[#1E2D42]">
         <img
           src="https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=1600&q=80"
@@ -173,7 +169,7 @@ export const Dashboard: React.FC = () => {
             </div>
           </div>
 
-          {/* Dynamic Countdown Widget for Next Upcoming Trip */}
+          {/* Dynamic Countdown Widget */}
           {nextTrip && (
             <div className="w-full lg:w-80 bg-white/10 dark:bg-[#162235]/90 backdrop-blur-xl border border-white/20 dark:border-[#1E2D42] p-5 rounded-2xl text-white space-y-3 shadow-xl">
               <div className="flex items-center justify-between">
@@ -193,7 +189,6 @@ export const Dashboard: React.FC = () => {
                 </p>
               </div>
 
-              {/* Countdown Ticker Box */}
               <div className="grid grid-cols-3 gap-2 text-center pt-1">
                 <div className="bg-black/40 rounded-xl p-2">
                   <span className="text-lg font-black text-emerald-400 block leading-none">{countdownText.days}</span>
@@ -221,12 +216,11 @@ export const Dashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* 2. Budget Highlights & Quick Metrics Summary (PS Required Widget) */}
+      {/* Budget Highlights (INR Currency Displays) */}
       <section className="space-y-3">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-black text-slate-900 dark:text-white flex items-center space-x-2">
-            <DollarSign className="w-5 h-5 text-emerald-500" />
-            <span>Budget Highlights & Travel Summary</span>
+          <h2 className="text-lg font-black text-slate-900 dark:text-white">
+            Budget Highlights & Financial Summary
           </h2>
           <Link to="/my-trips" className="text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:underline">
             Manage All Budgets →
@@ -234,26 +228,18 @@ export const Dashboard: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {/* Total Budget Allocated */}
           <div className="bg-white dark:bg-[#111E2E] p-5 rounded-2xl border border-slate-200 dark:border-[#1E2D42] shadow-sm space-y-2">
-            <div className="flex items-center justify-between text-slate-400">
-              <span className="text-[11px] font-extrabold uppercase tracking-wider">Allocated Budget</span>
-              <DollarSign className="w-4 h-4 text-emerald-500" />
-            </div>
+            <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 block">Allocated Budget</span>
             <div className="text-2xl font-black text-slate-900 dark:text-white">
-              ${budgetMetrics.totalAllocated.toLocaleString()}
+              ₹{budgetMetrics.totalAllocated.toLocaleString('en-IN')}
             </div>
             <p className="text-[11px] text-slate-500 dark:text-slate-400">Across {trips.length} planned trip{trips.length !== 1 ? 's' : ''}</p>
           </div>
 
-          {/* Recorded Spend */}
           <div className="bg-white dark:bg-[#111E2E] p-5 rounded-2xl border border-slate-200 dark:border-[#1E2D42] shadow-sm space-y-2">
-            <div className="flex items-center justify-between text-slate-400">
-              <span className="text-[11px] font-extrabold uppercase tracking-wider">Total Recorded Spend</span>
-              <TrendingUp className="w-4 h-4 text-amber-500" />
-            </div>
+            <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 block">Total Recorded Spend</span>
             <div className="text-2xl font-black text-emerald-600 dark:text-emerald-400">
-              ${budgetMetrics.totalSpent.toLocaleString()}
+              ₹{budgetMetrics.totalSpent.toLocaleString('en-IN')}
             </div>
             <div className="w-full bg-slate-100 dark:bg-[#162235] h-2 rounded-full overflow-hidden">
               <div
@@ -263,26 +249,18 @@ export const Dashboard: React.FC = () => {
             </div>
           </div>
 
-          {/* Remaining Balance */}
           <div className="bg-white dark:bg-[#111E2E] p-5 rounded-2xl border border-slate-200 dark:border-[#1E2D42] shadow-sm space-y-2">
-            <div className="flex items-center justify-between text-slate-400">
-              <span className="text-[11px] font-extrabold uppercase tracking-wider">Remaining Balance</span>
-              <PieChart className="w-4 h-4 text-cyan-500" />
-            </div>
+            <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 block">Remaining Balance</span>
             <div className="text-2xl font-black text-slate-900 dark:text-white">
-              ${budgetMetrics.remaining.toLocaleString()}
+              ₹{budgetMetrics.remaining.toLocaleString('en-IN')}
             </div>
             <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-bold">
               {100 - budgetMetrics.percentSpent}% available funds
             </p>
           </div>
 
-          {/* Active Trips Badge */}
           <div className="bg-white dark:bg-[#111E2E] p-5 rounded-2xl border border-slate-200 dark:border-[#1E2D42] shadow-sm space-y-2">
-            <div className="flex items-center justify-between text-slate-400">
-              <span className="text-[11px] font-extrabold uppercase tracking-wider">Active & Upcoming</span>
-              <Luggage className="w-4 h-4 text-indigo-500" />
-            </div>
+            <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 block">Active & Upcoming</span>
             <div className="text-2xl font-black text-slate-900 dark:text-white">
               {budgetMetrics.activeCount} <span className="text-xs font-bold text-slate-400">Trips</span>
             </div>
@@ -291,7 +269,7 @@ export const Dashboard: React.FC = () => {
         </div>
       </section>
 
-      {/* 3. Search & Region Filter Controls */}
+      {/* Search & Region Filter */}
       <div className="bg-white dark:bg-[#111E2E] p-4 sm:p-6 rounded-3xl shadow-sm border border-slate-200 dark:border-[#1E2D42] space-y-4">
         <div className="flex flex-col sm:flex-row gap-3 items-center justify-between">
           <div className="relative flex-1 w-full">
@@ -323,7 +301,7 @@ export const Dashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* 4. Top Regional Selections */}
+      {/* Regional Selections */}
       <section className="space-y-4">
         <div className="flex items-center justify-between">
           <div>
@@ -360,7 +338,7 @@ export const Dashboard: React.FC = () => {
         )}
       </section>
 
-      {/* 5. Trips Section */}
+      {/* Trips Section */}
       <section className="space-y-4 pt-6 border-t border-slate-200 dark:border-[#1E2D42]">
         <div className="flex items-center justify-between">
           <div>

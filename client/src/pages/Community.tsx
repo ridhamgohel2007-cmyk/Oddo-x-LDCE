@@ -7,7 +7,6 @@ import {
   Heart,
   Copy,
   Calendar,
-  DollarSign,
   MapPin,
   Share2,
   Sparkles,
@@ -207,8 +206,8 @@ export const Community: React.FC = () => {
                       </div>
 
                       <div className="flex items-center space-x-2 font-bold text-slate-900 dark:text-white">
-                        <DollarSign className="w-4 h-4 text-amber-500" />
-                        <span>${trip.totalBudget.toLocaleString()} Total Budget</span>
+                        <span className="font-extrabold text-amber-500">₹</span>
+                        <span>₹{trip.totalBudget?.toLocaleString('en-IN')} Total Budget</span>
                       </div>
                     </div>
 

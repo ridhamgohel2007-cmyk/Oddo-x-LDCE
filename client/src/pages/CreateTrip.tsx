@@ -6,7 +6,6 @@ import { ActivityData, ActivityCard } from '../components/ActivityCard';
 import {
   Calendar,
   MapPin,
-  DollarSign,
   Sparkles,
   ArrowRight,
   Image as ImageIcon,
@@ -40,7 +39,7 @@ export const CreateTrip: React.FC = () => {
   const [endDate, setEndDate] = useState(
     new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
   );
-  const [totalBudget, setTotalBudget] = useState('2500');
+  const [totalBudget, setTotalBudget] = useState('150000');
   const [isPublic, setIsPublic] = useState(true);
 
   // Multi-City Stops Builder State
@@ -50,7 +49,7 @@ export const CreateTrip: React.FC = () => {
       title: 'Stop 1: Primary Destination',
       startDate: new Date().toISOString().split('T')[0],
       endDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-      budget: '1200',
+      budget: '75000',
     },
   ]);
 
@@ -72,7 +71,7 @@ export const CreateTrip: React.FC = () => {
                 title: `Stop 1: ${preCity.name}`,
                 startDate: new Date().toISOString().split('T')[0],
                 endDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-                budget: '1200',
+                budget: '75000',
               },
             ]);
           }
@@ -94,7 +93,7 @@ export const CreateTrip: React.FC = () => {
         title: `Stop ${nextStopNum}: Destination ${nextStopNum}`,
         startDate: endDate,
         endDate: new Date(new Date(endDate).getTime() + 3 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-        budget: '800',
+        budget: '50000',
       },
     ]);
   };
@@ -180,7 +179,7 @@ export const CreateTrip: React.FC = () => {
               />
             </div>
 
-            {/* Date Range - Cleanly Separated Labels */}
+            {/* Date Range */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
@@ -215,25 +214,25 @@ export const CreateTrip: React.FC = () => {
               </div>
             </div>
 
-            {/* Estimated Total Budget */}
+            {/* Estimated Total Budget in INR */}
             <div>
               <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
-                Estimated Total Trip Budget ($) *
+                Estimated Total Trip Budget (₹ INR) *
               </label>
               <div className="relative">
-                <DollarSign className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
+                <span className="w-4 h-4 text-slate-400 font-black absolute left-3.5 top-2.5">₹</span>
                 <input
                   type="number"
                   required
                   value={totalBudget}
                   onChange={(e) => setTotalBudget(e.target.value)}
                   className="w-full pl-11 pr-4 py-2.5 bg-slate-50 dark:bg-[#162235] border border-slate-200 dark:border-[#1E2D42] rounded-xl text-xs font-semibold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                  placeholder="2500"
+                  placeholder="150000"
                 />
               </div>
             </div>
 
-            {/* Cover Photo Upload / Preset URL */}
+            {/* Cover Photo */}
             <div>
               <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
                 Cover Photo URL
@@ -249,7 +248,6 @@ export const CreateTrip: React.FC = () => {
                 />
               </div>
 
-              {/* Image Preview Thumbnail */}
               {coverImage && (
                 <div className="mt-2.5 h-28 w-full rounded-xl overflow-hidden bg-slate-100 dark:bg-[#162235] border border-slate-200 dark:border-[#1E2D42]">
                   <img src={coverImage} alt="Cover Preview" className="w-full h-full object-cover" />
@@ -257,7 +255,7 @@ export const CreateTrip: React.FC = () => {
               )}
             </div>
 
-            {/* Trip Description */}
+            {/* Description */}
             <div>
               <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
                 Trip Description & Notes
@@ -286,7 +284,7 @@ export const CreateTrip: React.FC = () => {
           </div>
         </div>
 
-        {/* Section 2: Multi-City Stops Builder (PS Requirement) */}
+        {/* Section 2: Multi-City Stops Builder with INR Budget */}
         <div className="bg-white dark:bg-[#111E2E] p-6 sm:p-8 rounded-3xl shadow-sm border border-slate-200 dark:border-[#1E2D42] space-y-6">
           <div className="flex items-center justify-between border-b border-slate-100 dark:border-[#1E2D42] pb-3">
             <div>
@@ -329,7 +327,6 @@ export const CreateTrip: React.FC = () => {
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {/* Stop Name / Label */}
                   <div>
                     <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-300 uppercase mb-1">
                       Stop Title / Section Label
@@ -344,7 +341,6 @@ export const CreateTrip: React.FC = () => {
                     />
                   </div>
 
-                  {/* City Selection */}
                   <div>
                     <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-300 uppercase mb-1">
                       Select Destination City
@@ -387,7 +383,7 @@ export const CreateTrip: React.FC = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Stop Budget ($)</label>
+                    <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Stop Budget (₹ INR)</label>
                     <input
                       type="number"
                       value={stop.budget}

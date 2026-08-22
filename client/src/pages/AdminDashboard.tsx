@@ -99,7 +99,6 @@ export const AdminDashboard: React.FC = () => {
     }
   };
 
-  // Export Analytics to CSV (PS Requirement)
   const handleExportCSV = () => {
     if (!data) return;
     const summary = data.summary;
@@ -126,7 +125,6 @@ export const AdminDashboard: React.FC = () => {
     document.body.removeChild(link);
   };
 
-  // Export PDF / Print Report (PS Requirement)
   const handleExportPDF = () => {
     window.print();
   };
@@ -314,7 +312,7 @@ export const AdminDashboard: React.FC = () => {
             </div>
           </div>
 
-          {/* Rankings Lists */}
+          {/* Rankings Lists with INR */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="bg-white dark:bg-[#111E2E] p-6 rounded-3xl border border-slate-200 dark:border-[#1E2D42] shadow-sm space-y-3">
               <h3 className="text-base font-black text-slate-900 dark:text-white">Popular Cities Ranking</h3>
@@ -334,7 +332,7 @@ export const AdminDashboard: React.FC = () => {
                 {popularActivities.map((a: any, i: number) => (
                   <div key={a.id} className="flex items-center justify-between p-3 bg-slate-50 dark:bg-[#162235] rounded-2xl text-xs font-semibold">
                     <span className="text-slate-900 dark:text-white font-bold">#{i + 1} {a.title} ({a.city?.name})</span>
-                    <span className="text-cyan-500 font-extrabold">${a.estimatedCost}</span>
+                    <span className="text-cyan-500 font-extrabold">₹{a.estimatedCost?.toLocaleString('en-IN')}</span>
                   </div>
                 ))}
               </div>
@@ -350,7 +348,6 @@ export const AdminDashboard: React.FC = () => {
               <p className="text-xs text-slate-500 dark:text-slate-400">Search users, modify roles (Admin vs Traveler), and view trip activity</p>
             </div>
 
-            {/* User Search & Filter */}
             <div className="flex items-center space-x-2 w-full sm:w-auto">
               <div className="relative flex-1 sm:w-64">
                 <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />

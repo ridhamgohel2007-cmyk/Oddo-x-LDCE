@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Calendar, MapPin, DollarSign, ArrowRight, Trash2, Edit3, Eye, PieChart } from 'lucide-react';
+import { Calendar, MapPin, DollarSign, ArrowRight, Trash2, Eye, PieChart } from 'lucide-react';
 import { StatusBadge } from './StatusBadge';
 
 export interface TripData {
@@ -48,7 +48,7 @@ export const TripCard: React.FC<TripCardProps> = ({ trip, onDelete }) => {
             <StatusBadge status={trip.status} />
           </div>
 
-          {/* Explicit Quick Actions Bar */}
+          {/* Quick Delete */}
           <div className="absolute top-3 right-3 flex items-center space-x-1.5">
             {onDelete && (
               <button
@@ -77,7 +77,7 @@ export const TripCard: React.FC<TripCardProps> = ({ trip, onDelete }) => {
             </p>
           </div>
 
-          {/* Granular Card Metrics */}
+          {/* Card Metrics with INR Currency Symbol */}
           <div className="space-y-2 text-xs text-slate-600 dark:text-slate-300 pt-2 border-t border-slate-100 dark:border-[#1E2D42]">
             <div className="flex items-center space-x-2">
               <Calendar className="w-4 h-4 text-emerald-500 shrink-0" />
@@ -93,8 +93,7 @@ export const TripCard: React.FC<TripCardProps> = ({ trip, onDelete }) => {
               </div>
               {trip.totalBudget > 0 && (
                 <div className="flex items-center space-x-1 text-emerald-600 dark:text-emerald-400 font-extrabold">
-                  <DollarSign className="w-3.5 h-3.5" />
-                  <span>${trip.totalBudget.toLocaleString()}</span>
+                  <span>₹{trip.totalBudget.toLocaleString('en-IN')}</span>
                 </div>
               )}
             </div>
@@ -102,7 +101,7 @@ export const TripCard: React.FC<TripCardProps> = ({ trip, onDelete }) => {
         </div>
       </div>
 
-      {/* Explicit Action Triggers Footer */}
+      {/* Action Buttons Footer */}
       <div className="px-5 py-3.5 bg-slate-50 dark:bg-[#162235]/60 border-t border-slate-100 dark:border-[#1E2D42] flex items-center justify-between gap-2">
         <Link
           to={`/trips/${trip.id}`}

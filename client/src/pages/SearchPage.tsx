@@ -1,56 +1,68 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import api from '../lib/api';
 import { CityCard, CityData } from '../components/CityCard';
 import { ActivityCard, ActivityData } from '../components/ActivityCard';
-import { TripData } from '../components/TripCard';
-import { Search, Compass, Plus, MapPin, Ticket, CheckCircle2, X } from 'lucide-react';
+import {
+  Compass,
+  Search,
+  MapPin,
+  Ticket,
+  Plus,
+  X,
+  CheckCircle2,
+  Clock,
+  Tag,
+} from 'lucide-react';
 
 export const SearchPage: React.FC = () => {
+  const [searchParams] = useSearchParams();
+  const initialQuery = searchParams.get('q') || '';
+
   const navigate = useNavigate();
 
   const [activeTab, setActiveTab] = useState<'CITIES' | 'ACTIVITIES'>('CITIES');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedRegion, setSelectedRegion] = useState('ALL');
-  const [selectedCategory, setSelectedCategory] = useState('ALL');
-  const [selectedCost, setSelectedCost] = useState('ALL');
-
   const [cities, setCities] = useState<CityData[]>([]);
   const [activities, setActivities] = useState<ActivityData[]>([]);
-  const [userTrips, setUserTrips] = useState<TripData[]>([]);
+
+  const [searchQuery, setSearchQuery] = useState(initialQuery);
+  const [selectedRegion, setSelectedRegion] = useState('ALL');
+  const [selectedCost, setSelectedCost] = useState('ALL');
+  const [selectedCategory, setSelectedCategory] = useState('ALL');
+
   const [loading, setLoading] = useState(true);
 
-  // Add to Trip Modal State
+  // Immediate "+ Add to Trip" Direct Action Modal State (Screen 8 PS Requirement)
   const [showAddToTripModal, setShowAddToTripModal] = useState(false);
   const [selectedItemToAdd, setSelectedItemToAdd] = useState<{
     type: 'CITY' | 'ACTIVITY';
     data: CityData | ActivityData;
   } | null>(null);
 
+  const [userTrips, setUserTrips] = useState<any[]>([]);
   const [targetTripId, setTargetTripId] = useState('');
-  const [targetStopId, setTargetStopId] = useState('');
   const [selectedTripDetails, setSelectedTripDetails] = useState<any>(null);
+  const [targetStopId, setTargetStopId] = useState('');
+
   const [attachLoading, setAttachLoading] = useState(false);
   const [attachSuccess, setAttachSuccess] = useState('');
 
   useEffect(() => {
-    fetchData();
+    fetchCatalog();
     fetchUserTrips();
-  }, [activeTab, selectedRegion, selectedCategory, selectedCost]);
+  }, []);
 
-  const fetchData = async () => {
-    setLoading(true);
+  const fetchCatalog = async () => {
     try {
-      if (activeTab === 'CITIES') {
-        const res = await api.get('/cities');
-        setCities(res.data);
-      } else {
-        const res = await api.get('/activities');
-        setActivities(res.data);
-      }
+      const [citiesRes, actRes] = await Promise.all([
+        api.get('/cities'),
+        api.get('/activities'),
+      ]);
+      setCities(citiesRes.data);
+      setActivities(actRes.data);
     } catch (err) {
-      console.error('Error fetching search data:', err);
-    } finally {
+      console.error('Error loading search catalog:', err);
+    } fontally: {
       setLoading(false);
     }
   };
@@ -67,7 +79,6 @@ export const SearchPage: React.FC = () => {
     }
   };
 
-  // Fetch stops when user selects a trip in modal
   useEffect(() => {
     if (!targetTripId) return;
     const fetchSingleTrip = async () => {
@@ -105,7 +116,7 @@ export const SearchPage: React.FC = () => {
         await api.post(`/trips/${targetTripId}/stops`, {
           cityId: city.id,
           title: `Stop: ${city.name}`,
-          budget: city.costIndex === 'HIGH' ? '1200' : '600',
+          budget: city.costIndex === 'HIGH' ? '60000' : '30000',
         });
         setAttachSuccess(`"${city.name}" successfully added to your trip!`);
       } else {
@@ -118,15 +129,16 @@ export const SearchPage: React.FC = () => {
         await api.post(`/trips/stops/${targetStopId}/items`, {
           title: act.title,
           activityId: act.id,
-          cost: act.estimatedCost,
-          timeSlot: `${act.durationHours} hrs`,
+          cost: act.estimatedCost.toString(),
           type: 'ACTIVITY',
+          timeSlot: `${act.durationHours} hrs duration`,
         });
-        setAttachSuccess(`"${act.title}" successfully attached to itinerary!`);
+        setAttachSuccess(`Activity "${act.title}" attached to itinerary!`);
       }
 
       setTimeout(() => {
         setShowAddToTripModal(false);
+        setAttachSuccess('');
       }, 1500);
     } catch (err) {
       alert('Failed to attach item to trip.');
@@ -167,7 +179,7 @@ export const SearchPage: React.FC = () => {
           </p>
         </div>
 
-        {/* Tab Toggles (Explore Cities vs Explore Activities) */}
+        {/* Tab Toggles */}
         <div className="flex bg-slate-100 dark:bg-[#162235] p-1.5 rounded-2xl border border-slate-200 dark:border-[#1E2D42]">
           <button
             onClick={() => setActiveTab('CITIES')}
@@ -194,7 +206,7 @@ export const SearchPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Filter Controls Bar */}
+      {/* Filter Controls Bar with INR Cost Index */}
       <div className="bg-white dark:bg-[#111E2E] p-4 sm:p-6 rounded-3xl shadow-sm border border-slate-200 dark:border-[#1E2D42] space-y-4">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="relative flex-1 w-full">
@@ -244,9 +256,9 @@ export const SearchPage: React.FC = () => {
               className="px-3.5 py-2.5 bg-slate-50 dark:bg-[#162235] border border-slate-200 dark:border-[#1E2D42] rounded-xl text-xs font-bold text-slate-900 dark:text-white"
             >
               <option value="ALL">Filter: Any Cost Index</option>
-              <option value="LOW">$ Low Cost</option>
-              <option value="MEDIUM">$$ Moderate</option>
-              <option value="HIGH">$$$ Luxury</option>
+              <option value="LOW">₹ Low Cost</option>
+              <option value="MEDIUM">₹₹ Moderate</option>
+              <option value="HIGH">₹₹₹ Luxury</option>
             </select>
           </div>
         </div>
@@ -259,65 +271,50 @@ export const SearchPage: React.FC = () => {
         </h2>
 
         {loading ? (
-          <div className="text-center py-12 text-slate-500 font-semibold">Searching catalog...</div>
+          <div className="text-center py-12 text-slate-500 font-semibold">Loading search catalog...</div>
         ) : activeTab === 'CITIES' ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredCities.map((city) => (
-              <CityCard
-                key={city.id}
-                city={city}
-                onSelect={(c) => handleOpenAddModal('CITY', c)}
-              />
+              <div key={city.id} className="relative group">
+                <CityCard city={city} />
+                <button
+                  onClick={() => handleOpenAddModal('CITY', city)}
+                  className="absolute bottom-3.5 right-3.5 z-10 px-3.5 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-xs font-bold shadow-md transition flex items-center space-x-1"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>+ Add to Trip</span>
+                </button>
+              </div>
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredActivities.map((act) => (
               <ActivityCard
                 key={act.id}
                 activity={act}
-                onAdd={(a) => handleOpenAddModal('ACTIVITY', a)}
+                onAdd={(selectedActivity) => handleOpenAddModal('ACTIVITY', selectedActivity)}
               />
             ))}
           </div>
         )}
       </div>
 
-      {/* Immediate "+ Add to Trip" Modal Trigger (PS Requirement) */}
+      {/* Direct Add to Trip Modal */}
       {showAddToTripModal && selectedItemToAdd && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-[#111E2E] max-w-md w-full p-6 rounded-3xl shadow-2xl border border-slate-200 dark:border-[#1E2D42] space-y-4 relative">
-            <button
-              onClick={() => setShowAddToTripModal(false)}
-              className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1"
-            >
-              <X className="w-5 h-5" />
-            </button>
-
-            <h3 className="text-lg font-extrabold text-slate-900 dark:text-white flex items-center space-x-2">
-              <Plus className="w-5 h-5 text-emerald-500" />
-              <span>Attach {selectedItemToAdd.type === 'CITY' ? 'City' : 'Activity'} to Itinerary</span>
-            </h3>
-
-            {/* Thumbnail Preview */}
-            <div className="p-3 bg-slate-50 dark:bg-[#162235] rounded-2xl border border-slate-200 dark:border-[#1E2D42] flex items-center space-x-3">
-              <img
-                src={selectedItemToAdd.data.imageUrl}
-                alt={selectedItemToAdd.type === 'CITY' ? (selectedItemToAdd.data as CityData).name : (selectedItemToAdd.data as ActivityData).title}
-                className="w-14 h-14 rounded-xl object-cover"
-              />
-              <div>
-                <h4 className="text-xs font-bold text-slate-900 dark:text-white">
-                  {selectedItemToAdd.type === 'CITY'
-                    ? (selectedItemToAdd.data as CityData).name
-                    : (selectedItemToAdd.data as ActivityData).title}
-                </h4>
-                <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                  {selectedItemToAdd.type === 'CITY'
-                    ? `${(selectedItemToAdd.data as CityData).country} • ${(selectedItemToAdd.data as CityData).region}`
-                    : `${(selectedItemToAdd.data as ActivityData).category} • $${(selectedItemToAdd.data as ActivityData).estimatedCost}`}
-                </p>
-              </div>
+          <div className="bg-white dark:bg-[#111E2E] max-w-md w-full p-6 rounded-3xl shadow-2xl border border-slate-200 dark:border-[#1E2D42] space-y-5">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-[#1E2D42] pb-3">
+              <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center space-x-2">
+                <Plus className="w-5 h-5 text-emerald-500" />
+                <span>Add Item Directly to Itinerary</span>
+              </h3>
+              <button
+                onClick={() => setShowAddToTripModal(false)}
+                className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-white rounded-lg"
+              >
+                <X className="w-5 h-5" />
+              </button>
             </div>
 
             {attachSuccess && (
@@ -327,48 +324,49 @@ export const SearchPage: React.FC = () => {
               </div>
             )}
 
+            <div className="p-4 bg-slate-50 dark:bg-[#162235] rounded-2xl border border-slate-200 dark:border-[#1E2D42] space-y-1">
+              <span className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-500">
+                Selected Item
+              </span>
+              <h4 className="text-sm font-black text-slate-900 dark:text-white">
+                {(selectedItemToAdd.data as any).title || (selectedItemToAdd.data as any).name}
+              </h4>
+            </div>
+
             <form onSubmit={handleConfirmAttach} className="space-y-4">
               <div>
                 <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">
                   Select Target Trip *
                 </label>
-                {userTrips.length === 0 ? (
-                  <p className="text-xs text-rose-500 font-semibold">No active trips found. Please create a trip first.</p>
-                ) : (
+                <select
+                  value={targetTripId}
+                  onChange={(e) => setTargetTripId(e.target.value)}
+                  className="w-full px-3 py-2 bg-slate-50 dark:bg-[#162235] border border-slate-200 dark:border-[#1E2D42] rounded-xl text-xs font-bold text-slate-900 dark:text-white"
+                >
+                  {userTrips.map((t) => (
+                    <option key={t.id} value={t.id}>
+                      {t.title} ({new Date(t.startDate).toLocaleDateString()})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {selectedItemToAdd.type === 'ACTIVITY' && selectedTripDetails?.stops?.length > 0 && (
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">
+                    Select Target City Stop *
+                  </label>
                   <select
-                    value={targetTripId}
-                    onChange={(e) => setTargetTripId(e.target.value)}
+                    value={targetStopId}
+                    onChange={(e) => setTargetStopId(e.target.value)}
                     className="w-full px-3 py-2 bg-slate-50 dark:bg-[#162235] border border-slate-200 dark:border-[#1E2D42] rounded-xl text-xs font-bold text-slate-900 dark:text-white"
                   >
-                    {userTrips.map((t) => (
-                      <option key={t.id} value={t.id}>
-                        {t.title} ({t.status})
+                    {selectedTripDetails.stops.map((s: any) => (
+                      <option key={s.id} value={s.id}>
+                        {s.title} ({s.city ? s.city.name : 'Destination Stop'})
                       </option>
                     ))}
                   </select>
-                )}
-              </div>
-
-              {selectedItemToAdd.type === 'ACTIVITY' && selectedTripDetails?.stops && (
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">
-                    Select City Destination Stop *
-                  </label>
-                  {selectedTripDetails.stops.length === 0 ? (
-                    <p className="text-xs text-amber-500 font-semibold">This trip has no city stops yet. Adding this will create a stop.</p>
-                  ) : (
-                    <select
-                      value={targetStopId}
-                      onChange={(e) => setTargetStopId(e.target.value)}
-                      className="w-full px-3 py-2 bg-slate-50 dark:bg-[#162235] border border-slate-200 dark:border-[#1E2D42] rounded-xl text-xs font-bold text-slate-900 dark:text-white"
-                    >
-                      {selectedTripDetails.stops.map((s: any) => (
-                        <option key={s.id} value={s.id}>
-                          {s.title} ({s.city?.name || 'City'})
-                        </option>
-                      ))}
-                    </select>
-                  )}
                 </div>
               )}
 
@@ -382,10 +380,10 @@ export const SearchPage: React.FC = () => {
                 </button>
                 <button
                   type="submit"
-                  disabled={attachLoading || userTrips.length === 0}
+                  disabled={attachLoading}
                   className="px-5 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-xs font-bold shadow-md"
                 >
-                  {attachLoading ? 'Attaching...' : '+ Attach to Itinerary'}
+                  {attachLoading ? 'Attaching...' : 'Attach to Itinerary'}
                 </button>
               </div>
             </form>

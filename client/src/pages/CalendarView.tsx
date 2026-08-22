@@ -21,7 +21,7 @@ import {
 
 export const CalendarView: React.FC = () => {
   const [trips, setTrips] = useState<any[]>([]);
-  const [currentMonth, setCurrentMonth] = useState(new Date(2026, 8, 1)); // September 2026 default
+  const [currentMonth, setCurrentMonth] = useState(new Date(2026, 8, 1));
   const [loading, setLoading] = useState(true);
 
   // Expand / Collapse Single Date Inspection Drawer
@@ -87,7 +87,6 @@ export const CalendarView: React.FC = () => {
   const daysArray = Array.from({ length: daysInMonth }, (_, i) => i + 1);
   const leadingPadding = Array.from({ length: firstDayIndex }, (_, i) => i);
 
-  // Drag and Drop handlers
   const handleDragStart = (e: React.DragEvent, eventItem: any) => {
     e.dataTransfer.setData('text/plain', JSON.stringify(eventItem));
     setDraggedActivity(eventItem);
@@ -129,7 +128,6 @@ export const CalendarView: React.FC = () => {
     setTimeout(() => setRescheduleSuccess(''), 4000);
   };
 
-  // Get items for selected date
   const getSelectedDateActivities = () => {
     if (!selectedDateStr) return [];
     const events: any[] = [];
@@ -195,7 +193,7 @@ export const CalendarView: React.FC = () => {
         </div>
       )}
 
-      {/* Month & Year Navigation Control Bar */}
+      {/* Control Bar */}
       <div className="bg-white dark:bg-[#111E2E] p-6 sm:p-8 rounded-3xl shadow-sm border border-slate-200 dark:border-[#1E2D42] space-y-6">
         <div className="flex flex-col md:flex-row items-center justify-between border-b border-slate-100 dark:border-[#1E2D42] pb-5 gap-4">
           
@@ -209,7 +207,6 @@ export const CalendarView: React.FC = () => {
               <ChevronLeft className="w-5 h-5" />
             </button>
 
-            {/* Easy Month Selector Dropdown */}
             <select
               value={monthIdx}
               onChange={(e) => handleMonthChange(parseInt(e.target.value))}
@@ -222,7 +219,6 @@ export const CalendarView: React.FC = () => {
               ))}
             </select>
 
-            {/* Easy Year Selector Dropdown */}
             <select
               value={year}
               onChange={(e) => handleYearChange(parseInt(e.target.value))}
@@ -323,7 +319,7 @@ export const CalendarView: React.FC = () => {
         </div>
       </div>
 
-      {/* Expanded Date Inspection Drawer */}
+      {/* Expanded Date Inspection Drawer with INR Currency */}
       {selectedDateStr && (
         <div className="bg-white dark:bg-[#111E2E] p-6 sm:p-8 rounded-3xl shadow-xl border border-slate-200 dark:border-[#1E2D42] space-y-5 animate-in fade-in duration-300">
           <div className="flex items-center justify-between border-b border-slate-100 dark:border-[#1E2D42] pb-3">
@@ -378,7 +374,7 @@ export const CalendarView: React.FC = () => {
                   </div>
 
                   <div className="flex items-center space-x-2">
-                    <span className="text-sm font-black text-emerald-600 dark:text-emerald-400 mr-2">${evt.cost}</span>
+                    <span className="text-sm font-black text-emerald-600 dark:text-emerald-400 mr-2">₹{evt.cost?.toLocaleString('en-IN')}</span>
 
                     <button
                       onClick={() => handleOpenRescheduleModal(evt)}

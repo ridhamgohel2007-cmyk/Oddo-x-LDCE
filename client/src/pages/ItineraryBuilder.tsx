@@ -5,7 +5,6 @@ import { StatusBadge } from '../components/StatusBadge';
 import {
   Calendar,
   MapPin,
-  DollarSign,
   Plus,
   Trash2,
   Share2,
@@ -31,20 +30,20 @@ export const ItineraryBuilder: React.FC = () => {
   const [cities, setCities] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // View Switcher: TIMELINE (Flowchart) vs DAY_BY_DAY (Grouped Calendar Days)
+  // View Switcher: TIMELINE vs DAY_BY_DAY
   const [viewMode, setViewMode] = useState<'TIMELINE' | 'DAY_BY_DAY'>('TIMELINE');
 
   // Modals & Forms
   const [showAddStopModal, setShowAddStopModal] = useState(false);
   const [newStopTitle, setNewStopTitle] = useState('');
   const [newStopCityId, setNewStopCityId] = useState('');
-  const [newStopBudget, setNewStopBudget] = useState('500');
+  const [newStopBudget, setNewStopBudget] = useState('25000');
 
   const [showAddItemModal, setShowAddItemModal] = useState(false);
   const [activeStopId, setActiveStopId] = useState('');
   const [newItemTitle, setNewItemTitle] = useState('');
   const [newItemTime, setNewItemTime] = useState('09:00 AM - 11:30 AM');
-  const [newItemCost, setNewItemCost] = useState('50');
+  const [newItemCost, setNewItemCost] = useState('2500');
   const [newItemType, setNewItemType] = useState<'TRANSPORT' | 'STAY' | 'ACTIVITY' | 'MEAL'>('ACTIVITY');
   const [newItemDay, setNewItemDay] = useState('1');
 
@@ -73,7 +72,6 @@ export const ItineraryBuilder: React.FC = () => {
     }
   };
 
-  // Reorder Stops (Up/Down)
   const handleReorderStop = async (stopId: string, direction: 'up' | 'down') => {
     try {
       await api.put(`/trips/stops/${stopId}/reorder`, { direction });
@@ -83,7 +81,6 @@ export const ItineraryBuilder: React.FC = () => {
     }
   };
 
-  // Reorder Itinerary Items (Up/Down)
   const handleReorderItem = async (itemId: string, direction: 'up' | 'down') => {
     try {
       await api.put(`/trips/items/${itemId}/reorder`, { direction });
@@ -311,7 +308,6 @@ export const ItineraryBuilder: React.FC = () => {
                   {/* Stop Header */}
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 dark:border-[#1E2D42] gap-3">
                     <div className="flex items-center space-x-3">
-                      {/* Reorder Up/Down Controls */}
                       <div className="flex flex-col space-y-1">
                         <button
                           onClick={() => handleReorderStop(stop.id, 'up')}
@@ -354,7 +350,7 @@ export const ItineraryBuilder: React.FC = () => {
 
                       <div className="px-3 py-1.5 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 rounded-xl font-medium text-emerald-800 dark:text-emerald-300">
                         <span className="text-emerald-600 dark:text-emerald-400">Budget: </span>
-                        <span className="font-bold">${stop.budget}</span>
+                        <span className="font-bold">₹{stop.budget?.toLocaleString('en-IN')}</span>
                       </div>
 
                       <button
@@ -434,7 +430,7 @@ export const ItineraryBuilder: React.FC = () => {
                                 <div className="flex items-center space-x-4">
                                   <div className="text-right">
                                     <span className="text-[10px] uppercase font-bold text-slate-400 block">Est. Cost</span>
-                                    <span className="text-xs font-black text-emerald-600 dark:text-emerald-400">${item.cost}</span>
+                                    <span className="text-xs font-black text-emerald-600 dark:text-emerald-400">₹{item.cost?.toLocaleString('en-IN')}</span>
                                   </div>
 
                                   <button
@@ -451,7 +447,7 @@ export const ItineraryBuilder: React.FC = () => {
                       )}
                     </div>
                   ) : (
-                    /* DAY-BY-DAY GROUPED VIEW */
+                    /* DAY-BY-DAY VIEW */
                     <div className="space-y-4">
                       <h4 className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider">
                         Day-by-Day Categorized Schedule
@@ -483,7 +479,7 @@ export const ItineraryBuilder: React.FC = () => {
                                       </div>
                                       <h5 className="text-xs font-bold text-slate-900 dark:text-white">{item.title}</h5>
                                     </div>
-                                    <span className="text-xs font-black text-emerald-600 dark:text-emerald-400">${item.cost}</span>
+                                    <span className="text-xs font-black text-emerald-600 dark:text-emerald-400">₹{item.cost?.toLocaleString('en-IN')}</span>
                                   </div>
                                 ))}
                               </div>
@@ -533,7 +529,7 @@ export const ItineraryBuilder: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Allocated Budget ($)</label>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Allocated Budget (₹ INR)</label>
                 <input
                   type="number"
                   value={newStopBudget}
@@ -562,7 +558,7 @@ export const ItineraryBuilder: React.FC = () => {
         </div>
       )}
 
-      {/* Add Item Modal without Emojis */}
+      {/* Add Item Modal */}
       {showAddItemModal && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white dark:bg-[#111E2E] max-w-md w-full p-6 rounded-3xl shadow-2xl border border-slate-200 dark:border-[#1E2D42] space-y-4">
@@ -606,7 +602,7 @@ export const ItineraryBuilder: React.FC = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Est. Cost ($)</label>
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Est. Cost (₹ INR)</label>
                   <input
                     type="number"
                     value={newItemCost}
