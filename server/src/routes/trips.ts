@@ -89,10 +89,10 @@ router.get('/:id', authenticateToken, async (req: AuthenticatedRequest, res: Res
   }
 });
 
-// POST /api/trips - Create new trip
+// POST /api/trips - Create new trip with multi-city support
 router.post('/', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const { title, description, coverImage, startDate, endDate, totalBudget, isPublic, cityId } = req.body;
+    const { title, description, coverImage, startDate, endDate, totalBudget, isPublic, cityId, stops } = req.body;
 
     if (!title || !startDate || !endDate) {
       return res.status(400).json({ message: 'Title, start date, and end date are required.' });
@@ -123,7 +123,24 @@ router.post('/', authenticateToken, async (req: AuthenticatedRequest, res: Respo
       },
     });
 
-    if (cityId) {
+    // Create multi-city stops if provided as an array
+    if (Array.isArray(stops) && stops.length > 0) {
+      for (let i = 0; i < stops.length; i++) {
+        const s = stops[i];
+        const city = s.cityId ? await prisma.city.findUnique({ where: { id: s.cityId } }) : null;
+        await prisma.tripStop.create({
+          data: {
+            tripId: trip.id,
+            cityId: s.cityId || undefined,
+            title: s.title || (city ? `Stop ${i + 1}: ${city.name}` : `Stop ${i + 1}`),
+            stopOrder: i + 1,
+            startDate: s.startDate ? new Date(s.startDate) : start,
+            endDate: s.endDate ? new Date(s.endDate) : end,
+            budget: s.budget ? parseFloat(s.budget) : (totalBudget ? parseFloat(totalBudget) / stops.length : 0),
+          },
+        });
+      }
+    } else if (cityId) {
       const city = await prisma.city.findUnique({ where: { id: cityId } });
       await prisma.tripStop.create({
         data: {
