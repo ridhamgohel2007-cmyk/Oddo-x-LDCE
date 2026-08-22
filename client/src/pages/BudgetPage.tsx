@@ -11,7 +11,7 @@ import {
   ArrowLeft,
   Receipt,
 } from 'lucide-react';
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend, BarChart, Bar, XAxis, YAxis } from 'recharts';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 
 export const BudgetPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -20,7 +20,6 @@ export const BudgetPage: React.FC = () => {
   const [trip, setTrip] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
-  // Form states for adding actual expense
   const [showAddExpenseModal, setShowAddExpenseModal] = useState(false);
   const [category, setCategory] = useState('STAY');
   const [amount, setAmount] = useState('150');
@@ -72,13 +71,13 @@ export const BudgetPage: React.FC = () => {
   };
 
   if (loading) {
-    return <div className="p-12 text-center text-gray-500 font-semibold">Calculating trip budget...</div>;
+    return <div className="p-12 text-center text-slate-500 font-bold">Calculating trip budget...</div>;
   }
 
   const categoryTotals = expenseData?.categoryTotals || {};
   const pieChartData = [
-    { name: 'Stay / Accommodation', value: categoryTotals.STAY || 0, color: '#3b82f6' },
-    { name: 'Transport / Flights', value: categoryTotals.TRANSPORT || 0, color: '#10b981' },
+    { name: 'Stay / Accommodation', value: categoryTotals.STAY || 0, color: '#4f46e5' },
+    { name: 'Transport / Flights', value: categoryTotals.TRANSPORT || 0, color: '#06b6d4' },
     { name: 'Activities / Sightseeing', value: categoryTotals.ACTIVITIES || 0, color: '#f59e0b' },
     { name: 'Meals & Dining', value: categoryTotals.MEALS || 0, color: '#8b5cf6' },
     { name: 'Other Expenses', value: categoryTotals.OTHER || 0, color: '#64748b' },
@@ -90,80 +89,80 @@ export const BudgetPage: React.FC = () => {
       <div className="flex items-center justify-between">
         <Link
           to={`/trips/${id}`}
-          className="inline-flex items-center space-x-2 text-xs font-bold text-gray-600 hover:text-gray-900"
+          className="inline-flex items-center space-x-2 text-xs font-bold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 transition"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Back to Itinerary Builder</span>
         </Link>
         <button
           onClick={() => setShowAddExpenseModal(true)}
-          className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-md transition flex items-center space-x-1.5"
+          className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-md transition flex items-center space-x-1.5"
         >
           <Plus className="w-4 h-4" />
           <span>Log Actual Expense</span>
         </button>
       </div>
 
-      {/* Screen 9 Wireframe: Trip Budget & Cost Breakdown Header */}
-      <div className="bg-white p-6 sm:p-8 rounded-3xl shadow-sm border border-gray-100 space-y-2">
-        <h1 className="text-3xl font-extrabold text-gray-900">
+      {/* Screen 9 Header */}
+      <div className="bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-3xl shadow-sm border border-slate-200/80 dark:border-slate-800 space-y-2">
+        <h1 className="text-3xl font-black text-slate-900 dark:text-slate-100">
           Financial View & Cost Breakdown
         </h1>
-        <p className="text-xs text-gray-500">
-          Screen 9: Summarized financial analytics for <span className="font-bold text-gray-800">{trip?.title}</span>
+        <p className="text-xs text-slate-500 dark:text-slate-400">
+          Summarized financial analytics for <span className="font-bold text-slate-800 dark:text-slate-200">{trip?.title}</span>
         </p>
       </div>
 
-      {/* Overbudget Warning Alert (Wireframe Screen 9) */}
+      {/* Overbudget Warning Alert */}
       {expenseData?.isOverBudget && (
-        <div className="p-4 bg-amber-50 border border-amber-200 rounded-2xl flex items-center space-x-3 text-amber-900 text-xs font-bold">
+        <div className="p-4 bg-amber-50 dark:bg-amber-950/60 border border-amber-200 dark:border-amber-800 rounded-2xl flex items-center space-x-3 text-amber-900 dark:text-amber-200 text-xs font-bold">
           <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0" />
           <div>
-            <p className="text-sm font-extrabold text-amber-950">Overbudget Alert!</p>
-            <p className="font-medium text-amber-800">
+            <p className="text-sm font-black text-amber-950 dark:text-amber-100">Overbudget Alert!</p>
+            <p className="font-medium text-amber-800 dark:text-amber-300">
               Total expenses (${expenseData.totalSpent.toLocaleString()}) exceed your allocated budget (${expenseData.totalBudget.toLocaleString()}).
             </p>
           </div>
         </div>
       )}
 
-      {/* Financial Summary Metric Cards */}
+      {/* Financial Metric Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-        <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm space-y-1">
-          <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Allocated Budget</span>
-          <div className="text-3xl font-black text-gray-900">${expenseData?.totalBudget?.toLocaleString() || 0}</div>
-          <span className="text-[11px] text-gray-500">Set during trip initiation</span>
+        <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-1">
+          <span className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider">Allocated Budget</span>
+          <div className="text-3xl font-black text-slate-900 dark:text-slate-100">${expenseData?.totalBudget?.toLocaleString() || 0}</div>
+          <span className="text-[11px] text-slate-500 dark:text-slate-400">Set during trip initiation</span>
         </div>
 
-        <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm space-y-1">
-          <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Total Recorded Spent</span>
-          <div className={`text-3xl font-black ${expenseData?.isOverBudget ? 'text-rose-600' : 'text-emerald-600'}`}>
+        <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-1">
+          <span className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider">Total Recorded Spent</span>
+          <div className={`text-3xl font-black ${expenseData?.isOverBudget ? 'text-rose-600 dark:text-rose-400' : 'text-indigo-600 dark:text-indigo-400'}`}>
             ${expenseData?.totalSpent?.toLocaleString() || 0}
           </div>
-          <span className="text-[11px] text-gray-500">Sum of logged expenses</span>
+          <span className="text-[11px] text-slate-500 dark:text-slate-400">Sum of logged expenses</span>
         </div>
 
-        <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm space-y-1">
-          <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Remaining Balance</span>
-          <div className={`text-3xl font-black ${expenseData?.remainingBudget < 0 ? 'text-rose-600' : 'text-blue-600'}`}>
+        <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-1">
+          <span className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider">Remaining Balance</span>
+          <div className={`text-3xl font-black ${expenseData?.remainingBudget < 0 ? 'text-rose-600 dark:text-rose-400' : 'text-cyan-600 dark:text-cyan-400'}`}>
             ${expenseData?.remainingBudget?.toLocaleString() || 0}
           </div>
-          <span className="text-[11px] text-gray-500">Available funds</span>
+          <span className="text-[11px] text-slate-500 dark:text-slate-400">Available funds</span>
         </div>
       </div>
 
-      {/* Charts Section */}
-      <div className="bg-white p-6 sm:p-8 rounded-3xl shadow-sm border border-gray-100 space-y-6">
-        <div className="border-b border-gray-100 pb-3">
-          <h2 className="text-lg font-extrabold text-gray-900 flex items-center space-x-2">
-            <PieChartIcon className="w-5 h-5 text-emerald-600" />
+      {/* Chart Section */}
+      <div className="bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-3xl shadow-sm border border-slate-200/80 dark:border-slate-800 space-y-6">
+        <div className="border-b border-slate-100 dark:border-slate-800 pb-3">
+          <h2 className="text-lg font-black text-slate-900 dark:text-slate-100 flex items-center space-x-2">
+            <PieChartIcon className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
             <span>Category Cost Distribution Chart</span>
           </h2>
-          <p className="text-xs text-gray-500">Breakdown of transport, accommodation, meals, and activity costs</p>
+          <p className="text-xs text-slate-500 dark:text-slate-400">Breakdown of transport, accommodation, meals, and activity costs</p>
         </div>
 
         {pieChartData.length === 0 ? (
-          <div className="p-8 text-center text-xs text-gray-400">No expense receipts logged yet.</div>
+          <div className="p-8 text-center text-xs text-slate-400">No expense receipts logged yet.</div>
         ) : (
           <div className="h-72 w-full">
             <ResponsiveContainer width="100%" height="100%">
@@ -189,27 +188,27 @@ export const BudgetPage: React.FC = () => {
         )}
       </div>
 
-      {/* Logged Expenses Receipts Table */}
-      <div className="bg-white p-6 sm:p-8 rounded-3xl shadow-sm border border-gray-100 space-y-4">
-        <div className="flex items-center justify-between border-b border-gray-100 pb-3">
-          <h2 className="text-lg font-extrabold text-gray-900 flex items-center space-x-2">
-            <Receipt className="w-5 h-5 text-blue-600" />
+      {/* Expense Log Table */}
+      <div className="bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-3xl shadow-sm border border-slate-200/80 dark:border-slate-800 space-y-4">
+        <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+          <h2 className="text-lg font-black text-slate-900 dark:text-slate-100 flex items-center space-x-2">
+            <Receipt className="w-5 h-5 text-cyan-600 dark:text-cyan-400" />
             <span>Logged Expenses</span>
           </h2>
           <button
             onClick={() => setShowAddExpenseModal(true)}
-            className="text-xs font-bold text-emerald-600 hover:underline"
+            className="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline"
           >
             + Add Expense Record
           </button>
         </div>
 
         {expenseData?.expenses?.length === 0 ? (
-          <p className="text-xs text-gray-400 italic py-4 text-center">No individual expenses logged yet.</p>
+          <p className="text-xs text-slate-400 italic py-4 text-center">No individual expenses logged yet.</p>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs text-gray-600">
-              <thead className="bg-gray-50 text-gray-700 uppercase font-bold text-[10px]">
+            <table className="w-full text-left text-xs text-slate-600 dark:text-slate-300">
+              <thead className="bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 uppercase font-bold text-[10px]">
                 <tr>
                   <th className="p-3">Category</th>
                   <th className="p-3">Notes / Description</th>
@@ -218,17 +217,17 @@ export const BudgetPage: React.FC = () => {
                   <th className="p-3 text-right">Action</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100">
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                 {expenseData.expenses.map((exp: any) => (
-                  <tr key={exp.id} className="hover:bg-gray-50/80">
-                    <td className="p-3 font-bold text-gray-800">{exp.category}</td>
+                  <tr key={exp.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/50">
+                    <td className="p-3 font-bold text-slate-900 dark:text-slate-100">{exp.category}</td>
                     <td className="p-3">{exp.notes || '—'}</td>
                     <td className="p-3">{new Date(exp.date).toLocaleDateString()}</td>
-                    <td className="p-3 font-bold text-emerald-700">${exp.amount}</td>
+                    <td className="p-3 font-extrabold text-indigo-600 dark:text-indigo-400">${exp.amount}</td>
                     <td className="p-3 text-right">
                       <button
                         onClick={() => handleDeleteExpense(exp.id)}
-                        className="text-gray-400 hover:text-rose-600 p-1"
+                        className="text-slate-400 hover:text-rose-600 p-1"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -243,16 +242,16 @@ export const BudgetPage: React.FC = () => {
 
       {/* Add Expense Modal */}
       {showAddExpenseModal && (
-        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white max-w-md w-full p-6 rounded-3xl shadow-2xl space-y-4">
-            <h3 className="text-lg font-bold text-gray-900">Log Actual Expense Receipt</h3>
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-slate-900 max-w-md w-full p-6 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 space-y-4">
+            <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">Log Actual Expense Receipt</h3>
             <form onSubmit={handleAddExpense} className="space-y-3">
               <div>
-                <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Expense Category</label>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Expense Category</label>
                 <select
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
-                  className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm font-semibold"
+                  className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-slate-100 font-semibold"
                 >
                   <option value="STAY">Stay / Accommodation</option>
                   <option value="TRANSPORT">Transport / Flights / Train</option>
@@ -263,24 +262,24 @@ export const BudgetPage: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Amount ($)</label>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Amount ($)</label>
                 <input
                   type="number"
                   required
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
-                  className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm"
+                  className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-slate-100"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Notes / Receipt Info</label>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Notes / Receipt Info</label>
                 <input
                   type="text"
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
-                  className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm"
-                  placeholder="e.g. Hotel Le Meurice deposit"
+                  className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-slate-100"
+                  placeholder="e.g. Taj Lake Palace deposit"
                 />
               </div>
 
@@ -288,13 +287,13 @@ export const BudgetPage: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setShowAddExpenseModal(false)}
-                  className="px-4 py-2 bg-gray-100 text-gray-700 rounded-xl text-xs font-semibold"
+                  className="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-semibold"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-emerald-600 text-white rounded-xl text-xs font-bold"
+                  className="px-4 py-2 bg-indigo-600 text-white rounded-xl text-xs font-bold"
                 >
                   Record Expense
                 </button>
