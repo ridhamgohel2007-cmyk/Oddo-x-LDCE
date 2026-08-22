@@ -53,6 +53,7 @@ export const Dashboard: React.FC = () => {
   const [selectedVibe, setSelectedVibe] = useState('ALL');
   const [loading, setLoading] = useState(true);
   const [vibeLoading, setVibeLoading] = useState(false);
+  const [demoLoading, setDemoLoading] = useState(false);
 
   // Currency Switcher State (INR / USD)
   const [currencyMode, setCurrencyMode] = useState<'INR' | 'USD'>('INR');
@@ -257,6 +258,12 @@ export const Dashboard: React.FC = () => {
     { name: 'Meals', value: 25, color: '#E2A03F' },
   ];
 
+  const safeSum = Math.max(1, totalCatSum);
+  const stayPct = Math.round(((budgetMetrics.categoryTotals.STAY || 0) / safeSum) * 100);
+  const transPct = Math.round(((budgetMetrics.categoryTotals.TRANSPORT || 0) / safeSum) * 100);
+  const actPct = Math.round(((budgetMetrics.categoryTotals.ACTIVITIES || 0) / safeSum) * 100);
+  const mealPct = Math.round(((budgetMetrics.categoryTotals.MEALS || 0) / safeSum) * 100);
+
   const handleOpenAddCityModal = (city: CityData) => {
     setSelectedCityToAdd(city);
     setShowAddCityModal(true);
@@ -328,6 +335,36 @@ export const Dashboard: React.FC = () => {
       alert('Failed to log expense.');
     } finally {
       setExpenseLoading(false);
+    }
+  };
+
+  // Quick Demo Data Loader Trigger (Request 4)
+  const handleLoadDemoTrip = async () => {
+    setDemoLoading(true);
+    try {
+      const delhi = cities.find((c) => c.name === 'Delhi') || cities[0];
+      const agra = cities.find((c) => c.name === 'Agra') || cities[1];
+      const jaipur = cities.find((c) => c.name === 'Jaipur') || cities[2];
+
+      const newTripRes = await api.post('/trips', {
+        title: 'Incredible India Express Circuit',
+        description: 'Delhi ➔ Agra ➔ Jaipur in 5 days of culture & heritage.',
+        startDate: new Date().toISOString(),
+        endDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(),
+        totalBudget: 45000,
+        isPublic: true,
+      });
+
+      const tripId = newTripRes.data.id;
+      if (delhi) await api.post('/stops', { tripId, cityId: delhi.id, title: 'Stop 1: Delhi Heritage', budget: 15000 });
+      if (agra) await api.post('/stops', { tripId, cityId: agra.id, title: 'Stop 2: Agra Taj Mahal', budget: 15000 });
+      if (jaipur) await api.post('/stops', { tripId, cityId: jaipur.id, title: 'Stop 3: Jaipur Palaces', budget: 15000 });
+
+      await loadData();
+    } catch (err) {
+      alert('Failed to load sample demo trip.');
+    } finally {
+      setDemoLoading(false);
     }
   };
 
@@ -568,7 +605,7 @@ export const Dashboard: React.FC = () => {
                   {formatMoney(budgetMetrics.totalSpent)}
                 </div>
               </div>
-              <div className="w-full bg-slate-100 dark:bg-[#0F172A] h-1.5 rounded-full overflow-hidden mt-3">
+              <div className="w-full bg-[#0F172A] dark:bg-[#0F172A] h-2 rounded-full overflow-hidden mt-3 border border-white/5">
                 <div
                   className="bg-[#10B981] h-full transition-all duration-500 rounded-full"
                   style={{ width: `${Math.max(2, budgetMetrics.percentSpent)}%` }}
@@ -587,7 +624,7 @@ export const Dashboard: React.FC = () => {
                   {formatMoney(budgetMetrics.remaining)}
                 </div>
               </div>
-              <div className="w-full bg-slate-100 dark:bg-[#0F172A] h-1.5 rounded-full overflow-hidden mt-3">
+              <div className="w-full bg-[#0F172A] dark:bg-[#0F172A] h-2 rounded-full overflow-hidden mt-3 border border-white/5">
                 <div
                   className="bg-[#00A09D] h-full transition-all duration-500 rounded-full"
                   style={{ width: `${Math.max(2, 100 - budgetMetrics.percentSpent)}%` }}
@@ -606,7 +643,7 @@ export const Dashboard: React.FC = () => {
             </div>
           </div>
 
-          {/* Financial Category Spend Card with Vertically Centered Donut & 2x2 Legend Grid (Request 1) */}
+          {/* Financial Category Spend Card with Vertically Centered Donut & Clean Single 2x2 Legend Grid (Request 1) */}
           <div className="bg-white dark:bg-[#1E293B] p-5 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm flex flex-col justify-between h-full space-y-4">
             <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/10 pb-2">
               <span className="text-xs font-extrabold uppercase tracking-wider text-slate-700 dark:text-slate-300">
@@ -615,7 +652,7 @@ export const Dashboard: React.FC = () => {
               <span className="text-[10px] font-bold text-[#10B981]">Live Split</span>
             </div>
 
-            {/* Vertically Centered Donut Chart with Inner Hole Amount (Request 1) */}
+            {/* Vertically Centered Donut Chart with Bold Center Donut Hole Total (Request 1) */}
             <div className="relative h-36 w-full flex items-center justify-center my-auto">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
@@ -623,8 +660,8 @@ export const Dashboard: React.FC = () => {
                     data={pieChartData}
                     cx="50%"
                     cy="50%"
-                    innerRadius={36}
-                    outerRadius={54}
+                    innerRadius={38}
+                    outerRadius={56}
                     paddingAngle={4}
                     dataKey="value"
                   >
@@ -636,50 +673,58 @@ export const Dashboard: React.FC = () => {
                 </PieChart>
               </ResponsiveContainer>
               <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-center">
-                <span className="text-[9px] font-extrabold uppercase text-slate-400 tracking-wider">Total Active</span>
-                <span className="text-xs font-black text-slate-900 dark:text-white">{formatMoney(budgetMetrics.totalSpent)}</span>
+                <span className="text-[9px] font-extrabold uppercase text-slate-400 tracking-wider">Total Spend</span>
+                <span className="text-sm font-black text-slate-900 dark:text-white">{formatMoney(budgetMetrics.totalSpent)}</span>
               </div>
             </div>
 
-            {/* Uniform 2x2 Legend Grid with Fixed Alignment (Request 1) */}
+            {/* Combined Single 2x2 Grid Legend with Amount + Percentage (Request 1) */}
             <div className="grid grid-cols-2 gap-2 text-xs font-bold pt-2 border-t border-slate-100 dark:border-white/10">
-              <div className={`flex items-center justify-between p-2 rounded-xl bg-slate-50 dark:bg-[#0F172A]/60 border border-slate-100 dark:border-white/5 ${budgetMetrics.categoryTotals.STAY === 0 ? 'opacity-50' : ''}`}>
+              <div className={`flex items-center justify-between p-2 rounded-xl bg-slate-50 dark:bg-[#0F172A]/60 border border-slate-100 dark:border-white/5 ${budgetMetrics.categoryTotals.STAY === 0 ? 'opacity-60' : ''}`}>
                 <div className="flex items-center space-x-1.5 text-purple-600 dark:text-purple-400">
                   <Hotel className="w-3.5 h-3.5 shrink-0 text-[#7C3AED]" />
                   <span className="text-[11px]">Stays</span>
                 </div>
-                <span className="text-xs font-black text-slate-900 dark:text-white">{formatMoney(budgetMetrics.categoryTotals.STAY)}</span>
+                <span className="text-xs font-black text-slate-900 dark:text-white">
+                  {formatMoney(budgetMetrics.categoryTotals.STAY)} <span className="text-[10px] font-normal text-slate-400">({stayPct}%)</span>
+                </span>
               </div>
 
-              <div className={`flex items-center justify-between p-2 rounded-xl bg-slate-50 dark:bg-[#0F172A]/60 border border-slate-100 dark:border-white/5 ${budgetMetrics.categoryTotals.TRANSPORT === 0 ? 'opacity-50' : ''}`}>
+              <div className={`flex items-center justify-between p-2 rounded-xl bg-slate-50 dark:bg-[#0F172A]/60 border border-slate-100 dark:border-white/5 ${budgetMetrics.categoryTotals.TRANSPORT === 0 ? 'opacity-60' : ''}`}>
                 <div className="flex items-center space-x-1.5 text-[#00A09D] dark:text-[#38BDF8]">
                   <Navigation className="w-3.5 h-3.5 shrink-0 text-[#00A09D]" />
                   <span className="text-[11px]">Transfers</span>
                 </div>
-                <span className="text-xs font-black text-slate-900 dark:text-white">{formatMoney(budgetMetrics.categoryTotals.TRANSPORT)}</span>
+                <span className="text-xs font-black text-slate-900 dark:text-white">
+                  {formatMoney(budgetMetrics.categoryTotals.TRANSPORT)} <span className="text-[10px] font-normal text-slate-400">({transPct}%)</span>
+                </span>
               </div>
 
-              <div className={`flex items-center justify-between p-2 rounded-xl bg-slate-50 dark:bg-[#0F172A]/60 border border-slate-100 dark:border-white/5 ${budgetMetrics.categoryTotals.ACTIVITIES === 0 ? 'opacity-50' : ''}`}>
+              <div className={`flex items-center justify-between p-2 rounded-xl bg-slate-50 dark:bg-[#0F172A]/60 border border-slate-100 dark:border-white/5 ${budgetMetrics.categoryTotals.ACTIVITIES === 0 ? 'opacity-60' : ''}`}>
                 <div className="flex items-center space-x-1.5 text-[#10B981]">
                   <Ticket className="w-3.5 h-3.5 shrink-0 text-[#10B981]" />
                   <span className="text-[11px]">Activities</span>
                 </div>
-                <span className="text-xs font-black text-slate-900 dark:text-white">{formatMoney(budgetMetrics.categoryTotals.ACTIVITIES)}</span>
+                <span className="text-xs font-black text-slate-900 dark:text-white">
+                  {formatMoney(budgetMetrics.categoryTotals.ACTIVITIES)} <span className="text-[10px] font-normal text-slate-400">({actPct}%)</span>
+                </span>
               </div>
 
-              <div className={`flex items-center justify-between p-2 rounded-xl bg-slate-50 dark:bg-[#0F172A]/60 border border-slate-100 dark:border-white/5 ${budgetMetrics.categoryTotals.MEALS === 0 ? 'opacity-50' : ''}`}>
+              <div className={`flex items-center justify-between p-2 rounded-xl bg-slate-50 dark:bg-[#0F172A]/60 border border-slate-100 dark:border-white/5 ${budgetMetrics.categoryTotals.MEALS === 0 ? 'opacity-60' : ''}`}>
                 <div className="flex items-center space-x-1.5 text-[#E2A03F]">
                   <Utensils className="w-3.5 h-3.5 shrink-0 text-[#E2A03F]" />
                   <span className="text-[11px]">Meals</span>
                 </div>
-                <span className="text-xs font-black text-slate-900 dark:text-white">{formatMoney(budgetMetrics.categoryTotals.MEALS)}</span>
+                <span className="text-xs font-black text-slate-900 dark:text-white">
+                  {formatMoney(budgetMetrics.categoryTotals.MEALS)} <span className="text-[10px] font-normal text-slate-400">({mealPct}%)</span>
+                </span>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* "Travel by Vibe" Filter Section with Perfectly Aligned Search Input & Visible Filter Pills (Request 3 & 4) */}
+      {/* "Travel by Vibe" Filter Section with Smooth Horizontal Scrolling & Unclipped Pills (Request 3) */}
       <div className="bg-white dark:bg-[#1E293B] p-6 sm:p-8 rounded-3xl shadow-sm border border-slate-200 dark:border-white/10 space-y-5">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 dark:border-white/10 pb-4">
           <div>
@@ -692,7 +737,6 @@ export const Dashboard: React.FC = () => {
             </p>
           </div>
 
-          {/* Search Input with Explicit 42px Height & Highlight Border (Request 3) */}
           <div className="relative w-full md:w-80 shrink-0">
             <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
             <input
@@ -705,8 +749,8 @@ export const Dashboard: React.FC = () => {
           </div>
         </div>
 
-        {/* Directly Visible Filter Pills Beneath Search Bar (Request 4) */}
-        <div className="flex items-center space-x-2.5 overflow-x-auto pb-1 scrollbar-none whitespace-nowrap">
+        {/* Smooth Horizontally Scrollable Unclipped Vibe Pills (Request 3) */}
+        <div className="flex items-center space-x-2.5 overflow-x-auto pb-2 pr-6 scrollbar-none whitespace-nowrap">
           {vibeOptions.map((vibe) => {
             const Icon = vibe.icon;
             const isSelected = selectedVibe === vibe.id;
@@ -799,14 +843,28 @@ export const Dashboard: React.FC = () => {
           <div className="p-10 bg-white dark:bg-[#1E293B] rounded-3xl border border-dashed border-slate-300 dark:border-white/10 text-center space-y-3">
             <Compass className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto" />
             <h3 className="text-base font-bold text-slate-700 dark:text-slate-300">No trips created yet</h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400 max-w-sm mx-auto">Start planning your customized multi-city itinerary now!</p>
-            <Link
-              to="/create-trip"
-              className="inline-flex items-center space-x-2 px-5 py-2.5 bg-[#714B67] hover:bg-[#613E57] text-white text-xs font-bold rounded-xl shadow-md"
-            >
-              <Plus className="w-4 h-4" />
-              <span>Plan First Trip</span>
-            </Link>
+            <p className="text-xs text-slate-500 dark:text-slate-400 max-w-sm mx-auto">Start planning your customized multi-city itinerary now or load quick demo data!</p>
+            
+            {/* Quick Demo Data Loader Trigger Button (Request 4) */}
+            <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+              <Link
+                to="/create-trip"
+                className="inline-flex items-center space-x-2 px-5 py-2.5 bg-[#714B67] hover:bg-[#613E57] text-white text-xs font-bold rounded-xl shadow-md transition"
+              >
+                <Plus className="w-4 h-4" />
+                <span>Plan First Trip</span>
+              </Link>
+
+              <button
+                type="button"
+                disabled={demoLoading}
+                onClick={handleLoadDemoTrip}
+                className="inline-flex items-center space-x-2 px-5 py-2.5 bg-white/10 hover:bg-white/20 text-[#38BDF8] border border-[#38BDF8]/40 text-xs font-bold rounded-xl shadow-sm transition"
+              >
+                <Sparkles className="w-4 h-4 text-[#E2A03F]" />
+                <span>{demoLoading ? 'Loading Demo Trip...' : '✨ Load Sample Demo Trip'}</span>
+              </button>
+            </div>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
