@@ -2,8 +2,7 @@
 
 <div align="center">
 
-<img src="client/public/globetrotter-banner.jpg" alt="GlobeTrotter Banner" width="460" style="border-radius: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.2);" />
-<img src="client/public/globetrotter-compass-emblem.jpg" alt="GlobeTrotter 3D Compass Emblem" width="170" style="border-radius: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); margin-left: 12px;" />
+<img src="client/public/globetrotter-banner.jpg" alt="GlobeTrotter Banner" width="600" style="border-radius: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.2);" />
 
 <br />
 <br />
