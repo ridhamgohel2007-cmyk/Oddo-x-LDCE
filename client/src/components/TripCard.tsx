@@ -23,6 +23,8 @@ import {
   Plus,
   Receipt,
   ArrowRight,
+  Edit,
+  ExternalLink,
 } from 'lucide-react';
 import { StatusBadge } from './StatusBadge';
 import api from '../lib/api';
@@ -86,13 +88,31 @@ export const TripCard: React.FC<TripCardProps> = ({ trip, onDelete, onDuplicate,
 
   const destinationCount = trip.stops?.length || 0;
 
+  // Calculate Days Until Departure Countdown
+  const startMs = new Date(trip.startDate).getTime();
+  const nowMs = new Date().getTime();
+  const diffDays = Math.ceil((startMs - nowMs) / (1000 * 60 * 60 * 24));
+
+  let countdownTextStr = '';
+  if (trip.status === 'ONGOING') {
+    countdownTextStr = 'Active Journey';
+  } else if (trip.status === 'COMPLETED') {
+    countdownTextStr = 'Completed';
+  } else if (diffDays > 0) {
+    countdownTextStr = `Starts in ${diffDays} day${diffDays !== 1 ? 's' : ''}`;
+  } else if (diffDays === 0) {
+    countdownTextStr = 'Starts Today!';
+  } else {
+    countdownTextStr = 'Upcoming';
+  }
+
   // Compute Multi-City Route String & Transit Time Estimates
   let routeNames: string[] = [];
   if (trip.stops && trip.stops.length > 0) {
     routeNames = trip.stops.map((s: any) => s.city?.name || s.title.replace('Stop: ', ''));
   }
 
-  // Calculate Tarzan-style Structured Itinerary Breakdown Counts
+  // Calculate Itinerary Breakdown & Completeness
   let stayCount = 0;
   let transportCount = 0;
   let activityCount = 0;
@@ -119,6 +139,14 @@ export const TripCard: React.FC<TripCardProps> = ({ trip, onDelete, onDuplicate,
     transportCount = Math.max(1, destinationCount);
     activityCount = Math.max(3, destinationCount * 2);
   }
+
+  // Booking Completeness Percentage Calculation
+  const completeness = Math.min(100, Math.round(
+    (destinationCount > 0 ? 30 : 0) +
+    (stayCount > 0 ? 30 : 0) +
+    (transportCount > 0 ? 20 : 0) +
+    (activityCount > 0 ? 20 : 0)
+  ));
 
   // Quick Alert Warning Pill
   const spentRatio = trip.totalBudget > 0 ? totalRecordedSpent / trip.totalBudget : 0;
@@ -188,8 +216,14 @@ export const TripCard: React.FC<TripCardProps> = ({ trip, onDelete, onDuplicate,
             alt={trip.title}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           />
-          <div className="absolute top-3 left-3 flex items-center space-x-1.5">
+          <div className="absolute top-3 left-3 flex flex-wrap items-center gap-1.5">
             <StatusBadge status={trip.status} />
+
+            {/* Countdown Badge Indicator (Request Item 7) */}
+            <span className="px-2.5 py-0.5 bg-black/60 text-[#38BDF8] rounded-full text-[10px] font-extrabold backdrop-blur-md border border-white/10 flex items-center space-x-1">
+              <Clock className="w-3 h-3 text-[#38BDF8] shrink-0" />
+              <span>{countdownTextStr}</span>
+            </span>
 
             {/* Quick Alert Warning Pill */}
             {isOverBudget && (
@@ -206,7 +240,7 @@ export const TripCard: React.FC<TripCardProps> = ({ trip, onDelete, onDuplicate,
             )}
           </div>
 
-          {/* Quick-Action Dropdown Menu (...) & Delete Buttons */}
+          {/* Quick-Action Dropdown Menu (...) & Actions (Request Item 6) */}
           <div className="absolute top-3 right-3 flex items-center space-x-1.5 z-20">
             <div className="relative">
               <button
@@ -217,13 +251,22 @@ export const TripCard: React.FC<TripCardProps> = ({ trip, onDelete, onDuplicate,
                   setShowMenu(!showMenu);
                 }}
                 className="p-2 bg-black/60 hover:bg-black/80 text-white rounded-full backdrop-blur-md transition shadow-md"
-                title="More Actions"
+                title="Quick Actions Menu"
               >
                 <MoreVertical className="w-3.5 h-3.5" />
               </button>
 
               {showMenu && (
                 <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-[#1E293B] rounded-2xl shadow-2xl border border-slate-200 dark:border-white/10 py-2 z-30 text-xs font-bold text-slate-700 dark:text-slate-200">
+                  <Link
+                    to={`/trips/${trip.id}`}
+                    onClick={() => setShowMenu(false)}
+                    className="w-full text-left px-4 py-2 hover:bg-slate-100 dark:hover:bg-[#0F172A] flex items-center space-x-2"
+                  >
+                    <Edit className="w-4 h-4 text-[#7C3AED]" />
+                    <span>Edit Itinerary</span>
+                  </Link>
+
                   <button
                     onClick={() => {
                       setShowMenu(false);
@@ -243,7 +286,7 @@ export const TripCard: React.FC<TripCardProps> = ({ trip, onDelete, onDuplicate,
                     className="w-full text-left px-4 py-2 hover:bg-slate-100 dark:hover:bg-[#0F172A] flex items-center space-x-2"
                   >
                     <Download className="w-4 h-4 text-[#06B6D4]" />
-                    <span>Export PDF / Calendar</span>
+                    <span>Export PDF / CSV</span>
                   </button>
 
                   <button
@@ -253,18 +296,32 @@ export const TripCard: React.FC<TripCardProps> = ({ trip, onDelete, onDuplicate,
                     <Copy className="w-4 h-4 text-[#E2A03F]" />
                     <span>Duplicate Itinerary</span>
                   </button>
+
+                  {onDelete && (
+                    <button
+                      onClick={() => {
+                        setShowMenu(false);
+                        onDelete(trip.id);
+                      }}
+                      className="w-full text-left px-4 py-2 hover:bg-rose-50 dark:hover:bg-rose-950/60 text-rose-600 dark:text-rose-400 flex items-center space-x-2 border-t border-slate-100 dark:border-white/10"
+                    >
+                      <Trash2 className="w-4 h-4 text-rose-500" />
+                      <span>Delete Trip</span>
+                    </button>
+                  )}
                 </div>
               )}
             </div>
 
             {onDelete && (
               <button
+                type="button"
                 onClick={(e) => {
                   e.preventDefault();
+                  e.stopPropagation();
                   onDelete(trip.id);
                 }}
-                aria-label={`Delete trip ${trip.title}`}
-                className="p-2 bg-black/60 hover:bg-rose-600 text-white rounded-full backdrop-blur-md transition"
+                className="p-2 bg-black/60 hover:bg-rose-600 text-white/80 hover:text-white rounded-full backdrop-blur-md transition shadow-md"
                 title="Delete Trip"
               >
                 <Trash2 className="w-3.5 h-3.5" />
@@ -273,161 +330,233 @@ export const TripCard: React.FC<TripCardProps> = ({ trip, onDelete, onDuplicate,
           </div>
         </div>
 
-        {/* Content & Metrics */}
+        {/* Card Content */}
         <div className="p-5 space-y-3">
+          <div className="space-y-1">
+            <Link
+              to={`/trips/${trip.id}`}
+              className="text-base font-extrabold text-slate-900 dark:text-white hover:text-[#7C3AED] dark:hover:text-[#38BDF8] transition line-clamp-1"
+            >
+              {trip.title}
+            </Link>
+            {trip.description && (
+              <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed">
+                {trip.description}
+              </p>
+            )}
+          </div>
+
+          {/* Multi-City Transit Route Pills */}
+          {routeNames.length > 0 && (
+            <div className="flex items-center space-x-1.5 overflow-x-auto py-1 scrollbar-none text-[10px] font-bold text-[#00A09D] dark:text-[#38BDF8]">
+              {routeNames.map((city, idx) => (
+                <React.Fragment key={idx}>
+                  <span className="px-2 py-0.5 rounded-md bg-[#00A09D]/10 dark:bg-[#00A09D]/20 border border-[#00A09D]/30 whitespace-nowrap">
+                    {city}
+                  </span>
+                  {idx < routeNames.length - 1 && <span className="text-slate-400 text-xs">➔</span>}
+                </React.Fragment>
+              ))}
+            </div>
+          )}
+
+          {/* Metadata Badges */}
+          <div className="flex flex-wrap gap-2 text-xs font-semibold text-slate-600 dark:text-slate-300 pt-1">
+            <div className="flex items-center space-x-1 text-[11px] bg-slate-100 dark:bg-[#0F172A] px-2.5 py-1 rounded-lg border border-slate-200 dark:border-white/10">
+              <Calendar className="w-3.5 h-3.5 text-[#7C3AED]" />
+              <span>{formattedStart} - {formattedEnd}</span>
+            </div>
+            <div className="flex items-center space-x-1 text-[11px] bg-slate-100 dark:bg-[#0F172A] px-2.5 py-1 rounded-lg border border-slate-200 dark:border-white/10">
+              <MapPin className="w-3.5 h-3.5 text-[#00A09D]" />
+              <span>{destinationCount} {destinationCount === 1 ? 'City Stop' : 'City Stops'}</span>
+            </div>
+          </div>
+
+          {/* Structured Itinerary Items Grid */}
+          <div className="grid grid-cols-4 gap-1.5 text-center text-[10px] font-bold pt-1">
+            <div className="bg-purple-50 dark:bg-purple-950/40 text-[#7C3AED] dark:text-purple-300 p-1.5 rounded-lg border border-purple-200 dark:border-purple-800">
+              <Hotel className="w-3 h-3 mx-auto mb-0.5 text-[#7C3AED]" />
+              <span>{stayCount} {stayCount === 1 ? 'Stay' : 'Stays'}</span>
+            </div>
+            <div className="bg-cyan-50 dark:bg-cyan-950/40 text-[#00A09D] dark:text-cyan-300 p-1.5 rounded-lg border border-cyan-200 dark:border-cyan-800">
+              <Navigation className="w-3 h-3 mx-auto mb-0.5 text-[#00A09D]" />
+              <span>{transportCount} {transportCount === 1 ? 'Transfer' : 'Transfers'}</span>
+            </div>
+            <div className="bg-emerald-50 dark:bg-emerald-950/40 text-[#10B981] dark:text-emerald-300 p-1.5 rounded-lg border border-emerald-200 dark:border-emerald-800">
+              <Ticket className="w-3 h-3 mx-auto mb-0.5 text-[#10B981]" />
+              <span>{activityCount} {activityCount === 1 ? 'Activity' : 'Activities'}</span>
+            </div>
+            <div className="bg-amber-50 dark:bg-amber-950/40 text-[#E2A03F] dark:text-amber-300 p-1.5 rounded-lg border border-amber-200 dark:border-amber-800">
+              <Utensils className="w-3 h-3 mx-auto mb-0.5 text-[#E2A03F]" />
+              <span>{mealCount} {mealCount === 1 ? 'Meal' : 'Meals'}</span>
+            </div>
+          </div>
+
+          {/* Booking Completeness Progress Indicator (Request Item 7) */}
+          <div className="space-y-1 pt-1">
+            <div className="flex items-center justify-between text-[10px] font-extrabold text-slate-500 dark:text-slate-400">
+              <span>Booking Completeness</span>
+              <span className="text-[#10B981]">{completeness}% Ready</span>
+            </div>
+            <div className="w-full bg-slate-100 dark:bg-[#0F172A] h-1.5 rounded-full overflow-hidden border border-slate-200 dark:border-white/5">
+              <div
+                className="bg-[#10B981] h-full rounded-full transition-all duration-500"
+                style={{ width: `${completeness}%` }}
+              />
+            </div>
+          </div>
+
           {duplicateSuccess && (
-            <div className="p-2 bg-emerald-50 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 text-[11px] font-extrabold rounded-xl flex items-center space-x-1.5">
-              <CheckCircle2 className="w-3.5 h-3.5 text-[#10B981]" />
+            <div className="p-2 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 text-[11px] font-bold rounded-lg flex items-center space-x-1 border border-emerald-200 dark:border-emerald-800">
+              <CheckCircle2 className="w-3.5 h-3.5 text-[#10B981] shrink-0" />
               <span>{duplicateSuccess}</span>
             </div>
           )}
 
-          <div>
-            <h3 className="text-lg font-bold text-slate-900 dark:text-white line-clamp-1 group-hover:text-[#7C3AED] transition-colors">
-              {trip.title}
-            </h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-2">
-              {trip.description || 'Customized multi-city travel itinerary.'}
-            </p>
-          </div>
-
-          {/* Odoo Teal Transit Snippet */}
-          {routeNames.length > 0 && (
-            <div className="p-2.5 bg-[#00A09D]/10 dark:bg-[#00A09D]/15 rounded-xl border border-[#00A09D]/30 text-[11px] font-bold text-[#00A09D] dark:text-[#38BDF8] space-y-1">
-              <div className="flex items-center space-x-1.5">
-                <Navigation className="w-3.5 h-3.5 text-[#00A09D] shrink-0" />
-                <span className="truncate">
-                  {routeNames.join(' ➔ ')}
-                </span>
-              </div>
-              {routeNames.length > 1 && (
-                <div className="text-[10px] text-slate-600 dark:text-slate-300 font-semibold flex items-center space-x-1">
-                  <Clock className="w-3 h-3 text-[#00A09D] shrink-0" />
-                  <span>Est. Transit: ~3h 45m drive / train between stops</span>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Clean Pluralization Itemized Chips */}
-          <div className="flex flex-wrap gap-1.5 pt-1">
-            {stayCount > 0 && (
-              <span className="inline-flex items-center space-x-1 px-2.5 py-1 bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 text-[10px] font-extrabold rounded-lg border border-indigo-200 dark:border-indigo-800">
-                <Hotel className="w-3 h-3 text-indigo-500" />
-                <span>{stayCount} {stayCount === 1 ? 'Stay' : 'Stays'}</span>
-              </span>
-            )}
-
-            {transportCount > 0 && (
-              <span className="inline-flex items-center space-x-1 px-2.5 py-1 bg-teal-50 dark:bg-teal-950/60 text-[#00A09D] dark:text-teal-300 text-[10px] font-extrabold rounded-lg border border-teal-200 dark:border-teal-800">
-                <Navigation className="w-3 h-3 text-[#00A09D]" />
-                <span>{transportCount} {transportCount === 1 ? 'Transfer' : 'Transfers'}</span>
-              </span>
-            )}
-
-            {activityCount > 0 && (
-              <span className="inline-flex items-center space-x-1 px-2.5 py-1 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 text-[10px] font-extrabold rounded-lg border border-emerald-200 dark:border-emerald-800">
-                <Ticket className="w-3 h-3 text-[#10B981]" />
-                <span>{activityCount} {activityCount === 1 ? 'Activity' : 'Activities'}</span>
-              </span>
-            )}
-
-            {mealCount > 0 && (
-              <span className="inline-flex items-center space-x-1 px-2.5 py-1 bg-amber-50 dark:bg-amber-950/60 text-[#E2A03F] dark:text-amber-300 text-[10px] font-extrabold rounded-lg border border-amber-200 dark:border-amber-800">
-                <Utensils className="w-3 h-3 text-[#E2A03F]" />
-                <span>{mealCount} {mealCount === 1 ? 'Meal' : 'Meals'}</span>
-              </span>
-            )}
-          </div>
-
-          {/* Card Metrics with Clean Pluralization City Stops */}
-          <div className="space-y-2.5 text-xs text-slate-600 dark:text-slate-300 pt-2.5 border-t border-slate-100 dark:border-white/10">
+          {/* Budget Summary & Pax Multiplier Controls */}
+          <div className="pt-2 border-t border-slate-100 dark:border-white/10 space-y-2">
             <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <Calendar className="w-4 h-4 text-[#714B67] dark:text-[#7C3AED] shrink-0" />
-                <span className="font-semibold">{formattedStart} - {formattedEnd}</span>
+              <div className="flex items-center space-x-1.5">
+                <Users className="w-3.5 h-3.5 text-[#00A09D] shrink-0" />
+                <select
+                  value={travelerCount}
+                  onChange={(e) => setTravelerCount(parseInt(e.target.value))}
+                  className="bg-white dark:bg-[#0F172A] text-slate-900 dark:text-[#E2E8F0] text-xs font-black px-2 py-1 rounded-lg border border-slate-300 dark:border-white/10 shadow-xs cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#7C3AED]"
+                >
+                  <option value={1} className="bg-white dark:bg-[#0F172A]">Solo (1 Pax)</option>
+                  <option value={2} className="bg-white dark:bg-[#0F172A]">Couple (2 Pax)</option>
+                  <option value={4} className="bg-white dark:bg-[#0F172A]">Group (4 Pax)</option>
+                  <option value={6} className="bg-white dark:bg-[#0F172A]">Family (6 Pax)</option>
+                </select>
               </div>
 
-              <div className="flex items-center space-x-2">
-                <MapPin className="w-4 h-4 text-[#00A09D] shrink-0" />
-                <span className="font-bold text-slate-800 dark:text-slate-200">
-                  {destinationCount} {destinationCount === 1 ? 'City Stop' : 'City Stops'}
-                </span>
-              </div>
+              <span className="text-[11px] font-black text-[#10B981] whitespace-nowrap">
+                {formatMoney(perPersonCost)} <span className="text-[9px] font-bold text-slate-500 dark:text-slate-400">/ person</span>
+              </span>
             </div>
 
-            {/* Pax Selector Dropdown in Odoo Control Style */}
-            {trip.totalBudget > 0 && (
-              <div className="bg-slate-100 dark:bg-[#0F172A] p-2.5 rounded-xl border border-slate-200 dark:border-white/10 space-y-2">
-                <div className="flex items-center justify-between gap-2">
-                  <div className="flex items-center space-x-1.5">
-                    <Users className="w-4 h-4 text-[#7C3AED] shrink-0" />
-                    <select
-                      value={travelerCount}
-                      onChange={(e) => setTravelerCount(parseInt(e.target.value))}
-                      className="bg-white dark:bg-[#0F172A] text-slate-900 dark:text-[#E2E8F0] text-xs font-black px-2.5 py-1 rounded-lg border border-slate-300 dark:border-white/10 shadow-xs cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#7C3AED]"
-                    >
-                      <option value={1} className="bg-white dark:bg-[#0F172A] text-slate-900 dark:text-[#E2E8F0] font-extrabold">Solo (1 Person)</option>
-                      <option value={2} className="bg-white dark:bg-[#0F172A] text-slate-900 dark:text-[#E2E8F0] font-extrabold">Couple (2 People)</option>
-                      <option value={4} className="bg-white dark:bg-[#0F172A] text-slate-900 dark:text-[#E2E8F0] font-extrabold">Group (4 People)</option>
-                      <option value={6} className="bg-white dark:bg-[#0F172A] text-slate-900 dark:text-[#E2E8F0] font-extrabold">Family (6 People)</option>
-                    </select>
-                  </div>
-
-                  {/* Dynamic Currency Format */}
-                  <span className="text-[11px] font-black text-[#10B981] whitespace-nowrap">
-                    {formatMoney(perPersonCost)} <span className="text-[9px] font-bold text-slate-500 dark:text-slate-400">/ person</span>
-                  </span>
-                </div>
-
-                {/* Clean Budget Label Spacing without Rogue Spaces */}
-                <div className="flex items-center justify-between text-[10px] text-slate-500 dark:text-slate-400 border-t border-slate-200 dark:border-white/10 pt-1.5">
-                  <div className="flex items-center space-x-1">
-                    <span>Total Group Budget ({count} pax):</span>
-                    <span className="font-bold text-slate-900 dark:text-white">{formatMoney(trip.totalBudget)}</span>
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      setShowQuickExpenseModal(true);
-                    }}
-                    className="inline-flex items-center space-x-1 px-2 py-0.5 bg-[#714B67] hover:bg-[#613E57] text-white rounded-lg text-[10px] font-bold shadow-xs transition"
-                    title="Log an expense directly for this trip"
-                  >
-                    <Plus className="w-3 h-3" />
-                    <span>Log Expense</span>
-                  </button>
-                </div>
+            <div className="flex items-center justify-between text-[10px] text-slate-500 dark:text-slate-400 border-t border-slate-100 dark:border-white/10 pt-1.5">
+              <div className="flex items-center space-x-1">
+                <span>Total Group Budget ({count} pax):</span>
+                <span className="font-bold text-slate-900 dark:text-white">{formatMoney(trip.totalBudget)}</span>
               </div>
-            )}
+
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setShowQuickExpenseModal(true);
+                }}
+                className="inline-flex items-center space-x-1 px-2 py-0.5 bg-[#714B67] hover:bg-[#613E57] text-white rounded-lg text-[10px] font-bold shadow-xs transition"
+                title="Log an expense directly for this trip"
+              >
+                <Plus className="w-3 h-3" />
+                <span>Log Expense</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Primary & Secondary Action Buttons Footer */}
-      <div className="px-5 py-3.5 bg-slate-50 dark:bg-[#0F172A]/80 border-t border-slate-100 dark:border-white/10 flex items-center justify-between gap-2">
-        <Link
-          to={`/trips/${trip.id}`}
-          className="px-3.5 py-2 bg-[#714B67] hover:bg-[#613E57] text-white rounded-xl text-xs font-bold transition flex items-center space-x-1.5 shadow-sm group/btn"
-        >
-          <Eye className="w-3.5 h-3.5" />
-          <span>Open Itinerary</span>
-          <ArrowRight className="w-3.5 h-3.5 group-hover/btn:translate-x-0.5 transition-transform" />
-        </Link>
+      {/* Card Action Footer */}
+      <div className="px-5 py-3 bg-slate-50 dark:bg-[#0F172A]/80 border-t border-slate-100 dark:border-white/10 flex items-center justify-between">
+        <span className="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider">
+          Multi-City Plan
+        </span>
 
         <Link
-          to={`/trips/${trip.id}/budget`}
-          className="px-3.5 py-2 bg-[#334155] hover:bg-[#475569] text-[#F8FAFC] rounded-xl text-xs font-bold transition flex items-center space-x-1.5"
+          to={`/trips/${trip.id}`}
+          className="px-3.5 py-1.5 bg-[#714B67] hover:bg-[#613E57] text-white rounded-xl text-xs font-bold shadow-sm transition flex items-center space-x-1.5 group/btn"
         >
-          <PieChart className="w-3.5 h-3.5 text-[#00A09D]" />
-          <span>Budget</span>
+          <Eye className="w-3.5 h-3.5" />
+          <span>View Itinerary</span>
+          <ArrowRight className="w-3.5 h-3.5 group-hover/btn:translate-x-0.5 transition-transform" />
         </Link>
       </div>
 
-      {/* Direct Quick "Add Expense" Modal Trigger */}
+      {/* Share Modal */}
+      {showShareModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-[#1E293B] max-w-md w-full p-6 rounded-3xl shadow-2xl border border-slate-200 dark:border-white/10 space-y-4 relative">
+            <button
+              onClick={() => setShowShareModal(false)}
+              className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-white p-1"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="flex items-center space-x-3">
+              <div className="p-2.5 bg-purple-50 dark:bg-purple-950/60 rounded-xl text-[#7C3AED]">
+                <Share2 className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="text-base font-extrabold text-slate-900 dark:text-white">Share Itinerary</h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400">Collaborate with fellow travelers</p>
+              </div>
+            </div>
+
+            <div className="space-y-3 pt-2">
+              <div className="p-3 bg-slate-50 dark:bg-[#0F172A] rounded-2xl border border-slate-200 dark:border-white/10 flex items-center justify-between">
+                <span className="text-xs text-slate-600 dark:text-slate-300 font-mono truncate mr-2">
+                  {window.location.origin}/trips/{trip.id}
+                </span>
+                <button
+                  type="button"
+                  onClick={handleShareCopy}
+                  className="px-3 py-1.5 bg-[#714B67] hover:bg-[#613E57] text-white rounded-xl text-xs font-bold shadow-xs transition shrink-0 flex items-center space-x-1"
+                >
+                  {copiedLink ? <CheckCircle2 className="w-3.5 h-3.5 text-[#10B981]" /> : <Copy className="w-3.5 h-3.5" />}
+                  <span>{copiedLink ? 'Copied!' : 'Copy Link'}</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Export Modal */}
+      {showExportModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-[#1E293B] max-w-md w-full p-6 rounded-3xl shadow-2xl border border-slate-200 dark:border-white/10 space-y-4 relative">
+            <button
+              onClick={() => setShowExportModal(false)}
+              className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-white p-1"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="flex items-center space-x-3">
+              <div className="p-2.5 bg-purple-50 dark:bg-purple-950/60 rounded-xl text-[#7C3AED]">
+                <Download className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="text-base font-extrabold text-slate-900 dark:text-white">Export Travel Options</h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400">Offline vouchers & budget summaries</p>
+              </div>
+            </div>
+
+            <div className="space-y-3 pt-2">
+              <button
+                type="button"
+                onClick={() => {
+                  window.print();
+                  setShowExportModal(false);
+                }}
+                className="w-full p-3 bg-slate-50 dark:bg-[#0F172A] hover:bg-slate-100 dark:hover:bg-[#334155] rounded-2xl border border-slate-200 dark:border-white/10 flex items-center justify-between text-xs font-bold text-slate-900 dark:text-white transition"
+              >
+                <div className="flex items-center space-x-2">
+                  <FileText className="w-4 h-4 text-[#7C3AED]" />
+                  <span>Download Print / PDF Travel Voucher</span>
+                </div>
+                <Download className="w-4 h-4 text-slate-400" />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Quick Log Expense Dialog */}
       {showQuickExpenseModal && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white dark:bg-[#1E293B] max-w-md w-full p-6 rounded-3xl shadow-2xl border border-slate-200 dark:border-white/10 space-y-4 relative">
@@ -444,7 +573,7 @@ export const TripCard: React.FC<TripCardProps> = ({ trip, onDelete, onDuplicate,
               </div>
               <div>
                 <h3 className="text-base font-extrabold text-slate-900 dark:text-white">Quick Log Expense</h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400">Log receipt directly for {trip.title}</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400">Log expense for {trip.title}</p>
               </div>
             </div>
 
@@ -457,21 +586,6 @@ export const TripCard: React.FC<TripCardProps> = ({ trip, onDelete, onDuplicate,
 
             <form onSubmit={handleQuickAddExpense} className="space-y-3">
               <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Expense Category</label>
-                <select
-                  value={expenseCategory}
-                  onChange={(e) => setExpenseCategory(e.target.value)}
-                  className="w-full px-3 py-2 bg-slate-50 dark:bg-[#0F172A] border border-slate-200 dark:border-white/10 rounded-xl text-xs text-slate-900 dark:text-white font-bold"
-                >
-                  <option value="STAY">Stay / Accommodation</option>
-                  <option value="TRANSPORT">Transport / Flights / Train</option>
-                  <option value="ACTIVITIES">Activities & Tickets</option>
-                  <option value="MEALS">Meals & Dining</option>
-                  <option value="OTHER">Other Expenses</option>
-                </select>
-              </div>
-
-              <div>
                 <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">
                   Amount ({currencyMode === 'USD' ? '$ USD' : '₹ INR'})
                 </label>
@@ -481,19 +595,33 @@ export const TripCard: React.FC<TripCardProps> = ({ trip, onDelete, onDuplicate,
                   step="1"
                   value={expenseAmount}
                   onChange={(e) => setExpenseAmount(e.target.value)}
-                  className="w-full px-3 py-2 bg-slate-50 dark:bg-[#0F172A] border border-slate-200 dark:border-white/10 rounded-xl text-xs text-slate-900 dark:text-white font-semibold"
+                  className="w-full px-3 py-2 bg-slate-50 dark:bg-[#0F172A] border border-slate-200 dark:border-white/10 rounded-xl text-xs text-slate-900 dark:text-white font-bold"
                   placeholder={currencyMode === 'USD' ? '30' : '2500'}
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Notes / Description</label>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Category</label>
+                <select
+                  value={expenseCategory}
+                  onChange={(e) => setExpenseCategory(e.target.value)}
+                  className="w-full px-3 py-2 bg-slate-50 dark:bg-[#0F172A] border border-slate-200 dark:border-white/10 rounded-xl text-xs font-bold text-slate-900 dark:text-[#E2E8F0]"
+                >
+                  <option value="STAY">🏨 Stay & Accommodation</option>
+                  <option value="TRANSPORT">✈️ Transport & Transfers</option>
+                  <option value="ACTIVITIES">🎟️ Activities & Sightseeing</option>
+                  <option value="MEALS">🍽️ Meals & Dining</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Notes (Optional)</label>
                 <input
                   type="text"
                   value={expenseNotes}
                   onChange={(e) => setExpenseNotes(e.target.value)}
                   className="w-full px-3 py-2 bg-slate-50 dark:bg-[#0F172A] border border-slate-200 dark:border-white/10 rounded-xl text-xs text-slate-900 dark:text-white font-semibold"
-                  placeholder="e.g. Hotel deposit, train ticket..."
+                  placeholder="e.g. Hotel deposit, Train ticket..."
                 />
               </div>
 
@@ -510,110 +638,10 @@ export const TripCard: React.FC<TripCardProps> = ({ trip, onDelete, onDuplicate,
                   disabled={expenseLoading}
                   className="px-5 py-2 bg-[#714B67] hover:bg-[#613E57] text-white rounded-xl text-xs font-bold shadow-md"
                 >
-                  {expenseLoading ? 'Saving...' : 'Log Expense'}
+                  {expenseLoading ? 'Saving...' : 'Save Expense'}
                 </button>
               </div>
             </form>
-          </div>
-        </div>
-      )}
-
-      {/* Share & Collaborate Modal */}
-      {showShareModal && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-[#1E293B] max-w-md w-full p-6 rounded-3xl shadow-2xl border border-slate-200 dark:border-white/10 space-y-4 relative">
-            <button
-              onClick={() => setShowShareModal(false)}
-              className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-white p-1"
-            >
-              <X className="w-5 h-5" />
-            </button>
-
-            <div className="flex items-center space-x-3">
-              <div className="p-2.5 bg-teal-50 dark:bg-teal-950/60 rounded-xl text-[#00A09D]">
-                <Share2 className="w-6 h-6" />
-              </div>
-              <div>
-                <h3 className="text-base font-extrabold text-slate-900 dark:text-white">Share & Collaborate</h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400">Invite friends or split travel expenses</p>
-              </div>
-            </div>
-
-            <div className="space-y-3 pt-2">
-              <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">
-                  Public Share Link
-                </label>
-                <div className="flex items-center space-x-2">
-                  <input
-                    type="text"
-                    readOnly
-                    value={window.location.origin + `/trips/${trip.id}`}
-                    className="flex-1 px-3 py-2 bg-slate-50 dark:bg-[#0F172A] border border-slate-200 dark:border-white/10 rounded-xl text-xs font-semibold text-slate-900 dark:text-white"
-                  />
-                  <button
-                    onClick={handleShareCopy}
-                    className="px-3.5 py-2 bg-[#714B67] hover:bg-[#613E57] text-white rounded-xl text-xs font-bold transition shadow-sm whitespace-nowrap"
-                  >
-                    {copiedLink ? 'Copied!' : 'Copy'}
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Export to PDF / Calendar Modal */}
-      {showExportModal && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-[#1E293B] max-w-md w-full p-6 rounded-3xl shadow-2xl border border-slate-200 dark:border-white/10 space-y-4 relative">
-            <button
-              onClick={() => setShowExportModal(false)}
-              className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-white p-1"
-            >
-              <X className="w-5 h-5" />
-            </button>
-
-            <div className="flex items-center space-x-3">
-              <div className="p-2.5 bg-cyan-50 dark:bg-cyan-950/60 rounded-xl text-[#06B6D4]">
-                <Download className="w-6 h-6" />
-              </div>
-              <div>
-                <h3 className="text-base font-extrabold text-slate-900 dark:text-white">Export Itinerary Voucher</h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400">Download PDF or sync to calendar</p>
-              </div>
-            </div>
-
-            <div className="space-y-2.5 pt-2">
-              <button
-                onClick={() => {
-                  window.print();
-                  setShowExportModal(false);
-                }}
-                className="w-full p-3 bg-slate-50 dark:bg-[#0F172A] hover:bg-slate-100 dark:hover:bg-[#334155] rounded-2xl border border-slate-200 dark:border-white/10 flex items-center justify-between text-xs font-bold text-slate-900 dark:text-white"
-              >
-                <div className="flex items-center space-x-2">
-                  <FileText className="w-4 h-4 text-[#7C3AED]" />
-                  <span>Download Offline Travel PDF Voucher</span>
-                </div>
-                <Download className="w-4 h-4 text-slate-400" />
-              </button>
-
-              <a
-                href={`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(trip.title)}`}
-                target="_blank"
-                rel="noreferrer"
-                onClick={() => setShowExportModal(false)}
-                className="w-full p-3 bg-slate-50 dark:bg-[#0F172A] hover:bg-slate-100 dark:hover:bg-[#334155] rounded-2xl border border-slate-200 dark:border-white/10 flex items-center justify-between text-xs font-bold text-slate-900 dark:text-white"
-              >
-                <div className="flex items-center space-x-2">
-                  <Calendar className="w-4 h-4 text-[#06B6D4]" />
-                  <span>Sync to Google Calendar</span>
-                </div>
-                <Eye className="w-4 h-4 text-slate-400" />
-              </a>
-            </div>
           </div>
         </div>
       )}
