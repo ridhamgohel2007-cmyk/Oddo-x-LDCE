@@ -138,14 +138,27 @@ export const UserProfile: React.FC = () => {
           <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
             {/* User Avatar */}
             <div className="flex flex-col items-center space-y-3">
-              <div className="relative w-32 h-32 rounded-full overflow-hidden border-4 border-emerald-500 shadow-xl bg-slate-100 dark:bg-[#162235]">
-                <img
-                  src={profilePic || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80'}
-                  alt={name}
-                  className="w-full h-full object-cover"
-                />
+              <div className="relative w-32 h-32 rounded-full overflow-hidden border-4 border-emerald-500 shadow-xl bg-gradient-to-tr from-purple-600 to-emerald-500 flex items-center justify-center text-white text-3xl font-black">
+                {profilePic ? (
+                  <img
+                    src={profilePic}
+                    alt={name}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      (e.target as HTMLElement).style.display = 'none';
+                    }}
+                  />
+                ) : null}
+                <span className="absolute inset-0 flex items-center justify-center font-black pointer-events-none">
+                  {(name || 'Globe Trotter')
+                    .split(' ')
+                    .map((n) => n[0])
+                    .join('')
+                    .toUpperCase()
+                    .slice(0, 2)}
+                </span>
               </div>
-              <span className="text-[11px] font-bold text-slate-400">User Avatar</span>
+              <span className="text-[11px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider">User Avatar</span>
             </div>
 
             {/* Profile Inputs */}
