@@ -21,6 +21,7 @@ interface AuthContextType {
   login: (token: string, user: User) => void;
   logout: () => void;
   updateUser: (user: User) => void;
+  toggleDemoRole: () => void;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -30,6 +31,7 @@ const AuthContext = createContext<AuthContextType>({
   login: () => {},
   logout: () => {},
   updateUser: () => {},
+  toggleDemoRole: () => {},
 });
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -75,8 +77,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser(updatedUser);
   };
 
+  // Instant Persona Switcher for Hackathon Demonstrations (Request Item 3)
+  const toggleDemoRole = () => {
+    if (!user) return;
+    const newRole = user.role === 'ADMIN' ? 'USER' : 'ADMIN';
+    const updated = { ...user, role: newRole as 'USER' | 'ADMIN' };
+    setUser(updated);
+  };
+
   return (
-    <AuthContext.Provider value={{ user, token, loading, login, logout, updateUser }}>
+    <AuthContext.Provider value={{ user, token, loading, login, logout, updateUser, toggleDemoRole }}>
       {children}
     </AuthContext.Provider>
   );
