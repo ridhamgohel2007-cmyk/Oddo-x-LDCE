@@ -13,6 +13,11 @@ import {
   CheckCircle2,
   Clock,
   Tag,
+  Flame,
+  Heart,
+  Mountain,
+  Landmark,
+  Car,
 } from 'lucide-react';
 
 export const SearchPage: React.FC = () => {
@@ -26,13 +31,13 @@ export const SearchPage: React.FC = () => {
   const [activities, setActivities] = useState<ActivityData[]>([]);
 
   const [searchQuery, setSearchQuery] = useState(initialQuery);
-  const [selectedRegion, setSelectedRegion] = useState('ALL');
+  const [selectedVibe, setSelectedVibe] = useState('ALL');
   const [selectedCost, setSelectedCost] = useState('ALL');
   const [selectedCategory, setSelectedCategory] = useState('ALL');
 
   const [loading, setLoading] = useState(true);
 
-  // Immediate "+ Add to Trip" Direct Action Modal State (Screen 8 PS Requirement)
+  // Immediate "+ Add to Trip" Direct Action Modal State
   const [showAddToTripModal, setShowAddToTripModal] = useState(false);
   const [selectedItemToAdd, setSelectedItemToAdd] = useState<{
     type: 'CITY' | 'ACTIVITY';
@@ -62,7 +67,7 @@ export const SearchPage: React.FC = () => {
       setActivities(actRes.data);
     } catch (err) {
       console.error('Error loading search catalog:', err);
-    } fontally: {
+    } finally {
       setLoading(false);
     }
   };
@@ -147,14 +152,38 @@ export const SearchPage: React.FC = () => {
     }
   };
 
+  const matchesVibe = (city: CityData, vibe: string) => {
+    if (vibe === 'ALL') return true;
+    const desc = (city.description || '').toLowerCase();
+    const name = (city.name || '').toLowerCase();
+    const region = (city.region || '').toLowerCase();
+    const cost = (city.costIndex || '').toUpperCase();
+
+    if (vibe === 'ROMANTIC') {
+      return desc.includes('romantic') || desc.includes('honeymoon') || desc.includes('eiffel') || desc.includes('canal') || desc.includes('beach') || name.includes('paris') || name.includes('goa') || name.includes('bali');
+    }
+    if (vibe === 'ADVENTURE') {
+      return desc.includes('adventure') || desc.includes('outdoor') || desc.includes('hike') || desc.includes('trek') || desc.includes('paragliding') || desc.includes('beach') || name.includes('goa') || name.includes('bali');
+    }
+    if (vibe === 'HERITAGE') {
+      return desc.includes('heritage') || desc.includes('culture') || desc.includes('history') || desc.includes('palace') || desc.includes('monument') || desc.includes('taj') || name.includes('agra') || name.includes('jaipur') || name.includes('delhi') || name.includes('kyoto') || name.includes('rome');
+    }
+    if (vibe === 'ROAD_TRIP') {
+      return desc.includes('drive') || desc.includes('road') || desc.includes('scenic') || desc.includes('coastal') || desc.includes('mountain') || name.includes('jaipur') || name.includes('goa') || region.includes('asia');
+    }
+    if (vibe === 'BUDGET') {
+      return cost === 'LOW' || desc.includes('budget') || desc.includes('affordable') || name.includes('agra') || name.includes('jaipur') || name.includes('goa');
+    }
+    return true;
+  };
+
   const filteredCities = cities.filter((c) => {
     const matchesSearch =
       c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       c.country.toLowerCase().includes(searchQuery.toLowerCase()) ||
       c.description.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesRegion = selectedRegion === 'ALL' || c.region === selectedRegion;
     const matchesCost = selectedCost === 'ALL' || c.costIndex === selectedCost;
-    return matchesSearch && matchesRegion && matchesCost;
+    return matchesSearch && matchesVibe(c, selectedVibe) && matchesCost;
   });
 
   const filteredActivities = activities.filter((a) => {
@@ -175,7 +204,7 @@ export const SearchPage: React.FC = () => {
             <span>Discovery & Catalog Search</span>
           </h1>
           <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mt-1">
-            Screen 8: Dedicated tabbed search for cities (country, cost index, popularity) vs. activities (duration, category)
+            Screen 8: Discover destinations by Travel Vibe (Honeymoon, Adventure, Heritage, Road Trips) or search activities
           </p>
         </div>
 
@@ -206,7 +235,7 @@ export const SearchPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Filter Controls Bar with INR Cost Index */}
+      {/* Filter Controls Bar with Travel Vibe */}
       <div className="bg-white dark:bg-[#111E2E] p-4 sm:p-6 rounded-3xl shadow-sm border border-slate-200 dark:border-[#1E2D42] space-y-4">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="relative flex-1 w-full">
@@ -227,14 +256,16 @@ export const SearchPage: React.FC = () => {
           <div className="flex items-center space-x-2 w-full sm:w-auto">
             {activeTab === 'CITIES' ? (
               <select
-                value={selectedRegion}
-                onChange={(e) => setSelectedRegion(e.target.value)}
+                value={selectedVibe}
+                onChange={(e) => setSelectedVibe(e.target.value)}
                 className="px-3.5 py-2.5 bg-slate-50 dark:bg-[#162235] border border-slate-200 dark:border-[#1E2D42] rounded-xl text-xs font-bold text-slate-900 dark:text-white"
               >
-                <option value="ALL">Group by: All Regions</option>
-                <option value="Europe">Europe</option>
-                <option value="Asia">Asia</option>
-                <option value="North America">North America</option>
+                <option value="ALL">Vibe: All Travel Moods</option>
+                <option value="ROMANTIC">Romantic & Honeymoon</option>
+                <option value="ADVENTURE">Adventure & Outdoors</option>
+                <option value="HERITAGE">Heritage & Culture</option>
+                <option value="ROAD_TRIP">Road Trips & Drives</option>
+                <option value="BUDGET">Budget Escapes</option>
               </select>
             ) : (
               <select

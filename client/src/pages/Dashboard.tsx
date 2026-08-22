@@ -14,9 +14,14 @@ import {
   ArrowRight,
   TrendingUp,
   Clock,
-  CheckCircle2,
   PieChart,
   Luggage,
+  Heart,
+  Mountain,
+  Landmark,
+  Car,
+  Tag,
+  Flame,
 } from 'lucide-react';
 
 export const Dashboard: React.FC = () => {
@@ -26,7 +31,9 @@ export const Dashboard: React.FC = () => {
   const [cities, setCities] = useState<CityData[]>([]);
   const [trips, setTrips] = useState<TripData[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedRegion, setSelectedRegion] = useState('ALL');
+  
+  // "Travel by Vibe" / Theme Filter State (Tarzan Way Feature)
+  const [selectedVibe, setSelectedVibe] = useState('ALL');
   const [loading, setLoading] = useState(true);
 
   // Dynamic Metrics & Countdown States
@@ -52,7 +59,6 @@ export const Dashboard: React.FC = () => {
         setCities(citiesRes.data);
         setTrips(allTrips);
 
-        // Calculate Budget Highlights across user trips
         let totalAllocated = 0;
         let totalSpent = 0;
         let activeCount = 0;
@@ -122,17 +128,51 @@ export const Dashboard: React.FC = () => {
     setCountdownText({ days, hours, mins });
   };
 
+  // Travel Vibe / Theme Filtering Logic
+  const matchesVibe = (city: CityData, vibe: string) => {
+    if (vibe === 'ALL') return true;
+    const desc = (city.description || '').toLowerCase();
+    const name = (city.name || '').toLowerCase();
+    const region = (city.region || '').toLowerCase();
+    const cost = (city.costIndex || '').toUpperCase();
+
+    if (vibe === 'ROMANTIC') {
+      return desc.includes('romantic') || desc.includes('honeymoon') || desc.includes('eiffel') || desc.includes('canal') || desc.includes('beach') || name.includes('paris') || name.includes('goa') || name.includes('bali');
+    }
+    if (vibe === 'ADVENTURE') {
+      return desc.includes('adventure') || desc.includes('outdoor') || desc.includes('hike') || desc.includes('trek') || desc.includes('paragliding') || desc.includes('beach') || name.includes('goa') || name.includes('bali');
+    }
+    if (vibe === 'HERITAGE') {
+      return desc.includes('heritage') || desc.includes('culture') || desc.includes('history') || desc.includes('palace') || desc.includes('monument') || desc.includes('taj') || name.includes('agra') || name.includes('jaipur') || name.includes('delhi') || name.includes('kyoto') || name.includes('rome');
+    }
+    if (vibe === 'ROAD_TRIP') {
+      return desc.includes('drive') || desc.includes('road') || desc.includes('scenic') || desc.includes('coastal') || desc.includes('mountain') || name.includes('jaipur') || name.includes('goa') || region.includes('asia');
+    }
+    if (vibe === 'BUDGET') {
+      return cost === 'LOW' || desc.includes('budget') || desc.includes('affordable') || name.includes('agra') || name.includes('jaipur') || name.includes('goa');
+    }
+    return true;
+  };
+
   const filteredCities = cities.filter((city) => {
     const matchesSearch =
       city.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       city.country.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesRegion = selectedRegion === 'ALL' || city.region === selectedRegion;
-    return matchesSearch && matchesRegion;
+    return matchesSearch && matchesVibe(city, selectedVibe);
   });
+
+  const vibeOptions = [
+    { id: 'ALL', label: 'All Destinations', icon: Globe2 },
+    { id: 'ROMANTIC', label: 'Romantic Escapes', icon: Heart },
+    { id: 'ADVENTURE', label: 'Adventure & Outdoors', icon: Mountain },
+    { id: 'HERITAGE', label: 'Heritage & Culture', icon: Landmark },
+    { id: 'ROAD_TRIP', label: 'Road Trips & Drives', icon: Car },
+    { id: 'BUDGET', label: 'Budget Escapes', icon: Tag },
+  ];
 
   return (
     <div className="space-y-8 pb-12">
-      {/* Dynamic Hero Header */}
+      {/* Hero Header */}
       <div className="relative rounded-3xl overflow-hidden shadow-2xl bg-gradient-to-r from-[#0B1320] via-[#111E2E] to-[#0B1320] border border-slate-200 dark:border-[#1E2D42]">
         <img
           src="https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=1600&q=80"
@@ -150,7 +190,7 @@ export const Dashboard: React.FC = () => {
               Welcome back, <span className="text-emerald-400">{user?.name}</span>!
             </h1>
             <p className="text-xs sm:text-sm text-slate-300">
-              Track active trip countdowns, manage multi-city budgets, and plan your next destination.
+              Track active trip countdowns, discover destinations by travel vibe, and manage multi-city budgets.
             </p>
             <div className="pt-2 flex flex-wrap gap-3">
               <Link
@@ -216,7 +256,7 @@ export const Dashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* Budget Highlights (INR Currency Displays) */}
+      {/* Budget Highlights */}
       <section className="space-y-3">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-black text-slate-900 dark:text-white">
@@ -269,47 +309,64 @@ export const Dashboard: React.FC = () => {
         </div>
       </section>
 
-      {/* Search & Region Filter */}
-      <div className="bg-white dark:bg-[#111E2E] p-4 sm:p-6 rounded-3xl shadow-sm border border-slate-200 dark:border-[#1E2D42] space-y-4">
-        <div className="flex flex-col sm:flex-row gap-3 items-center justify-between">
-          <div className="relative flex-1 w-full">
-            <Search className="w-4 h-4 text-slate-400 absolute left-4 top-3.5" />
+      {/* "Travel by Vibe" / Theme-Based Filtering Section (The Tarzan Way Feature) */}
+      <div className="bg-white dark:bg-[#111E2E] p-6 sm:p-8 rounded-3xl shadow-sm border border-slate-200 dark:border-[#1E2D42] space-y-5">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-slate-100 dark:border-[#1E2D42] pb-4">
+          <div>
+            <h2 className="text-xl font-extrabold text-slate-900 dark:text-white flex items-center space-x-2">
+              <Flame className="w-5 h-5 text-amber-500" />
+              <span>Travel by Vibe — Curated Mood Filtering</span>
+            </h2>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+              Discover destinations tailored to your travel style: Honeymoon, Road Trips, Adventure, Heritage, or Budget Escapes
+            </p>
+          </div>
+
+          {/* Quick Search */}
+          <div className="relative w-full md:w-64">
+            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search destinations (e.g. Paris, Tokyo, Agra, Jaipur, Goa, Bali)..."
-              className="w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-[#162235] border border-slate-200 dark:border-[#1E2D42] rounded-2xl text-xs font-semibold text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition"
+              placeholder="Search destinations..."
+              className="w-full pl-10 pr-3 py-2 bg-slate-50 dark:bg-[#162235] border border-slate-200 dark:border-[#1E2D42] rounded-xl text-xs font-semibold text-slate-900 dark:text-slate-100"
             />
           </div>
+        </div>
 
-          <div className="flex items-center space-x-2 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0">
-            {['ALL', 'Asia', 'Europe', 'North America'].map((region) => (
+        {/* Travel Vibe Selector Buttons */}
+        <div className="flex items-center space-x-2.5 overflow-x-auto pb-2 scrollbar-none">
+          {vibeOptions.map((vibe) => {
+            const Icon = vibe.icon;
+            const isSelected = selectedVibe === vibe.id;
+            return (
               <button
-                key={region}
-                onClick={() => setSelectedRegion(region)}
-                className={`px-4 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap transition ${
-                  selectedRegion === region
-                    ? 'bg-emerald-500 text-white shadow-md shadow-emerald-500/25'
-                    : 'bg-slate-100 dark:bg-[#162235] text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-[#1E2D42]'
+                key={vibe.id}
+                onClick={() => setSelectedVibe(vibe.id)}
+                className={`flex items-center space-x-2 px-4 py-2.5 rounded-2xl text-xs font-extrabold whitespace-nowrap transition-all duration-200 ${
+                  isSelected
+                    ? 'bg-emerald-500 text-white shadow-md shadow-emerald-500/25 scale-105'
+                    : 'bg-slate-100 dark:bg-[#162235] text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-[#1E2D42]'
                 }`}
               >
-                {region === 'ALL' ? 'All Regions' : region}
+                <Icon className={`w-4 h-4 ${isSelected ? 'text-white' : 'text-emerald-500'}`} />
+                <span>{vibe.label}</span>
               </button>
-            ))}
-          </div>
+            );
+          })}
         </div>
       </div>
 
-      {/* Regional Selections */}
+      {/* Regional / Vibe Selections Grid */}
       <section className="space-y-4">
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-xl font-black text-slate-900 dark:text-white flex items-center space-x-2">
               <Globe2 className="w-5 h-5 text-emerald-500" />
-              <span>Top Regional Selections</span>
+              <span>Curated Destination Selections ({filteredCities.length})</span>
             </h2>
-            <p className="text-xs text-slate-500 dark:text-slate-400">Handpicked popular cities and destinations worldwide</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400">Handpicked popular cities matching your travel mood</p>
           </div>
           <Link to="/search" className="text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:underline flex items-center space-x-1">
             <span>View All Destinations</span>
@@ -322,6 +379,10 @@ export const Dashboard: React.FC = () => {
             {[1, 2, 3].map((i) => (
               <div key={i} className="h-64 bg-slate-200 dark:bg-[#111E2E] rounded-2xl animate-pulse" />
             ))}
+          </div>
+        ) : filteredCities.length === 0 ? (
+          <div className="p-8 bg-white dark:bg-[#111E2E] rounded-3xl border border-slate-200 dark:border-[#1E2D42] text-center text-xs text-slate-400">
+            No destinations found matching this travel vibe filter. Try selecting "All Destinations"!
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
