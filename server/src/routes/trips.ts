@@ -123,7 +123,6 @@ router.post('/', authenticateToken, async (req: AuthenticatedRequest, res: Respo
       },
     });
 
-    // Create multi-city stops if provided as an array
     if (Array.isArray(stops) && stops.length > 0) {
       for (let i = 0; i < stops.length; i++) {
         const s = stops[i];
@@ -228,17 +227,23 @@ router.post('/:id/stops', authenticateToken, async (req: AuthenticatedRequest, r
     const { id } = req.params;
     const { cityId, title, startDate, endDate, budget, stopOrder } = req.body;
 
-    const trip = await prisma.trip.findUnique({ where: { id } });
+    const trip = await prisma.trip.findUnique({
+      where: { id },
+      include: { stops: true },
+    });
+
     if (!trip || (trip.userId !== req.user!.userId && req.user!.role !== 'ADMIN')) {
       return res.status(403).json({ message: 'Trip not found or unauthorized.' });
     }
+
+    const nextOrder = stopOrder || (trip.stops.length + 1);
 
     const stop = await prisma.tripStop.create({
       data: {
         tripId: id,
         cityId,
-        title: title || 'New Travel Stop',
-        stopOrder: stopOrder || 1,
+        title: title || `Stop ${nextOrder}`,
+        stopOrder: nextOrder,
         startDate: startDate ? new Date(startDate) : trip.startDate,
         endDate: endDate ? new Date(endDate) : trip.endDate,
         budget: budget ? parseFloat(budget) : 0,
@@ -255,7 +260,54 @@ router.post('/:id/stops', authenticateToken, async (req: AuthenticatedRequest, r
   }
 });
 
-// POST /api/trips/stops/:stopId/items - Add Itinerary Item
+// PUT /api/trips/stops/:stopId/reorder - Move Stop Up or Down
+router.put('/stops/:stopId/reorder', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const { stopId } = req.params;
+    const { direction } = req.body; // 'up' or 'down'
+
+    const stop = await prisma.tripStop.findUnique({
+      where: { id: stopId },
+      include: { trip: { include: { stops: { orderBy: { stopOrder: 'asc' } } } } },
+    });
+
+    if (!stop) return res.status(404).json({ message: 'Stop not found.' });
+
+    const allStops = stop.trip.stops;
+    const index = allStops.findIndex((s) => s.id === stopId);
+
+    if (direction === 'up' && index > 0) {
+      const prevStop = allStops[index - 1];
+      await prisma.$transaction([
+        prisma.tripStop.update({ where: { id: stop.id }, data: { stopOrder: prevStop.stopOrder } }),
+        prisma.tripStop.update({ where: { id: prevStop.id }, data: { stopOrder: stop.stopOrder } }),
+      ]);
+    } else if (direction === 'down' && index < allStops.length - 1) {
+      const nextStop = allStops[index + 1];
+      await prisma.$transaction([
+        prisma.tripStop.update({ where: { id: stop.id }, data: { stopOrder: nextStop.stopOrder } }),
+        prisma.tripStop.update({ where: { id: nextStop.id }, data: { stopOrder: stop.stopOrder } }),
+      ]);
+    }
+
+    return res.json({ message: 'Stops reordered successfully.' });
+  } catch (error) {
+    return res.status(500).json({ message: 'Failed to reorder stops.' });
+  }
+});
+
+// DELETE /api/trips/stops/:stopId - Remove Stop
+router.delete('/stops/:stopId', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const { stopId } = req.params;
+    await prisma.tripStop.delete({ where: { id: stopId } });
+    return res.json({ message: 'Stop deleted successfully.' });
+  } catch (error) {
+    return res.status(500).json({ message: 'Failed to delete stop.' });
+  }
+});
+
+// POST /api/trips/stops/:stopId/items - Add Granular Itinerary Item
 router.post('/stops/:stopId/items', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { stopId } = req.params;
@@ -263,7 +315,7 @@ router.post('/stops/:stopId/items', authenticateToken, async (req: Authenticated
 
     const stop = await prisma.tripStop.findUnique({
       where: { id: stopId },
-      include: { trip: true },
+      include: { trip: true, items: true },
     });
 
     if (!stop || (stop.trip.userId !== req.user!.userId && req.user!.role !== 'ADMIN')) {
@@ -278,8 +330,8 @@ router.post('/stops/:stopId/items', authenticateToken, async (req: Authenticated
         dayNumber: dayNumber ? parseInt(dayNumber) : 1,
         timeSlot,
         cost: cost ? parseFloat(cost) : 0,
-        type: type || 'ACTIVITY',
-        itemOrder: itemOrder || 1,
+        type: type || 'ACTIVITY', // 'TRANSPORT' | 'STAY' | 'ACTIVITY' | 'MEAL'
+        itemOrder: itemOrder || (stop.items.length + 1),
       },
       include: { activity: true },
     });
@@ -287,6 +339,42 @@ router.post('/stops/:stopId/items', authenticateToken, async (req: Authenticated
     return res.status(201).json(item);
   } catch (error) {
     return res.status(500).json({ message: 'Failed to add itinerary item.' });
+  }
+});
+
+// PUT /api/trips/items/:itemId/reorder - Move Item Up or Down
+router.put('/items/:itemId/reorder', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const { itemId } = req.params;
+    const { direction } = req.body;
+
+    const item = await prisma.itineraryItem.findUnique({
+      where: { id: itemId },
+      include: { stop: { include: { items: { orderBy: [{ dayNumber: 'asc' }, { itemOrder: 'asc' }] } } } },
+    });
+
+    if (!item) return res.status(404).json({ message: 'Item not found.' });
+
+    const itemsInStop = item.stop.items;
+    const index = itemsInStop.findIndex((i) => i.id === itemId);
+
+    if (direction === 'up' && index > 0) {
+      const prevItem = itemsInStop[index - 1];
+      await prisma.$transaction([
+        prisma.itineraryItem.update({ where: { id: item.id }, data: { itemOrder: prevItem.itemOrder } }),
+        prisma.itineraryItem.update({ where: { id: prevItem.id }, data: { itemOrder: item.itemOrder } }),
+      ]);
+    } else if (direction === 'down' && index < itemsInStop.length - 1) {
+      const nextItem = itemsInStop[index + 1];
+      await prisma.$transaction([
+        prisma.itineraryItem.update({ where: { id: item.id }, data: { itemOrder: nextItem.itemOrder } }),
+        prisma.itineraryItem.update({ where: { id: nextItem.id }, data: { itemOrder: item.itemOrder } }),
+      ]);
+    }
+
+    return res.json({ message: 'Items reordered successfully.' });
+  } catch (error) {
+    return res.status(500).json({ message: 'Failed to reorder items.' });
   }
 });
 

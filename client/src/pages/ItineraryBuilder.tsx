@@ -13,9 +13,13 @@ import {
   Clock,
   CheckCircle,
   Tag,
-  Eye,
   Layers,
-  ArrowRight,
+  ArrowUp,
+  Car,
+  Hotel,
+  Ticket,
+  Utensils,
+  GripVertical,
 } from 'lucide-react';
 
 export const ItineraryBuilder: React.FC = () => {
@@ -25,7 +29,7 @@ export const ItineraryBuilder: React.FC = () => {
   const [cities, setCities] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Modals / Form States
+  // Modals & Forms
   const [showAddStopModal, setShowAddStopModal] = useState(false);
   const [newStopTitle, setNewStopTitle] = useState('');
   const [newStopCityId, setNewStopCityId] = useState('');
@@ -34,9 +38,9 @@ export const ItineraryBuilder: React.FC = () => {
   const [showAddItemModal, setShowAddItemModal] = useState(false);
   const [activeStopId, setActiveStopId] = useState('');
   const [newItemTitle, setNewItemTitle] = useState('');
-  const [newItemTime, setNewItemTime] = useState('10:00 AM - 12:00 PM');
-  const [newItemCost, setNewItemCost] = useState('45');
-  const [newItemType, setNewItemType] = useState('ACTIVITY');
+  const [newItemTime, setNewItemTime] = useState('09:00 AM - 11:30 AM');
+  const [newItemCost, setNewItemCost] = useState('50');
+  const [newItemType, setNewItemType] = useState<'TRANSPORT' | 'STAY' | 'ACTIVITY' | 'MEAL'>('ACTIVITY');
   const [newItemDay, setNewItemDay] = useState('1');
 
   useEffect(() => {
@@ -64,6 +68,26 @@ export const ItineraryBuilder: React.FC = () => {
     }
   };
 
+  // Reorder Stops (Up/Down)
+  const handleReorderStop = async (stopId: string, direction: 'up' | 'down') => {
+    try {
+      await api.put(`/trips/stops/${stopId}/reorder`, { direction });
+      fetchTripDetails();
+    } catch (err) {
+      console.error('Error reordering stop:', err);
+    }
+  };
+
+  // Reorder Itinerary Items (Up/Down)
+  const handleReorderItem = async (itemId: string, direction: 'up' | 'down') => {
+    try {
+      await api.put(`/trips/items/${itemId}/reorder`, { direction });
+      fetchTripDetails();
+    } catch (err) {
+      console.error('Error reordering item:', err);
+    }
+  };
+
   const handleAddStop = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -79,6 +103,15 @@ export const ItineraryBuilder: React.FC = () => {
       fetchTripDetails();
     } catch (err) {
       console.error('Error adding stop:', err);
+    }
+  };
+
+  const handleDeleteStop = async (stopId: string) => {
+    try {
+      await api.delete(`/trips/stops/${stopId}`);
+      fetchTripDetails();
+    } catch (err) {
+      console.error('Error deleting stop:', err);
     }
   };
 
@@ -122,42 +155,75 @@ export const ItineraryBuilder: React.FC = () => {
     }
   };
 
+  const getCategoryBadge = (type: string) => {
+    switch (type?.toUpperCase()) {
+      case 'TRANSPORT':
+        return (
+          <span className="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
+            <Car className="w-3 h-3" />
+            <span>Transport</span>
+          </span>
+        );
+      case 'STAY':
+        return (
+          <span className="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
+            <Hotel className="w-3 h-3" />
+            <span>Stay / Hotel</span>
+          </span>
+        );
+      case 'MEAL':
+        return (
+          <span className="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-50 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
+            <Utensils className="w-3 h-3" />
+            <span>Meal</span>
+          </span>
+        );
+      default:
+        return (
+          <span className="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+            <Ticket className="w-3 h-3" />
+            <span>Activity</span>
+          </span>
+        );
+    }
+  };
+
   if (loading) {
-    return <div className="p-12 text-center text-gray-500 font-semibold">Loading itinerary...</div>;
+    return <div className="p-12 text-center text-slate-500 font-bold">Loading itinerary builder...</div>;
   }
 
   if (!trip) {
-    return <div className="p-12 text-center text-rose-500 font-semibold">Trip not found.</div>;
+    return <div className="p-12 text-center text-rose-500 font-bold">Trip not found.</div>;
   }
 
   return (
     <div className="space-y-8 pb-16">
       {/* Header Banner */}
-      <div className="bg-white p-6 sm:p-8 rounded-3xl shadow-sm border border-gray-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <div className="bg-white dark:bg-[#111E2E] p-6 sm:p-8 rounded-3xl shadow-sm border border-slate-200 dark:border-[#1E2D42] flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <div className="flex items-center space-x-3 mb-2">
             <StatusBadge status={trip.status} />
             {trip.isPublic && (
-              <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+              <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
                 Publicly Shared
               </span>
             )}
           </div>
-          <h1 className="text-3xl font-extrabold text-gray-900">{trip.title}</h1>
-          <p className="text-xs text-gray-500 mt-1 max-w-xl">{trip.description || 'Customized multi-city travel itinerary.'}</p>
+          <h1 className="text-3xl font-black text-slate-900 dark:text-white">{trip.title}</h1>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-xl">{trip.description || 'Customized multi-city travel itinerary.'}</p>
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
           <button
             onClick={handleShareTrip}
-            className="px-4 py-2.5 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-xl text-xs font-bold transition flex items-center space-x-1.5"
+            className="px-4 py-2.5 bg-slate-100 dark:bg-[#162235] hover:bg-slate-200 dark:hover:bg-[#1E2D42] text-slate-700 dark:text-slate-200 rounded-xl text-xs font-bold transition flex items-center space-x-1.5"
           >
-            <Share2 className="w-4 h-4" />
+            <Share2 className="w-4 h-4 text-emerald-500" />
             <span>Share Trip</span>
           </button>
           <Link
             to={`/trips/${trip.id}/budget`}
-            className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-md transition flex items-center space-x-1.5"
+            className="px-4 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-xs font-bold shadow-md transition flex items-center space-x-1.5"
           >
             <DollarSign className="w-4 h-4" />
             <span>View Budget Breakdown</span>
@@ -165,34 +231,34 @@ export const ItineraryBuilder: React.FC = () => {
         </div>
       </div>
 
-      {/* Screen 5 Wireframe: Section 1, Section 2, Section 3 Layout */}
+      {/* Sections & Stops List */}
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-xl font-extrabold text-gray-900 flex items-center space-x-2">
-              <Layers className="w-5 h-5 text-emerald-600" />
-              <span>Itinerary Sections & Destination Stops</span>
+            <h2 className="text-xl font-black text-slate-900 dark:text-white flex items-center space-x-2">
+              <Layers className="w-5 h-5 text-emerald-500" />
+              <span>Multi-City Sections & Reorderable Destination Stops</span>
             </h2>
-            <p className="text-xs text-gray-500">Day-wise section breakdown with allocated budgets</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400">Use up/down controls to reorder city stops or activity line items</p>
           </div>
 
           <button
             onClick={() => setShowAddStopModal(true)}
-            className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-md transition flex items-center space-x-1.5"
+            className="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold rounded-xl shadow-md transition flex items-center space-x-1.5"
           >
             <Plus className="w-4 h-4" />
-            <span>+ Add Another Section</span>
+            <span>+ Add City Stop</span>
           </button>
         </div>
 
         {trip.stops?.length === 0 ? (
-          <div className="p-8 bg-white rounded-3xl border border-dashed border-gray-300 text-center space-y-3">
-            <p className="text-xs text-gray-500">No destination sections added yet.</p>
+          <div className="p-8 bg-white dark:bg-[#111E2E] rounded-3xl border border-dashed border-slate-300 dark:border-[#1E2D42] text-center space-y-3">
+            <p className="text-xs text-slate-500 dark:text-slate-400">No destination sections added yet.</p>
             <button
               onClick={() => setShowAddStopModal(true)}
-              className="px-4 py-2 bg-emerald-600 text-white text-xs font-bold rounded-xl"
+              className="px-4 py-2 bg-emerald-500 text-white text-xs font-bold rounded-xl"
             >
-              Add Section 1
+              Add First City Stop
             </button>
           </div>
         ) : (
@@ -202,31 +268,55 @@ export const ItineraryBuilder: React.FC = () => {
               const stopEnd = new Date(stop.endDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 
               return (
-                <div key={stop.id} className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 space-y-5">
-                  {/* Section Header (Screen 5 wireframe) */}
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-gray-100 gap-3">
-                    <div>
-                      <span className="text-xs font-bold uppercase tracking-wider text-emerald-600">
-                        Section {index + 1}
-                      </span>
-                      <h3 className="text-lg font-bold text-gray-900 flex items-center space-x-2">
-                        <span>{stop.title}</span>
-                        {stop.city && (
-                          <span className="text-xs font-normal px-2.5 py-0.5 bg-emerald-50 text-emerald-700 rounded-full border border-emerald-200">
-                            {stop.city.name}, {stop.city.country}
-                          </span>
-                        )}
-                      </h3>
+                <div key={stop.id} className="bg-white dark:bg-[#111E2E] rounded-3xl p-6 shadow-sm border border-slate-200 dark:border-[#1E2D42] space-y-5">
+                  {/* Stop Header with Reorder Up / Down Controls */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 dark:border-[#1E2D42] gap-3">
+                    <div className="flex items-center space-x-3">
+                      {/* Reorder Stop Up/Down Controls */}
+                      <div className="flex flex-col space-y-1">
+                        <button
+                          onClick={() => handleReorderStop(stop.id, 'up')}
+                          disabled={index === 0}
+                          aria-label={`Move stop ${stop.title} up`}
+                          className="p-1 rounded bg-slate-100 dark:bg-[#162235] hover:bg-slate-200 dark:hover:bg-[#1E2D42] text-slate-600 dark:text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed"
+                          title="Move Stop Up"
+                        >
+                          <ArrowUp className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          onClick={() => handleReorderStop(stop.id, 'down')}
+                          disabled={index === trip.stops.length - 1}
+                          aria-label={`Move stop ${stop.title} down`}
+                          className="p-1 rounded bg-slate-100 dark:bg-[#162235] hover:bg-slate-200 dark:hover:bg-[#1E2D42] text-slate-600 dark:text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed"
+                          title="Move Stop Down"
+                        >
+                          <ArrowDown className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+
+                      <div>
+                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
+                          Stop #{index + 1}
+                        </span>
+                        <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center space-x-2">
+                          <span>{stop.title}</span>
+                          {stop.city && (
+                            <span className="text-xs font-bold px-2.5 py-0.5 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 rounded-full border border-emerald-200 dark:border-emerald-800">
+                              {stop.city.name}, {stop.city.country}
+                            </span>
+                          )}
+                        </h3>
+                      </div>
                     </div>
 
                     <div className="flex items-center space-x-3 text-xs">
-                      <div className="px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-xl font-medium text-gray-700">
-                        <span className="text-gray-400">Date Range: </span>
-                        <span className="font-bold">{stopStart} to {stopEnd}</span>
+                      <div className="px-3 py-1.5 bg-slate-50 dark:bg-[#162235] border border-slate-200 dark:border-[#1E2D42] rounded-xl font-medium text-slate-700 dark:text-slate-300">
+                        <span className="text-slate-400">Date Range: </span>
+                        <span className="font-bold">{stopStart} - {stopEnd}</span>
                       </div>
 
-                      <div className="px-3 py-1.5 bg-emerald-50 border border-emerald-200 rounded-xl font-medium text-emerald-800">
-                        <span className="text-emerald-600">Budget: </span>
+                      <div className="px-3 py-1.5 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 rounded-xl font-medium text-emerald-800 dark:text-emerald-300">
+                        <span className="text-emerald-600 dark:text-emerald-400">Budget: </span>
                         <span className="font-bold">${stop.budget}</span>
                       </div>
 
@@ -235,69 +325,95 @@ export const ItineraryBuilder: React.FC = () => {
                           setActiveStopId(stop.id);
                           setShowAddItemModal(true);
                         }}
-                        className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold flex items-center space-x-1"
+                        className="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl font-bold flex items-center space-x-1"
                       >
                         <Plus className="w-3.5 h-3.5" />
-                        <span>Add Activity</span>
+                        <span>Add Line Item</span>
+                      </button>
+
+                      <button
+                        onClick={() => handleDeleteStop(stop.id)}
+                        className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/60 rounded-xl transition"
+                        title="Delete Stop"
+                      >
+                        <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
                   </div>
 
-                  {/* Wireframe Screen 9: Physical Activity Sequence Flowchart / Daily Timeline */}
+                  {/* Granular Categorized Line Items Sequence */}
                   <div className="space-y-4">
-                    <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider">
-                      Physical Activity & Expense Sequence Flow
+                    <h4 className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider">
+                      Categorized Line Items (Transport, Stay, Activity, Meal)
                     </h4>
 
                     {stop.items?.length === 0 ? (
-                      <p className="text-xs text-gray-400 italic py-2">No activities added to this section yet.</p>
+                      <p className="text-xs text-slate-400 italic py-2">No categorized line items added to this stop yet.</p>
                     ) : (
-                      <div className="space-y-4 relative pl-4 border-l-2 border-emerald-200">
+                      <div className="space-y-3 relative pl-4 border-l-2 border-emerald-500/30">
                         {stop.items.map((item: any, i: number) => (
                           <div key={item.id} className="relative group">
-                            {/* Timeline Node Dot */}
-                            <div className="absolute -left-[25px] top-3.5 w-3.5 h-3.5 rounded-full bg-emerald-500 border-2 border-white ring-2 ring-emerald-200" />
+                            {/* Timeline Node */}
+                            <div className="absolute -left-[25px] top-4 w-3.5 h-3.5 rounded-full bg-emerald-500 border-2 border-white dark:border-[#111E2E]" />
 
-                            <div className="bg-gray-50 hover:bg-white p-4 rounded-2xl border border-gray-200 shadow-2xl transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                              <div className="space-y-1">
-                                <div className="flex items-center space-x-2">
-                                  <span className="px-2 py-0.5 bg-emerald-100 text-emerald-800 text-[10px] font-bold rounded">
-                                    Day {item.dayNumber}
-                                  </span>
-                                  <span className="text-xs font-semibold text-blue-600 flex items-center space-x-1">
-                                    <Clock className="w-3 h-3" />
-                                    <span>{item.timeSlot || 'Scheduled'}</span>
-                                  </span>
+                            <div className="bg-slate-50 dark:bg-[#162235] hover:bg-white dark:hover:bg-[#1C2C42] p-4 rounded-2xl border border-slate-200 dark:border-[#1E2D42] shadow-xs transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                              
+                              <div className="flex items-center space-x-3">
+                                {/* Item Reorder Up / Down Controls */}
+                                <div className="flex flex-col space-y-0.5">
+                                  <button
+                                    onClick={() => handleReorderItem(item.id, 'up')}
+                                    disabled={i === 0}
+                                    className="p-1 text-slate-400 hover:text-emerald-500 disabled:opacity-20"
+                                    title="Move Item Up"
+                                  >
+                                    <ArrowUp className="w-3 h-3" />
+                                  </button>
+                                  <button
+                                    onClick={() => handleReorderItem(item.id, 'down')}
+                                    disabled={i === stop.items.length - 1}
+                                    className="p-1 text-slate-400 hover:text-emerald-500 disabled:opacity-20"
+                                    title="Move Item Down"
+                                  >
+                                    <ArrowDown className="w-3 h-3" />
+                                  </button>
                                 </div>
 
-                                <h5 className="text-sm font-bold text-gray-900">{item.title}</h5>
-                                {item.activity && (
-                                  <p className="text-xs text-gray-500">{item.activity.description}</p>
-                                )}
+                                <div className="space-y-1">
+                                  <div className="flex items-center space-x-2">
+                                    <span className="px-2 py-0.5 bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-[10px] font-bold rounded">
+                                      Day {item.dayNumber}
+                                    </span>
+                                    {getCategoryBadge(item.type)}
+                                    <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 flex items-center space-x-1">
+                                      <Clock className="w-3 h-3 text-emerald-500" />
+                                      <span>{item.timeSlot || 'Scheduled'}</span>
+                                    </span>
+                                  </div>
+
+                                  <h5 className="text-xs font-bold text-slate-900 dark:text-white">{item.title}</h5>
+                                  {item.activity && (
+                                    <p className="text-xs text-slate-500 dark:text-slate-400">{item.activity.description}</p>
+                                  )}
+                                </div>
                               </div>
 
                               <div className="flex items-center space-x-4">
                                 <div className="text-right">
-                                  <span className="text-[10px] uppercase font-bold text-gray-400 block">Expense</span>
-                                  <span className="text-sm font-extrabold text-emerald-700">${item.cost}</span>
+                                  <span className="text-[10px] uppercase font-bold text-slate-400 block">Est. Cost</span>
+                                  <span className="text-xs font-black text-emerald-600 dark:text-emerald-400">${item.cost}</span>
                                 </div>
 
                                 <button
                                   onClick={() => handleDeleteItem(item.id)}
-                                  className="p-1.5 text-gray-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition"
+                                  className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/60 rounded-lg transition"
                                   title="Remove item"
                                 >
                                   <Trash2 className="w-4 h-4" />
                                 </button>
                               </div>
-                            </div>
 
-                            {/* Arrow Indicator for Flowchart Effect */}
-                            {i < stop.items.length - 1 && (
-                              <div className="flex justify-center my-1 text-emerald-400">
-                                <ArrowDown className="w-4 h-4" />
-                              </div>
-                            )}
+                            </div>
                           </div>
                         ))}
                       </div>
@@ -308,58 +424,47 @@ export const ItineraryBuilder: React.FC = () => {
             })}
           </div>
         )}
-
-        {/* Add Another Section Button (Screen 5 wireframe) */}
-        <div className="text-center pt-4">
-          <button
-            onClick={() => setShowAddStopModal(true)}
-            className="px-6 py-3 bg-white hover:bg-gray-50 text-emerald-700 border-2 border-dashed border-emerald-300 rounded-2xl text-xs font-bold transition flex items-center justify-center space-x-2 mx-auto"
-          >
-            <Plus className="w-4 h-4" />
-            <span>+ Add another Section</span>
-          </button>
-        </div>
       </div>
 
       {/* Add Stop Modal */}
       {showAddStopModal && (
-        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-900 max-w-md w-full p-6 rounded-3xl shadow-2xl space-y-4 border border-gray-100 dark:border-slate-800">
-            <h3 className="text-lg font-bold text-gray-900 dark:text-white">Add Itinerary Section / Destination Stop</h3>
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-[#111E2E] max-w-md w-full p-6 rounded-3xl shadow-2xl border border-slate-200 dark:border-[#1E2D42] space-y-4">
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white">Add City Destination Stop</h3>
             <form onSubmit={handleAddStop} className="space-y-3">
               <div>
-                <label className="block text-xs font-bold text-gray-900 dark:text-slate-200 uppercase mb-1">Section Title</label>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Section / Stop Title</label>
                 <input
                   type="text"
                   required
                   value={newStopTitle}
                   onChange={(e) => setNewStopTitle(e.target.value)}
-                  className="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-700 rounded-xl text-sm text-gray-900 dark:text-slate-100 font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  className="w-full px-3 py-2 bg-slate-50 dark:bg-[#162235] border border-slate-200 dark:border-[#1E2D42] rounded-xl text-xs text-slate-900 dark:text-white font-bold"
                   placeholder="e.g. Stop 2: Rome Sightseeing"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-gray-900 dark:text-slate-200 uppercase mb-1">City / Region</label>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">City / Region</label>
                 <select
                   value={newStopCityId}
                   onChange={(e) => setNewStopCityId(e.target.value)}
-                  className="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-700 rounded-xl text-sm text-gray-900 dark:text-slate-100 font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  className="w-full px-3 py-2 bg-slate-50 dark:bg-[#162235] border border-slate-200 dark:border-[#1E2D42] rounded-xl text-xs text-slate-900 dark:text-white font-bold"
                 >
-                  <option value="" className="bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-100">Select Destination City</option>
+                  <option value="">Select Destination City</option>
                   {cities.map((c) => (
-                    <option key={c.id} value={c.id} className="bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-100">{c.name}, {c.country}</option>
+                    <option key={c.id} value={c.id}>{c.name}, {c.country}</option>
                   ))}
                 </select>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-gray-900 dark:text-slate-200 uppercase mb-1">Budget Allocation ($)</label>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Allocated Budget ($)</label>
                 <input
                   type="number"
                   value={newStopBudget}
                   onChange={(e) => setNewStopBudget(e.target.value)}
-                  className="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-700 rounded-xl text-sm text-gray-900 dark:text-slate-100 font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  className="w-full px-3 py-2 bg-slate-50 dark:bg-[#162235] border border-slate-200 dark:border-[#1E2D42] rounded-xl text-xs text-slate-900 dark:text-white"
                 />
               </div>
 
@@ -367,15 +472,15 @@ export const ItineraryBuilder: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setShowAddStopModal(false)}
-                  className="px-4 py-2 bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-slate-300 rounded-xl text-xs font-semibold"
+                  className="px-4 py-2 bg-slate-100 dark:bg-[#162235] text-slate-700 dark:text-slate-300 rounded-xl text-xs font-semibold"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-emerald-600 text-white rounded-xl text-xs font-bold shadow-md"
+                  className="px-4 py-2 bg-emerald-500 text-white rounded-xl text-xs font-bold"
                 >
-                  Add Section
+                  Add Stop
                 </button>
               </div>
             </form>
@@ -383,54 +488,68 @@ export const ItineraryBuilder: React.FC = () => {
         </div>
       )}
 
-      {/* Add Item Modal */}
+      {/* Add Item Modal with Granular Categories */}
       {showAddItemModal && (
-        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-900 max-w-md w-full p-6 rounded-3xl shadow-2xl space-y-4 border border-gray-100 dark:border-slate-800">
-            <h3 className="text-lg font-bold text-gray-900 dark:text-white">Add Activity / Expense Item</h3>
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-[#111E2E] max-w-md w-full p-6 rounded-3xl shadow-2xl border border-slate-200 dark:border-[#1E2D42] space-y-4">
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white">Add Categorized Line Item</h3>
             <form onSubmit={handleAddItem} className="space-y-3">
               <div>
-                <label className="block text-xs font-bold text-gray-900 dark:text-slate-200 uppercase mb-1">Activity Title</label>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Item Title *</label>
                 <input
                   type="text"
                   required
                   value={newItemTitle}
                   onChange={(e) => setNewItemTitle(e.target.value)}
-                  className="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-700 rounded-xl text-sm text-gray-900 dark:text-slate-100 font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                  placeholder="e.g. Louvre Museum Guided Tour"
+                  className="w-full px-3 py-2 bg-slate-50 dark:bg-[#162235] border border-slate-200 dark:border-[#1E2D42] rounded-xl text-xs text-slate-900 dark:text-white font-bold"
+                  placeholder="e.g. Flight to Rome / Louvre Museum Ticket / Breakfast at Cafe"
                 />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Category *</label>
+                <select
+                  value={newItemType}
+                  onChange={(e: any) => setNewItemType(e.target.value)}
+                  className="w-full px-3 py-2 bg-slate-50 dark:bg-[#162235] border border-slate-200 dark:border-[#1E2D42] rounded-xl text-xs text-slate-900 dark:text-white font-bold"
+                >
+                  <option value="ACTIVITY">🎟️ Activity / Sightseeing</option>
+                  <option value="TRANSPORT">🚗 Transport / Flight / Train / Cab</option>
+                  <option value="STAY">🏨 Stay / Hotel / Resort</option>
+                  <option value="MEAL">🍽️ Meal / Dining / Breakfast</option>
+                </select>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-bold text-gray-900 dark:text-slate-200 uppercase mb-1">Day Number</label>
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Day Number</label>
                   <input
                     type="number"
                     min="1"
                     value={newItemDay}
                     onChange={(e) => setNewItemDay(e.target.value)}
-                    className="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-700 rounded-xl text-sm text-gray-900 dark:text-slate-100 font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-[#162235] border border-slate-200 dark:border-[#1E2D42] rounded-xl text-xs text-slate-900 dark:text-white"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-gray-900 dark:text-slate-200 uppercase mb-1">Cost ($)</label>
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Est. Cost ($)</label>
                   <input
                     type="number"
                     value={newItemCost}
                     onChange={(e) => setNewItemCost(e.target.value)}
-                    className="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-700 rounded-xl text-sm text-gray-900 dark:text-slate-100 font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-[#162235] border border-slate-200 dark:border-[#1E2D42] rounded-xl text-xs text-slate-900 dark:text-white"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Time Slot</label>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Time Slot / Duration</label>
                 <input
                   type="text"
                   value={newItemTime}
                   onChange={(e) => setNewItemTime(e.target.value)}
-                  className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm"
-                  placeholder="10:00 AM - 01:00 PM"
+                  className="w-full px-3 py-2 bg-slate-50 dark:bg-[#162235] border border-slate-200 dark:border-[#1E2D42] rounded-xl text-xs text-slate-900 dark:text-white"
+                  placeholder="e.g. 09:00 AM - 11:30 AM (2.5 hrs)"
                 />
               </div>
 
@@ -438,15 +557,15 @@ export const ItineraryBuilder: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setShowAddItemModal(false)}
-                  className="px-4 py-2 bg-gray-100 text-gray-700 rounded-xl text-xs font-semibold"
+                  className="px-4 py-2 bg-slate-100 dark:bg-[#162235] text-slate-700 dark:text-slate-300 rounded-xl text-xs font-semibold"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-emerald-600 text-white rounded-xl text-xs font-bold"
+                  className="px-4 py-2 bg-emerald-500 text-white rounded-xl text-xs font-bold"
                 >
-                  Add Item
+                  Save Item
                 </button>
               </div>
             </form>
