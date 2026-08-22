@@ -8,6 +8,7 @@ import {
   X,
   Search,
   ChevronRight,
+  ChevronDown,
 } from 'lucide-react';
 
 export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -82,7 +83,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
               </div>
             </Link>
 
-            {/* 2. Desktop Navigation Pill with Active Highlighting (Request Item 2) */}
+            {/* 2. Desktop Navigation Pill with Standard Active Indicators (Request Item 4) */}
             {user && (
               <div className="hidden lg:flex flex-1 items-center justify-center px-2">
                 <nav className="flex items-center space-x-1 bg-slate-100/90 dark:bg-[#1E293B] p-1.5 rounded-2xl border border-slate-200 dark:border-white/10 shrink-0 shadow-xs">
@@ -106,7 +107,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
               </div>
             )}
 
-            {/* 3. Right Side User Controls & Active CTA Highlight (Request Item 2) */}
+            {/* 3. Right Side User Controls & Role Badge Alignment (Request Item 5) */}
             {user ? (
               <div className="flex items-center space-x-2.5 sm:space-x-3 shrink-0">
                 
@@ -123,7 +124,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                   />
                 </form>
 
-                {/* Plan New Trip CTA Button with Active Location State */}
+                {/* Plan New Trip CTA Button */}
                 <Link
                   to="/create-trip"
                   className={`hidden sm:flex items-center space-x-1.5 px-3.5 py-2 text-white text-xs font-black rounded-xl shadow-md transition whitespace-nowrap shrink-0 ${
@@ -136,10 +137,10 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                   <span className="whitespace-nowrap">{isCreateTripActive ? 'Planning New Trip...' : 'Plan New Trip'}</span>
                 </Link>
 
-                {/* User Profile Pill */}
+                {/* Profile / Role Badge Pill with Dropdown Indicator (Request Item 5) */}
                 <Link
                   to="/profile"
-                  className="flex items-center space-x-2 px-3 py-1.5 rounded-2xl bg-slate-100 dark:bg-[#1E293B] hover:bg-slate-200 dark:hover:bg-slate-700 transition border border-slate-200 dark:border-white/10 shrink-0 min-w-max"
+                  className="flex items-center space-x-2 px-3 py-1.5 rounded-2xl bg-slate-100 dark:bg-[#1E293B] hover:bg-slate-200 dark:hover:bg-slate-700 transition border border-slate-200 dark:border-white/10 shrink-0 min-w-max group"
                   title={`${user.name} (${user.role})`}
                 >
                   <img
@@ -148,10 +149,11 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                     className="w-8 h-8 rounded-xl object-cover ring-2 ring-[#7C3AED]/40 shrink-0"
                   />
                   <div className="flex flex-col text-left whitespace-nowrap shrink-0">
-                    <span className="text-xs font-black text-slate-800 dark:text-slate-200 leading-tight whitespace-nowrap">
-                      {user.name}
+                    <span className="text-xs font-black text-slate-800 dark:text-slate-200 leading-tight whitespace-nowrap flex items-center space-x-1">
+                      <span>{user.name}</span>
+                      <ChevronDown className="w-3 h-3 text-slate-400 group-hover:text-white transition" />
                     </span>
-                    <span className="text-[9px] text-[#00A09D] dark:text-[#38BDF8] font-bold uppercase tracking-wider whitespace-nowrap">
+                    <span className="text-[9px] text-[#00A09D] dark:text-[#38BDF8] font-extrabold uppercase tracking-wider whitespace-nowrap">
                       {user.role}
                     </span>
                   </div>
@@ -223,21 +225,23 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
         {children}
       </main>
 
-      {/* Footer */}
-      <footer className="bg-white dark:bg-[#0F172A] border-t border-slate-200 dark:border-white/10 py-6 text-center text-xs text-slate-500 dark:text-slate-400">
+      {/* Footer with Divider & Spacing (Request Item 8) */}
+      <footer className="mt-12 bg-white dark:bg-[#0F172A] border-t border-slate-200 dark:border-white/10 py-8 text-center text-xs text-slate-500 dark:text-slate-400 shadow-xs">
         <div className="max-w-[1500px] mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center space-x-2">
             <img src="/globetrotter-logo.jpg" alt="GlobeTrotter Logo" className="w-5 h-5 rounded-full object-cover ring-1 ring-[#7C3AED]" />
             <span className="font-extrabold text-slate-800 dark:text-slate-200">GlobeTrotter Enterprise</span>
-            <span>— Smart Travel Planning Platform</span>
+            <span>— Smart Multi-City Travel Platform</span>
           </div>
 
           <div className="flex items-center space-x-4 font-semibold text-[11px]">
-            <Link to="/community" className="hover:text-[#7C3AED]">Community</Link>
+            <Link to="/community" className="hover:text-[#7C3AED]">Community Hub</Link>
             <span>•</span>
-            <Link to="/search" className="hover:text-[#7C3AED]">Explore</Link>
+            <Link to="/search" className="hover:text-[#7C3AED]">Explore Destinations</Link>
             <span>•</span>
             <Link to="/my-trips" className="hover:text-[#7C3AED]">Itineraries</Link>
+            <span>•</span>
+            <Link to="/calendar" className="hover:text-[#7C3AED]">Calendar</Link>
           </div>
         </div>
       </footer>
