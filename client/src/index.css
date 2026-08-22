@@ -1,0 +1,25 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  font-family: 'Inter', sans-serif;
+  @apply bg-slate-50 text-gray-900 transition-colors duration-200;
+}
+
+html.dark body {
+  @apply bg-slate-950 text-slate-100;
+}
+
+/* Custom dark mode card classes */
+.dark .dark-card {
+  @apply bg-slate-900 border-slate-800 text-slate-100;
+}
+
+.dark .dark-input {
+  @apply bg-slate-800 border-slate-700 text-slate-100 focus:bg-slate-800;
+}
+
+.dark .dark-muted {
+  @apply text-slate-400;
+}

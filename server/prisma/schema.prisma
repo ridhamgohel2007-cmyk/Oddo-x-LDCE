@@ -1,0 +1,125 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String          @id @default(uuid())
+  email        String          @unique
+  passwordHash String
+  name         String
+  role         String          @default("USER") // USER or ADMIN
+  phone        String?
+  city         String?
+  country      String?
+  bio          String?
+  profilePic   String?
+  language     String          @default("English")
+  trips        Trip[]
+  posts        CommunityPost[]
+  createdAt    DateTime        @default(now())
+}
+
+model City {
+  id              String      @id @default(uuid())
+  name            String
+  country         String
+  region          String
+  imageUrl        String
+  description     String
+  costIndex       String      @default("MEDIUM") // LOW, MEDIUM, HIGH
+  popularityScore Int         @default(80)
+  activities      Activity[]
+  stops           TripStop[]
+  createdAt       DateTime    @default(now())
+}
+
+model Activity {
+  id             String          @id @default(uuid())
+  cityId         String
+  city           City            @relation(fields: [cityId], references: [id], onDelete: Cascade)
+  title          String
+  description    String
+  category       String
+  estimatedCost  Float           @default(0)
+  durationHours  Float           @default(2.0)
+  imageUrl       String
+  itineraryItems ItineraryItem[]
+  createdAt      DateTime        @default(now())
+}
+
+model Trip {
+  id             String          @id @default(uuid())
+  userId         String
+  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title          String
+  description    String?
+  coverImage     String?
+  startDate      DateTime
+  endDate        DateTime
+  status         String          @default("UPCOMING") // ONGOING, UPCOMING, COMPLETED, CANCELLED
+  isPublic       Boolean         @default(false)
+  totalBudget    Float           @default(0)
+  stops          TripStop[]
+  expenses       TripExpense[]
+  communityPosts CommunityPost[]
+  createdAt      DateTime        @default(now())
+}
+
+model TripStop {
+  id        String          @id @default(uuid())
+  tripId    String
+  trip      Trip            @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  cityId    String?
+  city      City?           @relation(fields: [cityId], references: [id], onDelete: SetNull)
+  title     String
+  stopOrder Int             @default(1)
+  startDate DateTime
+  endDate   DateTime
+  budget    Float           @default(0)
+  items     ItineraryItem[]
+  createdAt DateTime        @default(now())
+}
+
+model ItineraryItem {
+  id         String    @id @default(uuid())
+  stopId     String
+  stop       TripStop  @relation(fields: [stopId], references: [id], onDelete: Cascade)
+  activityId String?
+  activity   Activity? @relation(fields: [activityId], references: [id], onDelete: SetNull)
+  title      String
+  dayNumber  Int       @default(1)
+  timeSlot   String?
+  cost       Float     @default(0)
+  type       String    @default("ACTIVITY") // ACTIVITY, HOTEL, TRANSPORT, MEAL, OTHER
+  itemOrder  Int       @default(1)
+  createdAt  DateTime  @default(now())
+}
+
+model TripExpense {
+  id        String   @id @default(uuid())
+  tripId    String
+  trip      Trip     @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  category  String   @default("OTHER") // TRANSPORT, STAY, ACTIVITIES, MEALS, OTHER
+  amount    Float
+  notes     String?
+  date      DateTime @default(now())
+  createdAt DateTime @default(now())
+}
+
+model CommunityPost {
+  id          String   @id @default(uuid())
+  tripId      String
+  trip        Trip     @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  authorId    String
+  author      User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  title       String
+  description String?
+  likesCount  Int      @default(0)
+  clonesCount Int      @default(0)
+  createdAt   DateTime @default(now())
+}

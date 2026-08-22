@@ -1,0 +1,16 @@
+{
+  "name": "globetrotter",
+  "version": "1.0.0",
+  "description": "GlobeTrotter - Personalized Travel Planning Platform",
+  "scripts": {
+    "dev:server": "npm run dev --prefix server",
+    "dev:client": "npm run dev --prefix client",
+    "build:server": "npm run build --prefix server",
+    "build:client": "npm run build --prefix client",
+    "db:push": "npm run db:push --prefix server",
+    "db:seed": "npm run db:seed --prefix server"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
