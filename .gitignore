@@ -18,6 +18,9 @@ server/prisma/*.db
 **/.env
 .env.local
 
+# Documents / PDFs
+*.pdf
+
 # Logs
 *.log
 npm-debug.log*
