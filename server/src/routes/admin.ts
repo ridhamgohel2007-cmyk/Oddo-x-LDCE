@@ -36,7 +36,7 @@ router.get('/analytics', authenticateToken, requireAdmin, async (req: Authentica
 
     // Recent user signups
     const users = await prisma.user.findMany({
-      take: 10,
+      take: 20,
       select: {
         id: true,
         name: true,
@@ -108,6 +108,21 @@ router.get('/users', authenticateToken, requireAdmin, async (req: AuthenticatedR
     return res.json(users);
   } catch (error) {
     return res.status(500).json({ message: 'Failed to fetch users.' });
+  }
+});
+
+// PUT /api/admin/users/:id/role - Update user role
+router.put('/users/:id/role', authenticateToken, requireAdmin, async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { role } = req.body;
+    const updated = await prisma.user.update({
+      where: { id },
+      data: { role },
+    });
+    return res.json(updated);
+  } catch (error) {
+    return res.status(500).json({ message: 'Failed to update user role.' });
   }
 });
 
