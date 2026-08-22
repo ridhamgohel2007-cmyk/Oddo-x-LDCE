@@ -56,7 +56,7 @@ export const Dashboard: React.FC = () => {
     const fetchData = async () => {
       try {
         const [citiesRes, tripsRes] = await Promise.all([
-          api.get('/cities?popular=true'),
+          api.get('/cities'),
           api.get('/trips'),
         ]);
 
@@ -151,19 +151,19 @@ export const Dashboard: React.FC = () => {
     const cost = (city.costIndex || '').toUpperCase();
 
     if (vibe === 'ROMANTIC') {
-      return desc.includes('romantic') || desc.includes('honeymoon') || desc.includes('eiffel') || desc.includes('canal') || desc.includes('beach') || name.includes('paris') || name.includes('goa') || name.includes('bali');
+      return desc.includes('romantic') || desc.includes('honeymoon') || desc.includes('eiffel') || desc.includes('canal') || desc.includes('beach') || desc.includes('hill') || name.includes('paris') || name.includes('goa') || name.includes('bali') || name.includes('shimla') || name.includes('manali') || name.includes('udaipur') || name.includes('srinagar') || name.includes('ooty') || name.includes('coorg');
     }
     if (vibe === 'ADVENTURE') {
-      return desc.includes('adventure') || desc.includes('outdoor') || desc.includes('hike') || desc.includes('trek') || desc.includes('paragliding') || desc.includes('beach') || name.includes('goa') || name.includes('bali');
+      return desc.includes('adventure') || desc.includes('outdoor') || desc.includes('hike') || desc.includes('trek') || desc.includes('paragliding') || desc.includes('rafting') || desc.includes('snow') || desc.includes('beach') || name.includes('goa') || name.includes('bali') || name.includes('manali') || name.includes('rishikesh') || name.includes('ladakh') || name.includes('leh');
     }
     if (vibe === 'HERITAGE') {
-      return desc.includes('heritage') || desc.includes('culture') || desc.includes('history') || desc.includes('palace') || desc.includes('monument') || desc.includes('taj') || name.includes('agra') || name.includes('jaipur') || name.includes('delhi') || name.includes('kyoto') || name.includes('rome');
+      return desc.includes('heritage') || desc.includes('culture') || desc.includes('history') || desc.includes('palace') || desc.includes('monument') || desc.includes('fort') || desc.includes('temple') || name.includes('agra') || name.includes('jaipur') || name.includes('delhi') || name.includes('varanasi') || name.includes('amritsar') || name.includes('mysore') || name.includes('jodhpur') || name.includes('jaisalmer') || name.includes('mahabalipuram') || name.includes('madurai') || name.includes('kolkata') || name.includes('ahmedabad');
     }
     if (vibe === 'ROAD_TRIP') {
-      return desc.includes('drive') || desc.includes('road') || desc.includes('scenic') || desc.includes('coastal') || desc.includes('mountain') || name.includes('jaipur') || name.includes('goa') || region.includes('asia');
+      return desc.includes('drive') || desc.includes('road') || desc.includes('scenic') || desc.includes('coastal') || desc.includes('mountain') || desc.includes('pass') || name.includes('jaipur') || name.includes('goa') || name.includes('ladakh') || name.includes('manali') || name.includes('shimla') || name.includes('coorg') || name.includes('pondicherry');
     }
     if (vibe === 'BUDGET') {
-      return cost === 'LOW' || desc.includes('budget') || desc.includes('affordable') || name.includes('agra') || name.includes('jaipur') || name.includes('goa');
+      return cost === 'LOW' || desc.includes('budget') || desc.includes('affordable') || name.includes('agra') || name.includes('jaipur') || name.includes('goa') || name.includes('varanasi') || name.includes('amritsar') || name.includes('rishikesh') || name.includes('pondicherry');
     }
     return true;
   };
@@ -171,7 +171,8 @@ export const Dashboard: React.FC = () => {
   const filteredCities = cities.filter((city) => {
     const matchesSearch =
       city.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      city.country.toLowerCase().includes(searchQuery.toLowerCase());
+      city.country.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      city.description.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesSearch && matchesVibe(city, selectedVibe);
   });
 
@@ -186,7 +187,7 @@ export const Dashboard: React.FC = () => {
 
   return (
     <div className="space-y-8 pb-12">
-      {/* Hero Banner with Action Buttons & Mini-Metrics */}
+      {/* Hero Banner */}
       <div className="relative rounded-3xl overflow-hidden shadow-2xl bg-gradient-to-r from-[#0B1320] via-[#111E2E] to-[#0B1320] border border-slate-200 dark:border-[#1E2D42]">
         <img
           src="https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=1600&q=80"
@@ -223,15 +224,15 @@ export const Dashboard: React.FC = () => {
               </Link>
             </div>
 
-            {/* Mini-Metrics Badges (Hero Empty Space Balance) */}
+            {/* Mini-Metrics Badges */}
             <div className="pt-2 flex flex-wrap gap-4 text-xs font-bold text-slate-300 border-t border-white/10 pt-4">
               <div className="flex items-center space-x-1.5 bg-white/5 px-3 py-1.5 rounded-xl border border-white/10">
                 <Map className="w-4 h-4 text-emerald-400" />
-                <span><strong className="text-white">12</strong> Cities Explored</span>
+                <span><strong className="text-white">{cities.filter(c => c.country === 'India').length}</strong> Popular Cities in India</span>
               </div>
               <div className="flex items-center space-x-1.5 bg-white/5 px-3 py-1.5 rounded-xl border border-white/10">
                 <Globe2 className="w-4 h-4 text-cyan-400" />
-                <span><strong className="text-white">5</strong> Countries Visited</span>
+                <span><strong className="text-white">{cities.length}</strong> Total Destinations</span>
               </div>
               <div className="flex items-center space-x-1.5 bg-white/5 px-3 py-1.5 rounded-xl border border-white/10">
                 <Luggage className="w-4 h-4 text-amber-400" />
@@ -240,7 +241,7 @@ export const Dashboard: React.FC = () => {
             </div>
           </div>
 
-          {/* Dynamic Countdown Widget with Animated Pulse Status Pill */}
+          {/* Dynamic Countdown Widget */}
           {nextTrip && (
             <div className="w-full lg:w-80 bg-white/10 dark:bg-[#162235]/90 backdrop-blur-xl border border-white/20 dark:border-[#1E2D42] p-5 rounded-2xl text-white space-y-3 shadow-xl">
               <div className="flex items-center justify-between">
@@ -249,7 +250,6 @@ export const Dashboard: React.FC = () => {
                   <span>Next Journey Countdown</span>
                 </span>
                 
-                {/* Subtle Animated Pulse UPCOMING Status Pill */}
                 <span className="px-2.5 py-0.5 bg-emerald-500/30 text-emerald-300 rounded-full text-[10px] font-extrabold animate-pulse ring-2 ring-emerald-400/50">
                   {nextTrip.status}
                 </span>
@@ -289,7 +289,7 @@ export const Dashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* Budget Highlights with Visual Progress Bar & Currency Switcher Toggle */}
+      {/* Budget Highlights */}
       <section className="space-y-3">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
           <div className="flex items-center space-x-3">
@@ -297,7 +297,7 @@ export const Dashboard: React.FC = () => {
               Budget Highlights & Financial Summary
             </h2>
 
-            {/* Currency Switcher Quick Toggle (INR / USD) */}
+            {/* Currency Switcher Quick Toggle */}
             <div className="flex items-center bg-slate-200 dark:bg-[#162235] p-1 rounded-xl border border-slate-300 dark:border-[#1E2D42]">
               <button
                 type="button"
@@ -388,27 +388,27 @@ export const Dashboard: React.FC = () => {
           <div>
             <h2 className="text-xl font-extrabold text-slate-900 dark:text-white flex items-center space-x-2">
               <Flame className="w-5 h-5 text-amber-500" />
-              <span>Travel by Vibe — Curated Mood Filtering</span>
+              <span>Travel by Vibe — Search Indian & Global Destinations</span>
             </h2>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-              Discover destinations tailored to your travel style: Honeymoon, Road Trips, Adventure, Heritage, or Budget Escapes
+              Search any popular city in India (Shimla, Manali, Goa, Kerala, Varanasi, Jaipur, Srinagar, Ladakh, Coorg, Ooty...)
             </p>
           </div>
 
-          {/* Quick Search */}
-          <div className="relative w-full md:w-64">
+          {/* Quick Search Bar for Every Popular City in India */}
+          <div className="relative w-full md:w-80">
             <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search destinations..."
-              className="w-full pl-10 pr-3 py-2 bg-slate-50 dark:bg-[#162235] border border-slate-200 dark:border-[#1E2D42] rounded-xl text-xs font-semibold text-slate-900 dark:text-slate-100"
+              placeholder="Search Indian cities (e.g. Manali, Goa, Shimla)..."
+              className="w-full pl-10 pr-3 py-2 bg-slate-50 dark:bg-[#162235] border border-slate-200 dark:border-[#1E2D42] rounded-xl text-xs font-semibold text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500"
             />
           </div>
         </div>
 
-        {/* Travel Vibe Selector Buttons with High-Contrast Emerald Active State */}
+        {/* Travel Vibe Selector Buttons */}
         <div className="flex items-center space-x-2.5 overflow-x-auto pb-2 scrollbar-none">
           {vibeOptions.map((vibe) => {
             const Icon = vibe.icon;
@@ -437,12 +437,12 @@ export const Dashboard: React.FC = () => {
           <div>
             <h2 className="text-xl font-black text-slate-900 dark:text-white flex items-center space-x-2">
               <Globe2 className="w-5 h-5 text-emerald-500" />
-              <span>Curated Destination Selections ({filteredCities.length})</span>
+              <span>Popular Destination Catalog ({filteredCities.length})</span>
             </h2>
-            <p className="text-xs text-slate-500 dark:text-slate-400">Handpicked popular cities matching your travel mood</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400">Explore popular cities in India and top destinations worldwide</p>
           </div>
           <Link to="/search" className="text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:underline flex items-center space-x-1">
-            <span>View All Destinations</span>
+            <span>View Full Catalog</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>
@@ -454,12 +454,13 @@ export const Dashboard: React.FC = () => {
             ))}
           </div>
         ) : filteredCities.length === 0 ? (
-          <div className="p-8 bg-white dark:bg-[#111E2E] rounded-3xl border border-slate-200 dark:border-[#1E2D42] text-center text-xs text-slate-400">
-            No destinations found matching this travel vibe filter. Try selecting "All Destinations"!
+          <div className="p-8 bg-white dark:bg-[#111E2E] rounded-3xl border border-slate-200 dark:border-[#1E2D42] text-center text-xs text-slate-400 space-y-2">
+            <p className="font-bold text-slate-700 dark:text-slate-300 text-sm">No destinations matched "{searchQuery}"</p>
+            <p>Try searching for popular Indian cities like <strong>Goa, Jaipur, Manali, Shimla, Varanasi, Kerala, Srinagar, Coorg, Ooty</strong>...</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredCities.slice(0, 6).map((city) => (
+            {(searchQuery.trim() !== '' || selectedVibe !== 'ALL' ? filteredCities : filteredCities.slice(0, 12)).map((city) => (
               <CityCard
                 key={city.id}
                 city={city}

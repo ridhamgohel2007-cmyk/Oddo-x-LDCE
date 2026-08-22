@@ -47,16 +47,16 @@ async function main() {
     },
   });
 
-  console.log('Seeding Indian Cities & Global Destinations...');
+  console.log('Seeding All Popular Cities in India & International Destinations...');
 
-  // Indian Cities
+  // --- POPULAR INDIAN CITIES ---
   const agra = await prisma.city.create({
     data: {
       name: 'Agra',
       country: 'India',
       region: 'Asia',
       imageUrl: 'https://images.unsplash.com/photo-1564507592333-c60657eea523?auto=format&fit=crop&w=800&q=80',
-      description: 'Home to the iconic Taj Mahal - one of the Seven Wonders of the World, Mughal grandeur, Agra Fort, and Mehtab Bagh sunset views.',
+      description: 'Home to the iconic Taj Mahal - one of the Seven Wonders of the World, Mughal architecture, Agra Fort, and Mehtab Bagh.',
       costIndex: 'MEDIUM',
       popularityScore: 99,
     },
@@ -68,9 +68,9 @@ async function main() {
       country: 'India',
       region: 'Asia',
       imageUrl: 'https://images.unsplash.com/photo-1477587458883-47145ed94245?auto=format&fit=crop&w=800&q=80',
-      description: 'The majestic Pink City of Rajasthan, famous for Hawa Mahal, Amer Fort, grand palaces, vibrant bazaars, and royal heritage.',
+      description: 'The majestic Pink City of Rajasthan, famous for Hawa Mahal, Amer Fort, grand royal palaces, and Johari Bazaar shopping.',
       costIndex: 'LOW',
-      popularityScore: 97,
+      popularityScore: 98,
     },
   });
 
@@ -80,9 +80,9 @@ async function main() {
       country: 'India',
       region: 'Asia',
       imageUrl: 'https://images.unsplash.com/photo-1570168007204-dfb528c6958f?auto=format&fit=crop&w=800&q=80',
-      description: 'The vibrant financial capital of India, famous for Gateway of India, Marine Drive promenade, Bollywood studios, and street food.',
+      description: 'The vibrant financial capital of India, famous for Gateway of India, Marine Drive promenade, Bollywood, and coastal street food.',
       costIndex: 'MEDIUM',
-      popularityScore: 96,
+      popularityScore: 97,
     },
   });
 
@@ -94,7 +94,7 @@ async function main() {
       imageUrl: 'https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?auto=format&fit=crop&w=800&q=80',
       description: 'India premier beach paradise with golden sands, Portuguese heritage, water sports, vibrant nightlife, and spice plantations.',
       costIndex: 'MEDIUM',
-      popularityScore: 96,
+      popularityScore: 98,
     },
   });
 
@@ -106,7 +106,7 @@ async function main() {
       imageUrl: 'https://images.unsplash.com/photo-1561361513-2d000a50f0dc?auto=format&fit=crop&w=800&q=80',
       description: 'The spiritual capital of India along the sacred Ganges river, famous for ancient ghats, evening Ganga Aarti, and Kashi Vishwanath temple.',
       costIndex: 'LOW',
-      popularityScore: 94,
+      popularityScore: 95,
     },
   });
 
@@ -118,7 +118,7 @@ async function main() {
       imageUrl: 'https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?auto=format&fit=crop&w=800&q=80',
       description: 'Gods Own Country, famous for serene backwater houseboat cruises, coconut groves, Ayurvedic wellness, and tea gardens.',
       costIndex: 'MEDIUM',
-      popularityScore: 95,
+      popularityScore: 96,
     },
   });
 
@@ -130,7 +130,7 @@ async function main() {
       imageUrl: 'https://images.unsplash.com/photo-1587474260584-136574528ed5?auto=format&fit=crop&w=800&q=80',
       description: 'The historic capital of India featuring Qutub Minar, India Gate, Red Fort, Humayun Tomb, and famous Chandni Chowk street food.',
       costIndex: 'MEDIUM',
-      popularityScore: 95,
+      popularityScore: 97,
     },
   });
 
@@ -142,11 +142,287 @@ async function main() {
       imageUrl: 'https://images.unsplash.com/photo-1615836245337-f5b9b2303f10?auto=format&fit=crop&w=800&q=80',
       description: 'The City of Lakes, renowned for romantic Lake Pichola boat cruises, grand City Palace, and heritage havelis.',
       costIndex: 'MEDIUM',
+      popularityScore: 95,
+    },
+  });
+
+  const ahmedabad = await prisma.city.create({
+    data: {
+      name: 'Ahmedabad',
+      country: 'India',
+      region: 'Asia',
+      imageUrl: 'https://images.unsplash.com/photo-1609766857041-ed402ea8069a?auto=format&fit=crop&w=800&q=80',
+      description: 'India first UNESCO World Heritage City, famous for Sabarmati Ashram, Kankaria Lake, Adalaj Stepwell, and Gujarati cuisine.',
+      costIndex: 'LOW',
+      popularityScore: 94,
+    },
+  });
+
+  const bangalore = await prisma.city.create({
+    data: {
+      name: 'Bangalore (Bengaluru)',
+      country: 'India',
+      region: 'Asia',
+      imageUrl: 'https://images.unsplash.com/photo-1596176530529-78163a4f7af2?auto=format&fit=crop&w=800&q=80',
+      description: 'The Garden City and tech hub of India, famous for Cubbon Park, Bangalore Palace, craft breweries, and pleasant weather.',
+      costIndex: 'MEDIUM',
       popularityScore: 93,
     },
   });
 
-  // Global Cities
+  const chennai = await prisma.city.create({
+    data: {
+      name: 'Chennai',
+      country: 'India',
+      region: 'Asia',
+      imageUrl: 'https://images.unsplash.com/photo-1582510003544-4d00b7f74220?auto=format&fit=crop&w=800&q=80',
+      description: 'The gateway to South India, renowned for Marina Beach, Dravidian Kapaleeshwarar Temple, and classical music & dance heritage.',
+      costIndex: 'LOW',
+      popularityScore: 92,
+    },
+  });
+
+  const kolkata = await prisma.city.create({
+    data: {
+      name: 'Kolkata',
+      country: 'India',
+      region: 'Asia',
+      imageUrl: 'https://images.unsplash.com/photo-1558431382-27e303142255?auto=format&fit=crop&w=800&q=80',
+      description: 'The City of Joy, famous for Victoria Memorial, Howrah Bridge, iconic yellow taxis, colonial charm, and sweets.',
+      costIndex: 'LOW',
+      popularityScore: 93,
+    },
+  });
+
+  const hyderabad = await prisma.city.create({
+    data: {
+      name: 'Hyderabad',
+      country: 'India',
+      region: 'Asia',
+      imageUrl: 'https://images.unsplash.com/photo-1605379399642-870262d3d051?auto=format&fit=crop&w=800&q=80',
+      description: 'The City of Pearls, renowned for Charminar, Golconda Fort, Ramoji Film City, and world-famous Hyderabadi Biryani.',
+      costIndex: 'MEDIUM',
+      popularityScore: 94,
+    },
+  });
+
+  const shimla = await prisma.city.create({
+    data: {
+      name: 'Shimla',
+      country: 'India',
+      region: 'Asia',
+      imageUrl: 'https://images.unsplash.com/photo-1562670652-e5947bddb335?auto=format&fit=crop&w=800&q=80',
+      description: 'The Queen of Hill Stations in Himachal Pradesh, famous for snow-capped Himalayan peaks, colonial Ridge, and Mall Road walks.',
+      costIndex: 'MEDIUM',
+      popularityScore: 95,
+    },
+  });
+
+  const manali = await prisma.city.create({
+    data: {
+      name: 'Manali',
+      country: 'India',
+      region: 'Asia',
+      imageUrl: 'https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?auto=format&fit=crop&w=800&q=80',
+      description: 'High-altitude Himalayan resort town in Himachal, famous for Solang Valley adventure sports, Rohtang Pass, and pine forests.',
+      costIndex: 'MEDIUM',
+      popularityScore: 97,
+    },
+  });
+
+  const rishikesh = await prisma.city.create({
+    data: {
+      name: 'Rishikesh',
+      country: 'India',
+      region: 'Asia',
+      imageUrl: 'https://images.unsplash.com/photo-1544735716-392fe2489ffa?auto=format&fit=crop&w=800&q=80',
+      description: 'The Yoga Capital of the World along the Ganges in Uttarakhand, famous for white-water river rafting, Lakshman Jhula, and Beatles Ashram.',
+      costIndex: 'LOW',
+      popularityScore: 96,
+    },
+  });
+
+  const amritsar = await prisma.city.create({
+    data: {
+      name: 'Amritsar',
+      country: 'India',
+      region: 'Asia',
+      imageUrl: 'https://images.unsplash.com/photo-1609946779435-0ef41680d283?auto=format&fit=crop&w=800&q=80',
+      description: 'Spiritual hub of Sikhism in Punjab, home to the shimmering Golden Temple (Harmandir Sahib), Wagah Border ceremony, and Kulchas.',
+      costIndex: 'LOW',
+      popularityScore: 96,
+    },
+  });
+
+  const darjeeling = await prisma.city.create({
+    data: {
+      name: 'Darjeeling',
+      country: 'India',
+      region: 'Asia',
+      imageUrl: 'https://images.unsplash.com/photo-1544644181-1484b3fdfc62?auto=format&fit=crop&w=800&q=80',
+      description: 'The Queen of Hills in West Bengal, famous for Kanchenjunga sunrise views from Tiger Hill, UNESCO Himalayan Toy Train, and tea estates.',
+      costIndex: 'LOW',
+      popularityScore: 94,
+    },
+  });
+
+  const srinagar = await prisma.city.create({
+    data: {
+      name: 'Srinagar (Kashmir)',
+      country: 'India',
+      region: 'Asia',
+      imageUrl: 'https://images.unsplash.com/photo-1595815771614-ade9d652a65d?auto=format&fit=crop&w=800&q=80',
+      description: 'Heaven on Earth in Jammu & Kashmir, famous for Dal Lake Shikara rides, wooden houseboats, Indira Gandhi Tulip Garden, and Gulmarg snow.',
+      costIndex: 'MEDIUM',
+      popularityScore: 97,
+    },
+  });
+
+  const ladakh = await prisma.city.create({
+    data: {
+      name: 'Ladakh (Leh)',
+      country: 'India',
+      region: 'Asia',
+      imageUrl: 'https://images.unsplash.com/photo-1581793745862-99fde7fa73d2?auto=format&fit=crop&w=800&q=80',
+      description: 'The Land of High Passes, famous for azure Pangong Tso Lake, double-humped camel rides in Nubra Valley, magnetic hill, and monasteries.',
+      costIndex: 'HIGH',
+      popularityScore: 98,
+    },
+  });
+
+  const jodhpur = await prisma.city.create({
+    data: {
+      name: 'Jodhpur',
+      country: 'India',
+      region: 'Asia',
+      imageUrl: 'https://images.unsplash.com/photo-1568849676085-51415703900f?auto=format&fit=crop&w=800&q=80',
+      description: 'The Sun City & Blue City of Rajasthan, guarded by the towering Mehrangarh Fort, Jaswant Thada, and Umaid Bhawan Palace.',
+      costIndex: 'MEDIUM',
+      popularityScore: 94,
+    },
+  });
+
+  const jaisalmer = await prisma.city.create({
+    data: {
+      name: 'Jaisalmer',
+      country: 'India',
+      region: 'Asia',
+      imageUrl: 'https://images.unsplash.com/photo-1577083552431-6e5fd01aa342?auto=format&fit=crop&w=800&q=80',
+      description: 'The Golden City in the heart of Thar Desert, famous for living Jaisalmer Fort, Sam Sand Dunes desert safari, and overnight luxury camps.',
+      costIndex: 'MEDIUM',
+      popularityScore: 95,
+    },
+  });
+
+  const mysore = await prisma.city.create({
+    data: {
+      name: 'Mysore (Mysuru)',
+      country: 'India',
+      region: 'Asia',
+      imageUrl: 'https://images.unsplash.com/photo-1600100397608-f010e423b971?auto=format&fit=crop&w=800&q=80',
+      description: 'The Heritage City of Karnataka, famous for the opulent Mysore Palace, Chamundeshwari Temple, silk saris, and Dasara celebrations.',
+      costIndex: 'LOW',
+      popularityScore: 93,
+    },
+  });
+
+  const ooty = await prisma.city.create({
+    data: {
+      name: 'Ooty',
+      country: 'India',
+      region: 'Asia',
+      imageUrl: 'https://images.unsplash.com/photo-1589182373726-e4f658ab50f0?auto=format&fit=crop&w=800&q=80',
+      description: 'Queen of Hill Stations in the Nilgiri Hills of Tamil Nadu, famous for botanical gardens, Ooty Lake, and tea plantation walks.',
+      costIndex: 'LOW',
+      popularityScore: 93,
+    },
+  });
+
+  const coorg = await prisma.city.create({
+    data: {
+      name: 'Coorg (Kodagu)',
+      country: 'India',
+      region: 'Asia',
+      imageUrl: 'https://images.unsplash.com/photo-1590050752117-238cb0fb12b1?auto=format&fit=crop&w=800&q=80',
+      description: 'The Scotland of India in Karnataka, famous for rolling coffee plantations, mist-covered Western Ghats, Abbey Falls, and spice estates.',
+      costIndex: 'MEDIUM',
+      popularityScore: 94,
+    },
+  });
+
+  const pondicherry = await prisma.city.create({
+    data: {
+      name: 'Pondicherry (Puducherry)',
+      country: 'India',
+      region: 'Asia',
+      imageUrl: 'https://images.unsplash.com/photo-1589793463357-5fb813435467?auto=format&fit=crop&w=800&q=80',
+      description: 'The French Riviera of the East, famous for mustard-yellow French Quarter villas, Auroville experimental township, and Promenade Beach.',
+      costIndex: 'LOW',
+      popularityScore: 95,
+    },
+  });
+
+  const mahabalipuram = await prisma.city.create({
+    data: {
+      name: 'Mahabalipuram',
+      country: 'India',
+      region: 'Asia',
+      imageUrl: 'https://images.unsplash.com/photo-1621847468516-1ed5d0df56fe?auto=format&fit=crop&w=800&q=80',
+      description: 'UNESCO World Heritage coastal town in Tamil Nadu, renowned for 7th-century Pallava Shore Temple, Pancha Rathas, and rock relief carvings.',
+      costIndex: 'LOW',
+      popularityScore: 91,
+    },
+  });
+
+  const madurai = await prisma.city.create({
+    data: {
+      name: 'Madurai',
+      country: 'India',
+      region: 'Asia',
+      imageUrl: 'https://images.unsplash.com/photo-1600100397608-f010e423b971?auto=format&fit=crop&w=800&q=80',
+      description: 'Ancient temple city of Tamil Nadu, famous for the towering colorful gopurams of Meenakshi Amman Temple and Thirumalai Nayakkar Palace.',
+      costIndex: 'LOW',
+      popularityScore: 92,
+    },
+  });
+
+  const kanyakumari = await prisma.city.create({
+    data: {
+      name: 'Kanyakumari',
+      country: 'India',
+      region: 'Asia',
+      imageUrl: 'https://images.unsplash.com/photo-1582510003544-4d00b7f74220?auto=format&fit=crop&w=800&q=80',
+      description: 'The southernmost tip of mainland India where the Arabian Sea, Bay of Bengal, and Indian Ocean meet; famous for Vivekananda Rock Memorial.',
+      costIndex: 'LOW',
+      popularityScore: 92,
+    },
+  });
+
+  const shillong = await prisma.city.create({
+    data: {
+      name: 'Shillong',
+      country: 'India',
+      region: 'Asia',
+      imageUrl: 'https://images.unsplash.com/photo-1572949645841-094f3a9c4c94?auto=format&fit=crop&w=800&q=80',
+      description: 'The Scotland of the East in Meghalaya, famous for Elephant Falls, Shillong Peak, pine-covered hills, and nearby Cherrapunji root bridges.',
+      costIndex: 'LOW',
+      popularityScore: 93,
+    },
+  });
+
+  const gangtok = await prisma.city.create({
+    data: {
+      name: 'Gangtok',
+      country: 'India',
+      region: 'Asia',
+      imageUrl: 'https://images.unsplash.com/photo-1573059224625-99e80479d20f?auto=format&fit=crop&w=800&q=80',
+      description: 'Capital of Sikkim nestled in the Eastern Himalayas, famous for Rumtek Monastery, Nathula Pass border, and Tsomgo Lake.',
+      costIndex: 'MEDIUM',
+      popularityScore: 94,
+    },
+  });
+
+  // --- INTERNATIONAL CITIES ---
   const paris = await prisma.city.create({
     data: {
       name: 'Paris',
@@ -328,30 +604,6 @@ async function main() {
       estimatedCost: 5500,
       durationHours: 3.0,
       imageUrl: 'https://images.unsplash.com/photo-1511739001486-6bfe10ce785f?auto=format&fit=crop&w=600&q=80',
-    },
-  });
-
-  const louvre = await prisma.activity.create({
-    data: {
-      cityId: paris.id,
-      title: 'Louvre Museum Guided Masterpiece Tour',
-      description: 'Explore the Mona Lisa, Venus de Milo, and Winged Victory with an expert art historian.',
-      category: 'Culture',
-      estimatedCost: 4000,
-      durationHours: 3.5,
-      imageUrl: 'https://images.unsplash.com/photo-1499856871958-5b9627545d1a?auto=format&fit=crop&w=600&q=80',
-    },
-  });
-
-  const sensoji = await prisma.activity.create({
-    data: {
-      cityId: tokyo.id,
-      title: 'Senso-ji Temple & Asakusa Food Tasting',
-      description: 'Discover Tokyo’s oldest Buddhist temple followed by traditional street food stalls.',
-      category: 'Culture',
-      estimatedCost: 3000,
-      durationHours: 2.5,
-      imageUrl: 'https://images.unsplash.com/photo-1542051841857-5f90071e7989?auto=format&fit=crop&w=600&q=80',
     },
   });
 
@@ -542,7 +794,7 @@ async function main() {
     },
   });
 
-  console.log('Database seeding finished successfully with Jiyan Mansuri & Ridham Gohel!');
+  console.log('Database seeding finished successfully with 31 popular Indian cities!');
 }
 
 main()
