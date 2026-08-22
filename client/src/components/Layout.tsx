@@ -149,7 +149,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                   {isDark ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-slate-600" />}
                 </button>
 
-                {/* Unclipped User Profile Pill with Auto-Width & Proper Padding (Request 1) */}
+                {/* Fully Unclipped User Profile Capsule with padding 6px 14px (px-3.5 py-1.5) & flex-shrink: 0 (Request 1) */}
                 <Link
                   to="/profile"
                   className="flex items-center space-x-2.5 px-3.5 py-1.5 rounded-2xl bg-slate-100 dark:bg-[#1E293B] hover:bg-slate-200 dark:hover:bg-slate-700 transition border border-slate-200 dark:border-white/10 shrink-0 min-w-max"
@@ -160,7 +160,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                     alt={user.name}
                     className="w-8 h-8 rounded-xl object-cover ring-2 ring-[#7C3AED]/40 shrink-0"
                   />
-                  <div className="hidden sm:flex flex-col text-left whitespace-nowrap">
+                  <div className="flex flex-col text-left whitespace-nowrap shrink-0">
                     <span className="text-xs font-black text-slate-800 dark:text-slate-200 leading-tight whitespace-nowrap">
                       {user.name}
                     </span>
