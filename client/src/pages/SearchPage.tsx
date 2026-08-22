@@ -278,42 +278,6 @@ export const SearchPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Active Filter Chips & Reset */}
-        {(selectedVibe !== 'ALL' || selectedCost !== 'ALL' || selectedCategory !== 'ALL' || searchQuery) && (
-          <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-100 dark:border-white/5 text-xs font-bold">
-            <span className="text-slate-500 dark:text-slate-400 text-[11px] font-extrabold uppercase">Active Filters:</span>
-            {searchQuery && (
-              <span className="px-2.5 py-1 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 rounded-lg border border-emerald-200 dark:border-emerald-800 flex items-center space-x-1">
-                <span>Query: "{searchQuery}"</span>
-                <button onClick={() => setSearchQuery('')}><X className="w-3 h-3 hover:text-rose-500" /></button>
-              </span>
-            )}
-            {selectedVibe !== 'ALL' && (
-              <span className="px-2.5 py-1 bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 rounded-lg border border-purple-200 dark:border-purple-800 flex items-center space-x-1">
-                <span>Vibe: {selectedVibe}</span>
-                <button onClick={() => setSelectedVibe('ALL')}><X className="w-3 h-3 hover:text-rose-500" /></button>
-              </span>
-            )}
-            {selectedCost !== 'ALL' && (
-              <span className="px-2.5 py-1 bg-amber-50 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 rounded-lg border border-amber-200 dark:border-amber-800 flex items-center space-x-1">
-                <span>Cost: {selectedCost}</span>
-                <button onClick={() => setSelectedCost('ALL')}><X className="w-3 h-3 hover:text-rose-500" /></button>
-              </span>
-            )}
-            <button
-              onClick={() => {
-                setSearchQuery('');
-                setSelectedVibe('ALL');
-                setSelectedCost('ALL');
-                setSelectedCategory('ALL');
-              }}
-              className="text-[11px] font-black text-rose-600 dark:text-rose-400 hover:underline ml-auto"
-            >
-              Reset All Filters
-            </button>
-          </div>
-        )}
-
         {/* Travel Vibe Selector Buttons */}
         {activeTab === 'CITIES' && (
           <div className="pt-2 border-t border-slate-100 dark:border-white/10">
