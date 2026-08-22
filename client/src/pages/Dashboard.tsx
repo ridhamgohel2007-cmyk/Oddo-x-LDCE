@@ -496,7 +496,7 @@ export const Dashboard: React.FC = () => {
         </div>
       )}
 
-      {/* Hero Banner */}
+      {/* Hero Banner featuring Uploaded 3D Compass Emblem */}
       <div className="relative rounded-3xl overflow-hidden shadow-2xl bg-gradient-to-r from-[#0F172A] via-[#1E293B] to-[#0F172A] border border-slate-200 dark:border-white/10">
         <img
           src="https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=1600&q=80"
@@ -510,12 +510,26 @@ export const Dashboard: React.FC = () => {
               <Sparkles className="w-4 h-4 text-[#E2A03F]" />
               <span>Odoo Enterprise Edition</span>
             </div>
-            <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight leading-snug">
-              Welcome back, <span className="text-[#38BDF8]">{user?.name}</span>!
-            </h1>
-            <p className="text-xs sm:text-sm text-slate-300">
-              Track active trip countdowns, discover destinations by continent & travel vibe, and manage multi-city budgets.
-            </p>
+
+            {/* Uploaded 3D Compass Emblem Container */}
+            <div className="flex items-center space-x-4">
+              <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-3xl overflow-hidden shadow-2xl ring-4 ring-[#7C3AED]/50 bg-black shrink-0 hover:scale-105 transition-transform duration-300">
+                <img
+                  src="/globetrotter-compass-emblem.jpg"
+                  alt="GlobeTrotter 3D Compass Emblem"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+
+              <div>
+                <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight leading-snug">
+                  Welcome back, <span className="text-[#38BDF8]">{user?.name}</span>!
+                </h1>
+                <p className="text-xs sm:text-sm text-slate-300 mt-1">
+                  Track active trip countdowns, discover destinations by continent & travel vibe, and manage multi-city budgets.
+                </p>
+              </div>
+            </div>
 
             <div className="pt-2 flex flex-wrap gap-3">
               <Link
@@ -842,7 +856,7 @@ export const Dashboard: React.FC = () => {
         </div>
       </section>
 
-      {/* "Travel by Vibe" & Continent Selector Menu Section (User Request) */}
+      {/* "Travel by Vibe" & Continent Selector Menu Section */}
       <div className="bg-white dark:bg-[#1E293B] p-6 sm:p-8 rounded-3xl shadow-sm border border-slate-200 dark:border-white/10 space-y-5">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 dark:border-white/10 pb-4">
           <div>
@@ -856,7 +870,7 @@ export const Dashboard: React.FC = () => {
           </div>
 
           <div className="flex items-center space-x-3 w-full md:w-auto">
-            {/* Continent Selector Dropdown Menu (User Request) */}
+            {/* Continent Selector Dropdown Menu */}
             <div className="relative w-full sm:w-56 shrink-0">
               <Globe className="w-4 h-4 text-[#00A09D] absolute left-3 top-3.5 pointer-events-none" />
               <select
@@ -889,7 +903,7 @@ export const Dashboard: React.FC = () => {
           </div>
         </div>
 
-        {/* Continent Quick Filter Bar (User Request) */}
+        {/* Continent Quick Filter Bar */}
         <div className="flex items-center space-x-2 overflow-x-auto pb-1 scrollbar-none whitespace-nowrap">
           <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 shrink-0 mr-1 flex items-center space-x-1">
             <Filter className="w-3.5 h-3.5 text-[#00A09D]" />
@@ -1021,7 +1035,9 @@ export const Dashboard: React.FC = () => {
 
         {trips.length === 0 ? (
           <div className="p-10 bg-white dark:bg-[#1E293B] rounded-3xl border border-dashed border-slate-300 dark:border-white/10 text-center space-y-3">
-            <Compass className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto" />
+            <div className="w-16 h-16 rounded-2xl overflow-hidden shadow-lg ring-2 ring-[#7C3AED]/40 mx-auto mb-2">
+              <img src="/globetrotter-compass-emblem.jpg" alt="GlobeTrotter 3D Compass Emblem" className="w-full h-full object-cover" />
+            </div>
             <h3 className="text-base font-bold text-slate-700 dark:text-slate-300">No trips created yet</h3>
             <p className="text-xs text-slate-500 dark:text-slate-400 max-w-sm mx-auto">Start planning your customized multi-city itinerary now or load quick demo data!</p>
             
@@ -1062,7 +1078,7 @@ export const Dashboard: React.FC = () => {
         )}
       </section>
 
-      {/* Interactive Export Modal with Options A, B, C */}
+      {/* Interactive Export Modal */}
       {showExportModal && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white dark:bg-[#1E293B] max-w-md w-full p-6 rounded-3xl shadow-2xl border border-slate-200 dark:border-white/10 space-y-4 relative">

@@ -287,16 +287,24 @@ export const SearchPage: React.FC = () => {
 
   return (
     <div className="space-y-6 pb-12">
-      {/* Header Banner */}
+      {/* Header Banner featuring Uploaded 3D Compass Emblem */}
       <div className="bg-white dark:bg-[#1E293B] p-6 sm:p-8 rounded-3xl shadow-sm border border-slate-200 dark:border-white/10 flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white flex items-center space-x-3">
-            <Compass className="w-8 h-8 text-[#7C3AED]" />
-            <span>Discovery & Catalog Search</span>
-          </h1>
-          <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mt-1">
-            Discover 31+ Indian and Global destinations by Continent & Travel Vibe
-          </p>
+        <div className="flex items-center space-x-4">
+          <div className="w-16 h-16 rounded-2xl overflow-hidden shadow-lg ring-2 ring-[#7C3AED]/40 bg-black shrink-0 hover:scale-105 transition-transform duration-300">
+            <img
+              src="/globetrotter-compass-emblem.jpg"
+              alt="GlobeTrotter 3D Compass Emblem"
+              className="w-full h-full object-cover"
+            />
+          </div>
+          <div>
+            <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white flex items-center space-x-3">
+              <span>Discovery & Catalog Search</span>
+            </h1>
+            <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mt-1">
+              Discover 31+ Indian and Global destinations by Continent & Travel Vibe
+            </p>
+          </div>
         </div>
 
         {/* Tab Toggles */}
@@ -344,7 +352,7 @@ export const SearchPage: React.FC = () => {
             />
           </div>
 
-          {/* Continent Dropdown Menu Selector (User Request) */}
+          {/* Continent Dropdown Menu Selector */}
           {activeTab === 'CITIES' && (
             <div className="relative w-full sm:w-56 shrink-0">
               <Globe className="w-4 h-4 text-[#00A09D] absolute left-3 top-3.5 pointer-events-none" />
