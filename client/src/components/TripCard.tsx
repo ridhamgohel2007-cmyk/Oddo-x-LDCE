@@ -20,6 +20,8 @@ import {
   X,
   FileText,
   Clock,
+  Plus,
+  Receipt,
 } from 'lucide-react';
 import { StatusBadge } from './StatusBadge';
 import api from '../lib/api';
@@ -50,6 +52,15 @@ export const TripCard: React.FC<TripCardProps> = ({ trip, onDelete, onDuplicate 
   // Modal Action States
   const [showShareModal, setShowShareModal] = useState(false);
   const [showExportModal, setShowExportModal] = useState(false);
+  const [showQuickExpenseModal, setShowQuickExpenseModal] = useState(false);
+
+  // Quick Expense Form State (Request 2)
+  const [expenseCategory, setExpenseCategory] = useState('STAY');
+  const [expenseAmount, setExpenseAmount] = useState('2500');
+  const [expenseNotes, setExpenseNotes] = useState('');
+  const [expenseLoading, setExpenseLoading] = useState(false);
+  const [expenseSuccess, setExpenseSuccess] = useState('');
+
   const [copiedLink, setCopiedLink] = useState(false);
   const [duplicateSuccess, setDuplicateSuccess] = useState('');
 
@@ -104,8 +115,9 @@ export const TripCard: React.FC<TripCardProps> = ({ trip, onDelete, onDuplicate 
   const isOverBudget = spentRatio >= 1.0;
   const isNearBudgetLimit = spentRatio >= 0.8 && !isOverBudget;
 
-  // Per-Person Split Math
-  const perPersonCost = Math.round(trip.totalBudget / Math.max(1, travelerCount));
+  // Interactive Pax Multiplier Real-Time Math (Request 1)
+  const count = Math.max(1, travelerCount);
+  const perPersonCost = Math.round(trip.totalBudget / count);
 
   const handleShareCopy = () => {
     navigator.clipboard.writeText(window.location.origin + `/trips/${trip.id}`);
@@ -125,6 +137,31 @@ export const TripCard: React.FC<TripCardProps> = ({ trip, onDelete, onDuplicate 
       }
     } catch (err) {
       alert('Failed to clone itinerary template.');
+    }
+  };
+
+  const handleQuickAddExpense = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setExpenseLoading(true);
+    setExpenseSuccess('');
+
+    try {
+      await api.post('/expenses', {
+        tripId: trip.id,
+        category: expenseCategory,
+        amount: expenseAmount,
+        notes: expenseNotes || 'Direct dashboard expense entry',
+      });
+      setExpenseSuccess('Expense logged successfully!');
+      setTimeout(() => {
+        setShowQuickExpenseModal(false);
+        setExpenseSuccess('');
+        setExpenseNotes('');
+      }, 1500);
+    } catch (err) {
+      alert('Failed to log expense. Please try again.');
+    } finally {
+      setExpenseLoading(false);
     }
   };
 
@@ -158,7 +195,6 @@ export const TripCard: React.FC<TripCardProps> = ({ trip, onDelete, onDuplicate 
 
           {/* Quick-Action Dropdown Menu (...) & Delete Buttons */}
           <div className="absolute top-3 right-3 flex items-center space-x-1.5 z-20">
-            {/* Action Dropdown Toggle Button */}
             <div className="relative">
               <button
                 type="button"
@@ -173,7 +209,6 @@ export const TripCard: React.FC<TripCardProps> = ({ trip, onDelete, onDuplicate 
                 <MoreVertical className="w-3.5 h-3.5" />
               </button>
 
-              {/* Quick Actions Dropdown Menu */}
               {showMenu && (
                 <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-[#111E2E] rounded-2xl shadow-2xl border border-slate-200 dark:border-[#1E2D42] py-2 z-30 text-xs font-bold text-slate-700 dark:text-slate-200">
                   <button
@@ -292,7 +327,7 @@ export const TripCard: React.FC<TripCardProps> = ({ trip, onDelete, onDuplicate 
             )}
           </div>
 
-          {/* Card Metrics with Crystal Clear High-Contrast Traveler Select Dropdown */}
+          {/* Card Metrics with Interactive Pax Multiplier & Direct "+ Log Expense" Quick Trigger */}
           <div className="space-y-2.5 text-xs text-slate-600 dark:text-slate-300 pt-2.5 border-t border-slate-100 dark:border-[#1E2D42]">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
@@ -308,10 +343,11 @@ export const TripCard: React.FC<TripCardProps> = ({ trip, onDelete, onDuplicate 
               </div>
             </div>
 
-            {/* Per-Person vs Total Group Pricing Display with Styled Dropdown */}
+            {/* Per-Person vs Total Group Pricing Display with Direct "+ Log Expense" Trigger (Request 1 & 2) */}
             {trip.totalBudget > 0 && (
-              <div className="bg-slate-100 dark:bg-[#16243A] p-2.5 rounded-xl border border-slate-200 dark:border-[#1E293B] space-y-1.5">
+              <div className="bg-slate-100 dark:bg-[#16243A] p-2.5 rounded-xl border border-slate-200 dark:border-[#1E293B] space-y-2">
                 <div className="flex items-center justify-between gap-2">
+                  {/* Interactive Pax Multiplier Selector (Request 1) */}
                   <div className="flex items-center space-x-1.5">
                     <Users className="w-4 h-4 text-emerald-500 shrink-0" />
                     <select
@@ -331,9 +367,27 @@ export const TripCard: React.FC<TripCardProps> = ({ trip, onDelete, onDuplicate 
                   </span>
                 </div>
 
-                <div className="flex items-center justify-between text-[10px] text-slate-500 dark:text-slate-400 border-t border-slate-200 dark:border-[#1E293B] pt-1">
-                  <span>Total Group Budget ({travelerCount} pax):</span>
-                  <span className="font-bold text-slate-900 dark:text-white">₹{trip.totalBudget.toLocaleString('en-IN')}</span>
+                {/* Real-time Group Spend & Direct "+ Log Expense" Trigger (Request 2) */}
+                <div className="flex items-center justify-between text-[10px] text-slate-500 dark:text-slate-400 border-t border-slate-200 dark:border-[#1E293B] pt-1.5">
+                  <div className="flex items-center space-x-1">
+                    <span>Total Group Budget ({count} pax):</span>
+                    <span className="font-bold text-slate-900 dark:text-white">₹{trip.totalBudget.toLocaleString('en-IN')}</span>
+                  </div>
+
+                  {/* Direct + Log Expense Quick Trigger Button */}
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setShowQuickExpenseModal(true);
+                    }}
+                    className="inline-flex items-center space-x-1 px-2 py-0.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg text-[10px] font-bold shadow-xs transition"
+                    title="Log an expense directly for this trip"
+                  >
+                    <Plus className="w-3 h-3" />
+                    <span>Log Expense</span>
+                  </button>
                 </div>
               </div>
             )}
@@ -359,6 +413,95 @@ export const TripCard: React.FC<TripCardProps> = ({ trip, onDelete, onDuplicate 
           <span>Budget</span>
         </Link>
       </div>
+
+      {/* Direct Quick "Add Expense" Modal Trigger (Request 2) */}
+      {showQuickExpenseModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-[#111E2E] max-w-md w-full p-6 rounded-3xl shadow-2xl border border-slate-200 dark:border-[#1E2D42] space-y-4 relative">
+            <button
+              onClick={() => setShowQuickExpenseModal(false)}
+              className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-white p-1"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="flex items-center space-x-3">
+              <div className="p-2.5 bg-emerald-50 dark:bg-emerald-950/60 rounded-xl text-emerald-600 dark:text-emerald-400">
+                <Receipt className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="text-base font-extrabold text-slate-900 dark:text-white">Quick Log Expense</h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400">Log receipt directly for {trip.title}</p>
+              </div>
+            </div>
+
+            {expenseSuccess && (
+              <div className="p-3 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 text-xs font-bold rounded-xl flex items-center space-x-2 border border-emerald-200 dark:border-emerald-800">
+                <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+                <span>{expenseSuccess}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleQuickAddExpense} className="space-y-3">
+              <div>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Expense Category</label>
+                <select
+                  value={expenseCategory}
+                  onChange={(e) => setExpenseCategory(e.target.value)}
+                  className="w-full px-3 py-2 bg-slate-50 dark:bg-[#162235] border border-slate-200 dark:border-[#1E2D42] rounded-xl text-xs text-slate-900 dark:text-white font-bold"
+                >
+                  <option value="STAY">Stay / Accommodation</option>
+                  <option value="TRANSPORT">Transport / Flights / Train</option>
+                  <option value="ACTIVITIES">Activities & Tickets</option>
+                  <option value="MEALS">Meals & Dining</option>
+                  <option value="OTHER">Other Expenses</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Amount (₹ INR)</label>
+                <input
+                  type="number"
+                  required
+                  step="1"
+                  value={expenseAmount}
+                  onChange={(e) => setExpenseAmount(e.target.value)}
+                  className="w-full px-3 py-2 bg-slate-50 dark:bg-[#162235] border border-slate-200 dark:border-[#1E2D42] rounded-xl text-xs text-slate-900 dark:text-white font-semibold"
+                  placeholder="2500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Notes / Description</label>
+                <input
+                  type="text"
+                  value={expenseNotes}
+                  onChange={(e) => setExpenseNotes(e.target.value)}
+                  className="w-full px-3 py-2 bg-slate-50 dark:bg-[#162235] border border-slate-200 dark:border-[#1E2D42] rounded-xl text-xs text-slate-900 dark:text-white font-semibold"
+                  placeholder="e.g. Hotel deposit, train ticket..."
+                />
+              </div>
+
+              <div className="flex justify-end space-x-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowQuickExpenseModal(false)}
+                  className="px-4 py-2 bg-slate-100 dark:bg-[#162235] text-slate-700 dark:text-slate-300 rounded-xl text-xs font-semibold"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={expenseLoading}
+                  className="px-5 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-xs font-bold shadow-md"
+                >
+                  {expenseLoading ? 'Saving...' : 'Log Expense'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Share & Collaborate Modal */}
       {showShareModal && (
