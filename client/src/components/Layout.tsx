@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import {
@@ -9,6 +9,8 @@ import {
   X,
   Search,
   ChevronRight,
+  Sun,
+  Moon,
 } from 'lucide-react';
 
 export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -17,6 +19,26 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [globalSearch, setGlobalSearch] = useState('');
+  
+  // Theme Toggle State (Sun / Moon)
+  const [isDark, setIsDark] = useState(() => {
+    return document.documentElement.classList.contains('dark') ||
+      localStorage.getItem('theme') === 'dark';
+  });
+
+  useEffect(() => {
+    if (isDark) {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
+    }
+  }, [isDark]);
+
+  const toggleTheme = () => {
+    setIsDark(!isDark);
+  };
 
   const navLinks = [
     { name: 'Dashboard', path: '/dashboard' },
@@ -79,7 +101,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
               </form>
             )}
 
-            {/* Desktop Navigation Links with High-Contrast Odoo Active State */}
+            {/* Desktop Navigation Links */}
             {user && (
               <nav className="hidden md:flex items-center space-x-1.5 bg-slate-100/90 dark:bg-[#1E293B] p-1.5 rounded-2xl border border-slate-200 dark:border-white/10 shrink-0">
                 {navLinks.map((link) => {
@@ -101,9 +123,9 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
               </nav>
             )}
 
-            {/* Right Side User Profile & Actions */}
+            {/* Right Side User Profile, Theme Switcher & Actions */}
             {user ? (
-              <div className="flex items-center space-x-3 shrink-0">
+              <div className="flex items-center space-x-2.5 shrink-0">
                 <Link
                   to="/create-trip"
                   className="hidden sm:flex items-center space-x-1.5 px-3.5 py-2 bg-[#714B67] hover:bg-[#613E57] text-white text-xs font-bold rounded-xl shadow-md shadow-purple-500/20 transition hover:-translate-y-0.5"
@@ -112,21 +134,33 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                   <span className="whitespace-nowrap">Plan New Trip</span>
                 </Link>
 
-                {/* User Profile Avatar Pill */}
+                {/* Theme Toggle Button (Sun / Moon - Request 2) */}
+                <button
+                  type="button"
+                  onClick={toggleTheme}
+                  className="p-2 rounded-xl bg-slate-100 dark:bg-[#1E293B] hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-amber-400 border border-slate-200 dark:border-white/10 transition shadow-xs"
+                  title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+                  aria-label="Toggle Theme Mode"
+                >
+                  {isDark ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-slate-600" />}
+                </button>
+
+                {/* User Profile Avatar Pill (Request 2: Well-Padded & Unclipped) */}
                 <Link
                   to="/profile"
-                  className="flex items-center space-x-2 p-1.5 rounded-2xl bg-slate-100 dark:bg-[#1E293B] hover:bg-slate-200 dark:hover:bg-slate-700 transition border border-slate-200 dark:border-white/10"
+                  className="flex items-center space-x-2.5 px-3 py-1.5 rounded-2xl bg-slate-100 dark:bg-[#1E293B] hover:bg-slate-200 dark:hover:bg-slate-700 transition border border-slate-200 dark:border-white/10 shrink-0"
+                  title={`${user.name} (${user.role})`}
                 >
                   <img
                     src={user.profilePic || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80'}
                     alt={user.name}
-                    className="w-7 h-7 rounded-xl object-cover ring-2 ring-[#7C3AED]/40"
+                    className="w-8 h-8 rounded-xl object-cover ring-2 ring-[#7C3AED]/40 shrink-0"
                   />
-                  <div className="hidden md:flex flex-col text-left">
-                    <span className="text-xs font-extrabold text-slate-800 dark:text-slate-200 leading-none">
+                  <div className="hidden md:flex flex-col text-left max-w-[140px]">
+                    <span className="text-xs font-black text-slate-800 dark:text-slate-200 leading-tight truncate">
                       {user.name}
                     </span>
-                    <span className="text-[9px] text-slate-500 dark:text-slate-400 font-bold capitalize mt-0.5">
+                    <span className="text-[9px] text-[#00A09D] dark:text-[#38BDF8] font-bold uppercase tracking-wider">
                       {user.role}
                     </span>
                   </div>
@@ -150,6 +184,15 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
               </div>
             ) : (
               <div className="flex items-center space-x-2">
+                {/* Theme Toggle Button when Logged Out */}
+                <button
+                  type="button"
+                  onClick={toggleTheme}
+                  className="p-2 rounded-xl bg-slate-100 dark:bg-[#1E293B] text-slate-700 dark:text-amber-400 border border-slate-200 dark:border-white/10 transition"
+                  title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+                >
+                  {isDark ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-slate-600" />}
+                </button>
                 <Link
                   to="/login"
                   className="px-4 py-2 text-xs font-bold text-slate-700 dark:text-slate-200 hover:text-[#7C3AED]"

@@ -175,8 +175,6 @@ export const Dashboard: React.FC = () => {
     if (vibe === 'ALL') return true;
     const desc = (city.description || '').toLowerCase();
     const name = (city.name || '').toLowerCase();
-    const region = (city.region || '').toLowerCase();
-    const cost = (city.costIndex || '').toUpperCase();
 
     if (vibe === 'ROMANTIC') {
       return desc.includes('romantic') || desc.includes('honeymoon') || desc.includes('eiffel') || desc.includes('canal') || desc.includes('beach') || desc.includes('hill') || name.includes('paris') || name.includes('goa') || name.includes('bali') || name.includes('shimla') || name.includes('manali') || name.includes('udaipur') || name.includes('srinagar') || name.includes('ooty') || name.includes('coorg');
@@ -191,7 +189,7 @@ export const Dashboard: React.FC = () => {
       return desc.includes('drive') || desc.includes('road') || desc.includes('scenic') || desc.includes('coastal') || desc.includes('mountain') || desc.includes('pass') || name.includes('jaipur') || name.includes('goa') || name.includes('ladakh') || name.includes('manali') || name.includes('shimla') || name.includes('coorg') || name.includes('pondicherry');
     }
     if (vibe === 'BUDGET') {
-      return cost === 'LOW' || desc.includes('budget') || desc.includes('affordable') || name.includes('agra') || name.includes('jaipur') || name.includes('goa') || name.includes('varanasi') || name.includes('amritsar') || name.includes('rishikesh') || name.includes('pondicherry');
+      return city.costIndex === 'LOW' || desc.includes('budget') || desc.includes('affordable') || name.includes('agra') || name.includes('jaipur') || name.includes('goa') || name.includes('varanasi') || name.includes('amritsar') || name.includes('rishikesh') || name.includes('pondicherry');
     }
     return true;
   };
@@ -214,15 +212,21 @@ export const Dashboard: React.FC = () => {
   ];
 
   const pieChartData = [
-    { name: 'Stays', value: budgetMetrics.categoryTotals.STAY || 1, color: '#7C3AED' },
-    { name: 'Transfers', value: budgetMetrics.categoryTotals.TRANSPORT || 1, color: '#00A09D' },
-    { name: 'Activities', value: budgetMetrics.categoryTotals.ACTIVITIES || 1, color: '#10B981' },
-    { name: 'Meals', value: budgetMetrics.categoryTotals.MEALS || 1, color: '#E2A03F' },
+    { name: 'Stays', value: budgetMetrics.categoryTotals.STAY || 0, color: '#7C3AED' },
+    { name: 'Transfers', value: budgetMetrics.categoryTotals.TRANSPORT || 0, color: '#00A09D' },
+    { name: 'Activities', value: budgetMetrics.categoryTotals.ACTIVITIES || 0, color: '#10B981' },
+    { name: 'Meals', value: budgetMetrics.categoryTotals.MEALS || 0, color: '#E2A03F' },
   ];
+
+  const totalCatSum = Math.max(1, budgetMetrics.categoryTotals.STAY + budgetMetrics.categoryTotals.TRANSPORT + budgetMetrics.categoryTotals.ACTIVITIES + budgetMetrics.categoryTotals.MEALS);
+  const stayPct = Math.round((budgetMetrics.categoryTotals.STAY / totalCatSum) * 100);
+  const transPct = Math.round((budgetMetrics.categoryTotals.TRANSPORT / totalCatSum) * 100);
+  const actPct = Math.round((budgetMetrics.categoryTotals.ACTIVITIES / totalCatSum) * 100);
+  const mealPct = Math.round((budgetMetrics.categoryTotals.MEALS / totalCatSum) * 100);
 
   return (
     <div className="space-y-8 pb-12">
-      {/* Hero Banner with Odoo Deep Purple & Cyan Gradients */}
+      {/* Hero Banner */}
       <div className="relative rounded-3xl overflow-hidden shadow-2xl bg-gradient-to-r from-[#0F172A] via-[#1E293B] to-[#0F172A] border border-slate-200 dark:border-white/10">
         <img
           src="https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=1600&q=80"
@@ -236,6 +240,7 @@ export const Dashboard: React.FC = () => {
               <Sparkles className="w-4 h-4 text-[#E2A03F]" />
               <span>Odoo Enterprise Edition</span>
             </div>
+            {/* Clean Greeting Header without Rogue Punctuation Spaces (Request 1) */}
             <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight leading-snug">
               Welcome back, <span className="text-[#38BDF8]">{user?.name}</span>!
             </h1>
@@ -259,24 +264,24 @@ export const Dashboard: React.FC = () => {
               </Link>
             </div>
 
-            {/* Mini-Metrics Badges */}
-            <div className="pt-2 flex flex-wrap gap-4 text-xs font-bold text-slate-300 border-t border-white/10 pt-4">
-              <div className="flex items-center space-x-1.5 bg-white/5 px-3 py-1.5 rounded-xl border border-white/10">
-                <Map className="w-4 h-4 text-[#10B981]" />
-                <span><strong className="text-white">{cities.filter(c => c.country === 'India').length}</strong> Popular Cities in India</span>
+            {/* Clean 3-Column Hero Quick Metrics Grid (Request 3) */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-4 border-t border-white/10 w-full text-xs font-bold text-slate-300">
+              <div className="flex items-center space-x-2 bg-white/5 px-3 py-2 rounded-xl border border-white/10">
+                <Map className="w-4 h-4 text-[#10B981] shrink-0" />
+                <span className="truncate"><strong className="text-white">{cities.filter(c => c.country === 'India').length}</strong> Cities in India</span>
               </div>
-              <div className="flex items-center space-x-1.5 bg-white/5 px-3 py-1.5 rounded-xl border border-white/10">
-                <Globe2 className="w-4 h-4 text-[#00A09D]" />
-                <span><strong className="text-white">{cities.length}</strong> Total Destinations</span>
+              <div className="flex items-center space-x-2 bg-white/5 px-3 py-2 rounded-xl border border-white/10">
+                <Globe2 className="w-4 h-4 text-[#00A09D] shrink-0" />
+                <span className="truncate"><strong className="text-white">{cities.length}</strong> Destinations</span>
               </div>
-              <div className="flex items-center space-x-1.5 bg-white/5 px-3 py-1.5 rounded-xl border border-white/10">
-                <Luggage className="w-4 h-4 text-[#E2A03F]" />
-                <span><strong className="text-white">{trips.length}</strong> Active Itineraries</span>
+              <div className="flex items-center space-x-2 bg-white/5 px-3 py-2 rounded-xl border border-white/10">
+                <Luggage className="w-4 h-4 text-[#E2A03F] shrink-0" />
+                <span className="truncate"><strong className="text-white">{trips.length}</strong> Itineraries</span>
               </div>
             </div>
           </div>
 
-          {/* Dynamic Countdown Widget */}
+          {/* Dynamic Countdown Widget with Compact Horizontal Chips & Trailing Arrow (Request 3) */}
           {nextTrip && (
             <div className="w-full lg:w-80 bg-white/10 dark:bg-[#1E293B]/90 backdrop-blur-xl border border-white/20 dark:border-white/10 p-5 rounded-2xl text-white space-y-3 shadow-xl">
               <div className="flex items-center justify-between">
@@ -297,18 +302,15 @@ export const Dashboard: React.FC = () => {
                 </p>
               </div>
 
-              {/* Weather & Packing Intelligence Banner */}
-              <div className="p-2.5 bg-black/40 rounded-xl border border-white/10 text-[11px] space-y-1">
-                <div className="flex items-center justify-between font-bold text-[#E2A03F]">
-                  <div className="flex items-center space-x-1">
-                    <CloudSun className="w-4 h-4 text-[#E2A03F]" />
-                    <span>Departure Weather Forecast</span>
-                  </div>
+              {/* Compact Weather & Packing Chip Tags (Request 3) */}
+              <div className="flex flex-wrap gap-2 pt-1">
+                <div className="flex items-center space-x-1.5 px-2.5 py-1 bg-black/40 rounded-xl border border-white/10 text-[11px] font-bold text-[#E2A03F]">
+                  <Sun className="w-3.5 h-3.5 text-[#E2A03F] shrink-0" />
                   <span>26°C / Sunny</span>
                 </div>
-                <div className="flex items-center space-x-1 text-[10px] text-slate-300 font-medium">
-                  <Shirt className="w-3 h-3 text-[#38BDF8] shrink-0" />
-                  <span>Packing: Light cottons, sunglasses & sunscreen</span>
+                <div className="flex items-center space-x-1.5 px-2.5 py-1 bg-black/40 rounded-xl border border-white/10 text-[11px] font-bold text-[#38BDF8]">
+                  <Shirt className="w-3.5 h-3.5 text-[#38BDF8] shrink-0" />
+                  <span>Light Cottons & Sunglasses</span>
                 </div>
               </div>
 
@@ -327,11 +329,13 @@ export const Dashboard: React.FC = () => {
                 </div>
               </div>
 
+              {/* Polished CTA Button with Trailing Arrow (Request 3) */}
               <Link
                 to={`/trips/${nextTrip.id}`}
-                className="w-full py-2 bg-[#714B67] hover:bg-[#613E57] text-white rounded-xl text-xs font-bold text-center block transition shadow-md"
+                className="w-full py-2 bg-[#714B67] hover:bg-[#613E57] text-white rounded-xl text-xs font-bold flex items-center justify-center space-x-1.5 transition shadow-md group"
               >
-                Open Itinerary
+                <span>Open Itinerary</span>
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
               </Link>
             </div>
           )}
@@ -339,16 +343,16 @@ export const Dashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* Budget Highlights with Donut Chart & Visual Progress Bar */}
+      {/* Budget Highlights with Inline Currency Switcher & Stacked Category Spend Progress Bar (Request 4) */}
       <section className="space-y-4">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
-          <div className="flex items-center space-x-3">
-            <h2 className="text-lg font-black text-slate-900 dark:text-white flex items-center space-x-2">
-              <PieChartIcon className="w-5 h-5 text-[#7C3AED]" />
-              <span>Financial Budget Summary & Category Spend</span>
-            </h2>
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+          <h2 className="text-lg font-black text-slate-900 dark:text-white flex items-center space-x-2">
+            <PieChartIcon className="w-5 h-5 text-[#7C3AED]" />
+            <span>Financial Budget Summary & Category Spend</span>
+          </h2>
 
-            {/* Currency Switcher Quick Toggle */}
+          {/* Inline Currency Switcher & Manage All Budgets link (Request 4) */}
+          <div className="flex items-center space-x-3 self-end sm:self-auto">
             <div className="flex items-center bg-slate-200 dark:bg-[#1E293B] p-1 rounded-xl border border-slate-300 dark:border-white/10">
               <button
                 type="button"
@@ -373,11 +377,12 @@ export const Dashboard: React.FC = () => {
                 $ USD
               </button>
             </div>
-          </div>
 
-          <Link to="/my-trips" className="text-xs font-bold text-[#7C3AED] dark:text-[#38BDF8] hover:underline">
-            Manage All Budgets →
-          </Link>
+            <Link to="/my-trips" className="text-xs font-bold text-[#7C3AED] dark:text-[#38BDF8] hover:underline flex items-center space-x-1">
+              <span>Manage All Budgets</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -434,7 +439,7 @@ export const Dashboard: React.FC = () => {
             </div>
           </div>
 
-          {/* Financial Category Breakdown Donut Chart */}
+          {/* Financial Category Spend Card with Multi-Colored Stacked Progress Bar (Request 4) */}
           <div className="bg-white dark:bg-[#1E293B] p-5 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm flex flex-col justify-between space-y-3">
             <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/10 pb-2">
               <span className="text-xs font-extrabold uppercase tracking-wider text-slate-700 dark:text-slate-300">
@@ -443,15 +448,31 @@ export const Dashboard: React.FC = () => {
               <span className="text-[10px] font-bold text-[#10B981]">Live Split</span>
             </div>
 
-            <div className="h-36 w-full flex items-center justify-center">
+            {/* Multi-Colored Horizontal Stacked Progress Bar (Request 4) */}
+            <div className="space-y-1.5">
+              <div className="w-full h-3 bg-slate-100 dark:bg-[#0F172A] rounded-full overflow-hidden flex">
+                <div className="bg-[#7C3AED] h-full transition-all duration-500" style={{ width: `${stayPct}%` }} title={`Stays: ${stayPct}%`} />
+                <div className="bg-[#00A09D] h-full transition-all duration-500" style={{ width: `${transPct}%` }} title={`Transfers: ${transPct}%`} />
+                <div className="bg-[#10B981] h-full transition-all duration-500" style={{ width: `${actPct}%` }} title={`Activities: ${actPct}%`} />
+                <div className="bg-[#E2A03F] h-full transition-all duration-500" style={{ width: `${mealPct}%` }} title={`Meals: ${mealPct}%`} />
+              </div>
+              <div className="flex justify-between text-[9px] font-extrabold text-slate-400">
+                <span>Stays ({stayPct}%)</span>
+                <span>Transfers ({transPct}%)</span>
+                <span>Activities ({actPct}%)</span>
+                <span>Meals ({mealPct}%)</span>
+              </div>
+            </div>
+
+            <div className="h-32 w-full flex items-center justify-center">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
                     data={pieChartData}
                     cx="50%"
                     cy="50%"
-                    innerRadius={35}
-                    outerRadius={55}
+                    innerRadius={30}
+                    outerRadius={50}
                     paddingAngle={4}
                     dataKey="value"
                   >
@@ -464,20 +485,21 @@ export const Dashboard: React.FC = () => {
               </ResponsiveContainer>
             </div>
 
+            {/* Dimmed Text Handling for ₹0 Empty Categories (Request 4) */}
             <div className="grid grid-cols-2 gap-2 text-[10px] font-extrabold pt-1">
-              <div className="flex items-center space-x-1.5 text-purple-600 dark:text-purple-400">
+              <div className={`flex items-center space-x-1.5 text-purple-600 dark:text-purple-400 ${budgetMetrics.categoryTotals.STAY === 0 ? 'opacity-40' : ''}`}>
                 <Hotel className="w-3 h-3 shrink-0" />
                 <span>Stays ({formatMoney(budgetMetrics.categoryTotals.STAY)})</span>
               </div>
-              <div className="flex items-center space-x-1.5 text-[#00A09D] dark:text-[#38BDF8]">
+              <div className={`flex items-center space-x-1.5 text-[#00A09D] dark:text-[#38BDF8] ${budgetMetrics.categoryTotals.TRANSPORT === 0 ? 'opacity-40' : ''}`}>
                 <Navigation className="w-3 h-3 shrink-0" />
                 <span>Transfers ({formatMoney(budgetMetrics.categoryTotals.TRANSPORT)})</span>
               </div>
-              <div className="flex items-center space-x-1.5 text-[#10B981]">
+              <div className={`flex items-center space-x-1.5 text-[#10B981] ${budgetMetrics.categoryTotals.ACTIVITIES === 0 ? 'opacity-40' : ''}`}>
                 <Ticket className="w-3 h-3 shrink-0" />
                 <span>Activities ({formatMoney(budgetMetrics.categoryTotals.ACTIVITIES)})</span>
               </div>
-              <div className="flex items-center space-x-1.5 text-[#E2A03F]">
+              <div className={`flex items-center space-x-1.5 text-[#E2A03F] ${budgetMetrics.categoryTotals.MEALS === 0 ? 'opacity-40' : ''}`}>
                 <Utensils className="w-3 h-3 shrink-0" />
                 <span>Meals ({formatMoney(budgetMetrics.categoryTotals.MEALS)})</span>
               </div>
