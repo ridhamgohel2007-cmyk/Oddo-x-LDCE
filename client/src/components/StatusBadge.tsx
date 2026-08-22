@@ -27,7 +27,11 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({ status }) => {
   }
 
   return (
-    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold border backdrop-blur-md ${badgeStyle}`}>
+    <span 
+      title={`Trip Status: ${normalizedStatus}`}
+      aria-label={`Trip status is ${normalizedStatus}`}
+      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold border backdrop-blur-md ${badgeStyle}`}
+    >
       {normalizedStatus === 'UPCOMING' ? (
         <span className="relative flex h-2 w-2 mr-1.5">
           <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#38BDF8] opacity-75"></span>
