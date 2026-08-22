@@ -2,15 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import {
-  Globe,
   Plus,
   LogOut,
   Menu,
   X,
   Search,
   ChevronRight,
-  Sun,
-  Moon,
 } from 'lucide-react';
 
 export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -20,25 +17,19 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [globalSearch, setGlobalSearch] = useState('');
 
-  // Theme Toggle State (Sun / Moon)
-  const [isDark, setIsDark] = useState(() => {
-    return document.documentElement.classList.contains('dark') ||
-      localStorage.getItem('theme') !== 'light';
-  });
-
+  // Ensure dark mode is active across HTML root
   useEffect(() => {
-    if (isDark) {
-      document.documentElement.classList.add('dark');
-      localStorage.setItem('theme', 'dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-      localStorage.setItem('theme', 'light');
-    }
-  }, [isDark]);
-
-  const toggleTheme = () => {
-    setIsDark(!isDark);
-  };
+    document.documentElement.classList.add('dark');
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        const searchInput = document.getElementById('header-global-search');
+        if (searchInput) searchInput.focus();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   const navLinks = [
     { name: 'Dashboard', path: '/dashboard' },
@@ -65,12 +56,12 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
 
   return (
     <div className="min-h-screen flex flex-col bg-[#F8FAFC] dark:bg-[#0F172A] text-slate-900 dark:text-slate-100 transition-colors duration-300 antialiased font-sans">
-      {/* Top Navbar */}
+      {/* Top Header Navigation Bar */}
       <header className="sticky top-0 z-40 bg-white/95 dark:bg-[#0F172A]/95 backdrop-blur-xl border-b border-slate-200 dark:border-white/10 shadow-xs">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16 gap-4">
+        <div className="max-w-[1500px] mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16 gap-3 sm:gap-6">
             
-            {/* Brand Logo */}
+            {/* 1. Brand Logo (Shifted left with clean spacing) */}
             <Link to="/dashboard" className="flex items-center space-x-3 group shrink-0">
               <div className="w-10 h-10 rounded-2xl overflow-hidden ring-2 ring-[#7C3AED]/50 shadow-md shadow-purple-500/20 group-hover:scale-105 transition-all duration-300 bg-white shrink-0">
                 <img
@@ -89,70 +80,60 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
               </div>
             </Link>
 
-            {/* Header Search Bar */}
+            {/* 2. Desktop Navigation Pill (Centered in a straight horizontal line) */}
             {user && (
-              <form onSubmit={handleGlobalSearch} className="hidden xl:flex items-center flex-1 max-w-xs mx-2">
-                <div className="relative w-full">
-                  <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3.5 top-2.5" />
+              <div className="hidden lg:flex flex-1 items-center justify-center px-2">
+                <nav className="flex items-center space-x-1 bg-slate-100/90 dark:bg-[#1E293B] p-1.5 rounded-2xl border border-slate-200 dark:border-white/10 shrink-0 shadow-xs">
+                  {navLinks.map((link) => {
+                    const isActive = location.pathname === link.path;
+                    return (
+                      <Link
+                        key={link.path}
+                        to={link.path}
+                        className={`whitespace-nowrap px-3.5 py-1.5 rounded-xl text-xs font-black tracking-wide transition-all duration-200 inline-block ${
+                          isActive
+                            ? 'bg-[#714B67] dark:bg-[#7C3AED] text-white shadow-md shadow-purple-500/25 border border-purple-400/50'
+                            : 'text-slate-700 dark:text-slate-300 hover:text-[#7C3AED] dark:hover:text-[#38BDF8] hover:bg-slate-200/60 dark:hover:bg-[#0F172A]'
+                        }`}
+                      >
+                        {link.name}
+                      </Link>
+                    );
+                  })}
+                </nav>
+              </div>
+            )}
+
+            {/* 3. Right Side User Controls & Actions */}
+            {user ? (
+              <div className="flex items-center space-x-2.5 sm:space-x-3 shrink-0">
+                
+                {/* Header Global Search */}
+                <form onSubmit={handleGlobalSearch} className="hidden xl:flex items-center relative">
+                  <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3.5 top-2.5 pointer-events-none" />
                   <input
+                    id="header-global-search"
                     type="text"
                     value={globalSearch}
                     onChange={(e) => setGlobalSearch(e.target.value)}
-                    placeholder="Search destinations or trips..."
-                    className="w-full pl-9 pr-3 py-1.5 bg-slate-100 dark:bg-[#1E293B] border border-slate-200 dark:border-white/10 rounded-xl text-xs font-semibold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#7C3AED] transition-all whitespace-nowrap"
+                    placeholder="Search (Ctrl + K)..."
+                    className="w-36 lg:w-44 pl-9 pr-3 py-1.5 bg-slate-100 dark:bg-[#1E293B] border border-slate-200 dark:border-white/10 rounded-xl text-xs font-semibold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#7C3AED] transition-all whitespace-nowrap"
                   />
-                </div>
-              </form>
-            )}
+                </form>
 
-            {/* Desktop Navigation Links */}
-            {user && (
-              <nav className="hidden md:flex items-center space-x-1.5 bg-slate-100/90 dark:bg-[#1E293B] p-1.5 rounded-2xl border border-slate-200 dark:border-white/10 shrink-0">
-                {navLinks.map((link) => {
-                  const isActive = location.pathname === link.path;
-                  return (
-                    <Link
-                      key={link.path}
-                      to={link.path}
-                      className={`whitespace-nowrap px-4 py-2 rounded-xl text-xs font-black tracking-wide transition-all duration-200 inline-block ${
-                        isActive
-                          ? 'bg-[#714B67] dark:bg-[#7C3AED] text-white shadow-md shadow-purple-500/25 border border-purple-400'
-                          : 'text-slate-700 dark:text-slate-300 hover:text-[#7C3AED] dark:hover:text-[#38BDF8] hover:bg-slate-200/60 dark:hover:bg-[#0F172A]'
-                      }`}
-                    >
-                      {link.name}
-                    </Link>
-                  );
-                })}
-              </nav>
-            )}
-
-            {/* Right Side User Profile, Theme Switcher & Actions */}
-            {user ? (
-              <div className="flex items-center space-x-2.5 shrink-0">
+                {/* Plan New Trip CTA Button */}
                 <Link
                   to="/create-trip"
-                  className="hidden sm:flex items-center space-x-1.5 px-3.5 py-2 bg-[#714B67] hover:bg-[#613E57] text-white text-xs font-bold rounded-xl shadow-md shadow-purple-500/20 transition hover:-translate-y-0.5"
+                  className="hidden sm:flex items-center space-x-1.5 px-3.5 py-2 bg-[#714B67] hover:bg-[#613E57] dark:bg-[#7C3AED] dark:hover:bg-[#6D28D9] text-white text-xs font-black rounded-xl shadow-md shadow-purple-500/20 transition hover:-translate-y-0.5 whitespace-nowrap shrink-0"
                 >
-                  <Plus className="w-4 h-4" />
+                  <Plus className="w-4 h-4 shrink-0" />
                   <span className="whitespace-nowrap">Plan New Trip</span>
                 </Link>
 
-                {/* Theme Toggle Button (Sun / Moon) placed directly between [+ Plan New Trip] and User Profile Avatar (Request 1) */}
-                <button
-                  type="button"
-                  onClick={toggleTheme}
-                  className="p-2 rounded-xl bg-slate-100 dark:bg-[#1E293B] hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-amber-400 border border-slate-200 dark:border-white/10 transition shadow-xs shrink-0"
-                  title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
-                  aria-label="Toggle Theme Mode"
-                >
-                  {isDark ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-slate-600" />}
-                </button>
-
-                {/* Fully Unclipped User Profile Capsule with padding 6px 14px (px-3.5 py-1.5) & flex-shrink: 0 (Request 1) */}
+                {/* User Profile Pill */}
                 <Link
                   to="/profile"
-                  className="flex items-center space-x-2.5 px-3.5 py-1.5 rounded-2xl bg-slate-100 dark:bg-[#1E293B] hover:bg-slate-200 dark:hover:bg-slate-700 transition border border-slate-200 dark:border-white/10 shrink-0 min-w-max"
+                  className="flex items-center space-x-2 px-3 py-1.5 rounded-2xl bg-slate-100 dark:bg-[#1E293B] hover:bg-slate-200 dark:hover:bg-slate-700 transition border border-slate-200 dark:border-white/10 shrink-0 min-w-max"
                   title={`${user.name} (${user.role})`}
                 >
                   <img
@@ -170,6 +151,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                   </div>
                 </Link>
 
+                {/* Logout Button */}
                 <button
                   onClick={handleLogout}
                   className="p-2 text-slate-400 hover:text-rose-500 dark:hover:text-rose-400 transition rounded-xl hover:bg-slate-100 dark:hover:bg-[#1E293B] shrink-0"
@@ -181,22 +163,13 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                 {/* Mobile Hamburger Toggle */}
                 <button
                   onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                  className="md:hidden p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-[#1E293B] shrink-0"
+                  className="lg:hidden p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-[#1E293B] shrink-0"
                 >
                   {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
                 </button>
               </div>
             ) : (
               <div className="flex items-center space-x-2">
-                <button
-                  type="button"
-                  onClick={toggleTheme}
-                  className="p-2 rounded-xl bg-slate-100 dark:bg-[#1E293B] text-slate-700 dark:text-amber-400 border border-slate-200 dark:border-white/10 transition shrink-0"
-                  title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
-                >
-                  {isDark ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-slate-600" />}
-                </button>
-
                 <Link
                   to="/login"
                   className="px-4 py-2 text-xs font-bold text-slate-700 dark:text-slate-200 hover:text-[#7C3AED]"
@@ -216,7 +189,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
 
         {/* Mobile Navigation Drawer */}
         {mobileMenuOpen && user && (
-          <div className="md:hidden border-t border-slate-200 dark:border-white/10 bg-white dark:bg-[#0F172A] px-4 py-3 space-y-2">
+          <div className="lg:hidden border-t border-slate-200 dark:border-white/10 bg-white dark:bg-[#0F172A] px-4 py-3 space-y-2">
             {navLinks.map((link) => {
               const isActive = location.pathname === link.path;
               return (
@@ -240,13 +213,13 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
       </header>
 
       {/* Main Page Content */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+      <main className="flex-1 max-w-[1500px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         {children}
       </main>
 
       {/* Footer */}
       <footer className="bg-white dark:bg-[#0F172A] border-t border-slate-200 dark:border-white/10 py-6 text-center text-xs text-slate-500 dark:text-slate-400">
-        <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="max-w-[1500px] mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center space-x-2">
             <img src="/globetrotter-logo.jpg" alt="GlobeTrotter Logo" className="w-5 h-5 rounded-full object-cover ring-1 ring-[#7C3AED]" />
             <span className="font-extrabold text-slate-800 dark:text-slate-200">GlobeTrotter Enterprise</span>
