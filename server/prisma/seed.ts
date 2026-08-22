@@ -34,7 +34,7 @@ async function main() {
 
   const jiyanUser = await prisma.user.create({
     data: {
-      email: 'traveler@globetrotter.com',
+      email: 'jiyan@globetrotter.com',
       passwordHash,
       name: 'Jiyan Mansuri',
       role: 'USER',

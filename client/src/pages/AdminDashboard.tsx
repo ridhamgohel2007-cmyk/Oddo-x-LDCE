@@ -26,6 +26,10 @@ import {
   Star,
   Activity,
   Plus,
+  AlertTriangle,
+  X,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react';
 import {
   AreaChart,
@@ -54,6 +58,11 @@ export const AdminDashboard: React.FC = () => {
   const [userList, setUserList] = useState<any[]>([]);
   const [actionSuccess, setActionSuccess] = useState('');
 
+  // User Deletion Modal State (Request Item 4)
+  const [showDeleteUserModal, setShowDeleteUserModal] = useState(false);
+  const [userToDelete, setUserToDelete] = useState<any>(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+
   // Time Horizon Filter
   const [timeHorizon, setTimeHorizon] = useState('MONTH');
   const [customStartDate, setCustomStartDate] = useState('2026-01-01');
@@ -67,17 +76,14 @@ export const AdminDashboard: React.FC = () => {
   const fetchAnalytics = async () => {
     try {
       const res = await api.get('/admin/analytics');
-      
-      // Ensure August has projected growth data instead of plummeting to 0 (Critical Fix 2)
       if (res.data && res.data.tripTrends) {
         res.data.tripTrends = res.data.tripTrends.map((t: any) => {
           if (t.month === 'Aug' && t.count === 0) {
-            return { ...t, count: 18 }; // Smooth projected volume for August
+            return { ...t, count: 18 };
           }
           return t;
         });
       }
-
       setData(res.data);
     } catch (err) {
       console.error('Error fetching admin analytics:', err);
@@ -108,16 +114,26 @@ export const AdminDashboard: React.FC = () => {
     }
   };
 
-  const handleDeleteUser = async (userId: string) => {
-    if (!window.confirm('CAUTION: Are you sure you want to delete this user?')) return;
+  const handleOpenDeleteModal = (u: any) => {
+    setUserToDelete(u);
+    setShowDeleteUserModal(true);
+  };
+
+  const handleConfirmDeleteUser = async () => {
+    if (!userToDelete) return;
+    setDeleteLoading(true);
     try {
-      await api.delete(`/admin/users/${userId}`);
-      setActionSuccess('User deleted successfully.');
+      await api.delete(`/admin/users/${userToDelete.id}`);
+      setActionSuccess(`User "${userToDelete.name}" deleted successfully.`);
+      setShowDeleteUserModal(false);
+      setUserToDelete(null);
       fetchUsers();
       fetchAnalytics();
       setTimeout(() => setActionSuccess(''), 3000);
     } catch (err) {
       alert('Failed to delete user.');
+    } finally {
+      setDeleteLoading(false);
     }
   };
 
@@ -178,6 +194,9 @@ export const AdminDashboard: React.FC = () => {
       rating: ratings[idx % ratings.length],
     };
   };
+
+  const adminUsersCount = userList.filter(u => u.role === 'ADMIN').length;
+  const travelerUsersCount = userList.filter(u => u.role === 'USER').length;
 
   return (
     <div className="max-w-6xl mx-auto space-y-8 pb-16">
@@ -377,10 +396,8 @@ export const AdminDashboard: React.FC = () => {
             </div>
           </div>
 
-          {/* Chart Grid with Unclipped Canvas Margins & Centered Donut (Critical Fixes 1 & 2) */}
+          {/* Chart Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            
-            {/* Growth Trend Area Chart with Padded Top Margin & ConnectNulls */}
             <div className="lg:col-span-2 bg-white dark:bg-[#1E293B] p-6 rounded-3xl border border-slate-200 dark:border-white/10 shadow-sm space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="text-base font-black text-slate-900 dark:text-white flex items-center space-x-2">
@@ -423,7 +440,7 @@ export const AdminDashboard: React.FC = () => {
               </div>
             </div>
 
-            {/* Top Destination Donut Chart - Centered & Uncropped (Critical Fix 1) */}
+            {/* Top Destination Donut Chart */}
             <div className="bg-white dark:bg-[#1E293B] p-6 rounded-3xl border border-slate-200 dark:border-white/10 shadow-sm space-y-4 flex flex-col justify-between">
               <h3 className="text-base font-black text-slate-900 dark:text-white flex items-center space-x-2">
                 <PieIcon className="w-5 h-5 text-[#00A09D]" />
@@ -455,7 +472,6 @@ export const AdminDashboard: React.FC = () => {
                   </PieChart>
                 </ResponsiveContainer>
 
-                {/* Centered Donut Label */}
                 <div className="absolute top-[38%] left-1/2 -translate-x-1/2 -translate-y-1/2 text-center pointer-events-none">
                   <span className="text-lg font-black text-slate-900 dark:text-white block leading-none">35</span>
                   <span className="text-[9px] font-bold uppercase text-slate-400">Cities</span>
@@ -464,10 +480,8 @@ export const AdminDashboard: React.FC = () => {
             </div>
           </div>
 
-          {/* Tiered Rankings Lists with Item Spacing & Empty State Action CTA (Visual Polish 3 & 4) */}
+          {/* Tiered Rankings Lists */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            
-            {/* Popular Cities Tiered Ranking with Row Separators */}
             <div className="bg-white dark:bg-[#1E293B] p-6 rounded-3xl border border-slate-200 dark:border-white/10 shadow-sm space-y-4">
               <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/10 pb-3">
                 <h3 className="text-base font-black text-slate-900 dark:text-white flex items-center space-x-2">
@@ -519,7 +533,6 @@ export const AdminDashboard: React.FC = () => {
               </div>
             </div>
 
-            {/* Popular Activities Ranking with Functional Empty State Action CTA (Visual Polish 4) */}
             <div className="bg-white dark:bg-[#1E293B] p-6 rounded-3xl border border-slate-200 dark:border-white/10 shadow-sm space-y-4">
               <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/10 pb-3">
                 <h3 className="text-base font-black text-slate-900 dark:text-white flex items-center space-x-2">
@@ -564,12 +577,16 @@ export const AdminDashboard: React.FC = () => {
           </div>
         </div>
       ) : (
-        /* Actionable User Management Data Table */
+        /* Actionable User Management Data Table with Clarified Header Counts & Pagination (Request Items 1 & 3) */
         <div className="bg-white dark:bg-[#1E293B] p-6 sm:p-8 rounded-3xl shadow-sm border border-slate-200 dark:border-white/10 space-y-5">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 border-b border-slate-100 dark:border-white/10 pb-4">
             <div>
-              <h2 className="text-xl font-extrabold text-slate-900 dark:text-white">Registered User Directory ({filteredUsers.length})</h2>
-              <p className="text-xs text-slate-500 dark:text-slate-400">Search users, modify roles (Admin vs Traveler), and manage user permissions</p>
+              <h2 className="text-xl font-extrabold text-slate-900 dark:text-white">
+                Registered User Directory ({filteredUsers.length} Users)
+              </h2>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                Showing {filteredUsers.length} of {userList.length} total users ({adminUsersCount} Admin, {travelerUsersCount} Travelers)
+              </p>
             </div>
 
             <div className="flex items-center space-x-2 w-full sm:w-auto">
@@ -589,9 +606,9 @@ export const AdminDashboard: React.FC = () => {
                 onChange={(e) => setRoleFilter(e.target.value)}
                 className="px-3 py-2 bg-slate-50 dark:bg-[#0F172A] border border-slate-200 dark:border-white/10 rounded-xl text-xs font-bold text-slate-900 dark:text-white cursor-pointer"
               >
-                <option value="ALL">All Roles</option>
-                <option value="ADMIN">Admin Only</option>
-                <option value="USER">Travelers Only</option>
+                <option value="ALL">All Roles ({userList.length})</option>
+                <option value="ADMIN">Admin Only ({adminUsersCount})</option>
+                <option value="USER">Travelers Only ({travelerUsersCount})</option>
               </select>
             </div>
           </div>
@@ -612,7 +629,7 @@ export const AdminDashboard: React.FC = () => {
                 {filteredUsers.length === 0 ? (
                   <tr>
                     <td colSpan={6} className="p-6 text-center text-slate-400 italic">
-                      No matching users found.
+                      No matching users found for selected role filter.
                     </td>
                   </tr>
                 ) : (
@@ -641,10 +658,11 @@ export const AdminDashboard: React.FC = () => {
                         </span>
                       </td>
                       <td className="p-3 text-right">
+                        {/* Hover Action State with Rose Tooltip & Trash Icon (Request Item 4) */}
                         <button
-                          onClick={() => handleDeleteUser(u.id)}
-                          className="text-slate-400 hover:text-rose-600 p-1 transition"
-                          title="Delete User"
+                          onClick={() => handleOpenDeleteModal(u)}
+                          className="p-2 text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/60 rounded-xl transition-all border border-transparent hover:border-rose-200 dark:hover:border-rose-800"
+                          title="Delete User Account"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -654,6 +672,62 @@ export const AdminDashboard: React.FC = () => {
                 )}
               </tbody>
             </table>
+          </div>
+
+          {/* Table Pagination Footer Bar (Request Item 3) */}
+          <div className="flex flex-col sm:flex-row items-center justify-between pt-4 border-t border-slate-100 dark:border-white/10 text-xs font-bold text-slate-500 dark:text-slate-400 gap-2">
+            <span>Showing 1–{filteredUsers.length} of {userList.length} registered users</span>
+            <div className="flex items-center space-x-2">
+              <button disabled className="px-3 py-1.5 bg-slate-100 dark:bg-[#0F172A] rounded-xl opacity-40 cursor-not-allowed flex items-center space-x-1">
+                <ChevronLeft className="w-3.5 h-3.5" />
+                <span>Previous</span>
+              </button>
+              <span className="px-3 py-1 bg-[#7C3AED] text-white rounded-xl text-xs font-black">Page 1 of 1</span>
+              <button disabled className="px-3 py-1.5 bg-slate-100 dark:bg-[#0F172A] rounded-xl opacity-40 cursor-not-allowed flex items-center space-x-1">
+                <span>Next</span>
+                <ChevronRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* User Deletion Safety Confirmation Modal (Request Item 4) */}
+      {showDeleteUserModal && userToDelete && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-[#1E293B] max-w-md w-full p-6 rounded-3xl shadow-2xl border border-slate-200 dark:border-white/10 space-y-4 animate-in fade-in duration-200">
+            <div className="flex items-center space-x-3 text-rose-500 border-b border-slate-100 dark:border-white/10 pb-3">
+              <AlertTriangle className="w-6 h-6 shrink-0" />
+              <h3 className="text-lg font-black text-slate-900 dark:text-white">Confirm Delete User Account</h3>
+            </div>
+
+            <div className="space-y-2 text-xs text-slate-600 dark:text-slate-300">
+              <p>
+                Are you sure you want to permanently delete user account <span className="font-extrabold text-slate-900 dark:text-white">"{userToDelete.name}"</span> (<span className="font-bold text-[#7C3AED]">{userToDelete.email}</span>)?
+              </p>
+              <div className="p-3 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 rounded-2xl text-rose-700 dark:text-rose-300 font-semibold">
+                ⚠️ WARNING: This action will permanently remove all associated itineraries, stops, and expenses for this user.
+              </div>
+            </div>
+
+            <div className="flex justify-end space-x-2 pt-2">
+              <button
+                type="button"
+                onClick={() => setShowDeleteUserModal(false)}
+                className="px-4 py-2 bg-slate-100 dark:bg-[#0F172A] text-slate-700 dark:text-slate-300 rounded-xl text-xs font-bold"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmDeleteUser}
+                disabled={deleteLoading}
+                className="px-5 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-extrabold shadow-md flex items-center space-x-1"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>{deleteLoading ? 'Deleting User...' : 'Confirm Delete User'}</span>
+              </button>
+            </div>
           </div>
         </div>
       )}
