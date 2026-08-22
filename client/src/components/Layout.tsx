@@ -9,6 +9,8 @@ import {
   X,
   Search,
   ChevronRight,
+  Sun,
+  Moon,
 } from 'lucide-react';
 
 export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -18,10 +20,25 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [globalSearch, setGlobalSearch] = useState('');
 
-  // Ensure dark class is always active on HTML document root for crisp Odoo dark mode
+  // Theme Toggle State (Sun / Moon)
+  const [isDark, setIsDark] = useState(() => {
+    return document.documentElement.classList.contains('dark') ||
+      localStorage.getItem('theme') !== 'light';
+  });
+
   useEffect(() => {
-    document.documentElement.classList.add('dark');
-  }, []);
+    if (isDark) {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
+    }
+  }, [isDark]);
+
+  const toggleTheme = () => {
+    setIsDark(!isDark);
+  };
 
   const navLinks = [
     { name: 'Dashboard', path: '/dashboard' },
@@ -53,7 +70,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 gap-4">
             
-            {/* Brand Logo with Uploaded First Image Near Brand Name */}
+            {/* Brand Logo */}
             <Link to="/dashboard" className="flex items-center space-x-3 group shrink-0">
               <div className="w-10 h-10 rounded-2xl overflow-hidden ring-2 ring-[#7C3AED]/50 shadow-md shadow-purple-500/20 group-hover:scale-105 transition-all duration-300 bg-white shrink-0">
                 <img
@@ -110,7 +127,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
               </nav>
             )}
 
-            {/* Right Side User Profile & Actions */}
+            {/* Right Side User Profile, Theme Switcher & Actions */}
             {user ? (
               <div className="flex items-center space-x-2.5 shrink-0">
                 <Link
@@ -121,10 +138,21 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                   <span className="whitespace-nowrap">Plan New Trip</span>
                 </Link>
 
-                {/* User Profile Avatar Pill */}
+                {/* Theme Toggle Button (Sun / Moon) placed directly between [+ Plan New Trip] and User Profile Avatar (Request 1) */}
+                <button
+                  type="button"
+                  onClick={toggleTheme}
+                  className="p-2 rounded-xl bg-slate-100 dark:bg-[#1E293B] hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-amber-400 border border-slate-200 dark:border-white/10 transition shadow-xs shrink-0"
+                  title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+                  aria-label="Toggle Theme Mode"
+                >
+                  {isDark ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-slate-600" />}
+                </button>
+
+                {/* Unclipped User Profile Pill with Auto-Width & Proper Padding (Request 1) */}
                 <Link
                   to="/profile"
-                  className="flex items-center space-x-2.5 px-3 py-1.5 rounded-2xl bg-slate-100 dark:bg-[#1E293B] hover:bg-slate-200 dark:hover:bg-slate-700 transition border border-slate-200 dark:border-white/10 shrink-0"
+                  className="flex items-center space-x-2.5 px-3.5 py-1.5 rounded-2xl bg-slate-100 dark:bg-[#1E293B] hover:bg-slate-200 dark:hover:bg-slate-700 transition border border-slate-200 dark:border-white/10 shrink-0 min-w-max"
                   title={`${user.name} (${user.role})`}
                 >
                   <img
@@ -132,11 +160,11 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                     alt={user.name}
                     className="w-8 h-8 rounded-xl object-cover ring-2 ring-[#7C3AED]/40 shrink-0"
                   />
-                  <div className="hidden md:flex flex-col text-left max-w-[140px]">
-                    <span className="text-xs font-black text-slate-800 dark:text-slate-200 leading-tight truncate">
+                  <div className="hidden sm:flex flex-col text-left whitespace-nowrap">
+                    <span className="text-xs font-black text-slate-800 dark:text-slate-200 leading-tight whitespace-nowrap">
                       {user.name}
                     </span>
-                    <span className="text-[9px] text-[#00A09D] dark:text-[#38BDF8] font-bold uppercase tracking-wider">
+                    <span className="text-[9px] text-[#00A09D] dark:text-[#38BDF8] font-bold uppercase tracking-wider whitespace-nowrap">
                       {user.role}
                     </span>
                   </div>
@@ -144,7 +172,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
 
                 <button
                   onClick={handleLogout}
-                  className="p-2 text-slate-400 hover:text-rose-500 dark:hover:text-rose-400 transition rounded-xl hover:bg-slate-100 dark:hover:bg-[#1E293B]"
+                  className="p-2 text-slate-400 hover:text-rose-500 dark:hover:text-rose-400 transition rounded-xl hover:bg-slate-100 dark:hover:bg-[#1E293B] shrink-0"
                   title="Log Out"
                 >
                   <LogOut className="w-4 h-4" />
@@ -153,13 +181,22 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                 {/* Mobile Hamburger Toggle */}
                 <button
                   onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                  className="md:hidden p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-[#1E293B]"
+                  className="md:hidden p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-[#1E293B] shrink-0"
                 >
                   {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
                 </button>
               </div>
             ) : (
               <div className="flex items-center space-x-2">
+                <button
+                  type="button"
+                  onClick={toggleTheme}
+                  className="p-2 rounded-xl bg-slate-100 dark:bg-[#1E293B] text-slate-700 dark:text-amber-400 border border-slate-200 dark:border-white/10 transition shrink-0"
+                  title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+                >
+                  {isDark ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-slate-600" />}
+                </button>
+
                 <Link
                   to="/login"
                   className="px-4 py-2 text-xs font-bold text-slate-700 dark:text-slate-200 hover:text-[#7C3AED]"
@@ -207,7 +244,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
         {children}
       </main>
 
-      {/* Footer with First Image */}
+      {/* Footer */}
       <footer className="bg-white dark:bg-[#0F172A] border-t border-slate-200 dark:border-white/10 py-6 text-center text-xs text-slate-500 dark:text-slate-400">
         <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center space-x-2">

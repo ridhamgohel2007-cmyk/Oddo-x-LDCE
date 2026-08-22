@@ -53,13 +53,13 @@ export const Dashboard: React.FC = () => {
   const [vibeLoading, setVibeLoading] = useState(false);
   const [demoLoading, setDemoLoading] = useState(false);
 
-  // Currency Switcher State (INR / USD)
+  // Dynamic Currency Switcher State (INR / USD) (Request 2)
   const [currencyMode, setCurrencyMode] = useState<'INR' | 'USD'>('INR');
 
-  // Floating Toast Feedback State (Request 4)
+  // Floating Toast Feedback State
   const [toastMsg, setToastMsg] = useState<string | null>(null);
 
-  // Export Modal State (Request 3)
+  // Export Modal State (Request 4)
   const [showExportModal, setShowExportModal] = useState(false);
 
   // Dynamic Metrics & Countdown States
@@ -339,7 +339,6 @@ export const Dashboard: React.FC = () => {
     }
   };
 
-  // Quick Demo Data Loader Trigger (Request 4)
   const handleLoadDemoTrip = async () => {
     setDemoLoading(true);
     try {
@@ -390,7 +389,7 @@ export const Dashboard: React.FC = () => {
 
   return (
     <div className="space-y-8 pb-12 relative">
-      {/* Instant Floating Toast Feedback Notification Banner (Request 4) */}
+      {/* Instant Floating Toast Feedback Notification Banner */}
       {toastMsg && (
         <div className="fixed top-20 right-6 z-50 bg-[#714B67] dark:bg-[#7C3AED] text-white px-4 py-3 rounded-2xl shadow-2xl border border-purple-400/40 flex items-center space-x-2.5 animate-bounce text-xs font-black">
           <CheckCircle2 className="w-4 h-4 text-[#10B981] shrink-0" />
@@ -428,7 +427,7 @@ export const Dashboard: React.FC = () => {
                 <span>Plan New Trip</span>
               </Link>
               
-              {/* Export Modal Trigger (Request 3) */}
+              {/* Export Modal Trigger (Request 4) */}
               <button
                 onClick={() => setShowExportModal(true)}
                 className="px-5 py-3 bg-white/10 hover:bg-white/20 text-white border border-white/20 rounded-2xl font-bold text-xs backdrop-blur-md transition flex items-center space-x-2"
@@ -553,7 +552,7 @@ export const Dashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* Budget Highlights with Fully Dynamic Currency Toggle (Request 2) */}
+      {/* Budget Highlights with Dynamic Currency Switcher State (Request 2) */}
       <section className="space-y-4">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
           <h2 className="text-lg font-black text-slate-900 dark:text-white flex items-center space-x-2">
@@ -562,26 +561,32 @@ export const Dashboard: React.FC = () => {
           </h2>
 
           <div className="flex items-center space-x-3 self-end sm:self-auto">
-            {/* Dynamic Currency Toggle Switch (Request 2) */}
+            {/* Dynamic Currency Toggle Switch with High-Contrast Active Pill Styling (Request 2) */}
             <div className="flex items-center bg-slate-200 dark:bg-[#1E293B] p-1 rounded-xl border border-slate-300 dark:border-white/10">
               <button
                 type="button"
-                onClick={() => setCurrencyMode('INR')}
-                className={`px-3 py-1 rounded-lg text-xs font-black transition ${
+                onClick={() => {
+                  setCurrencyMode('INR');
+                  showToast('✓ Currency switched to ₹ INR');
+                }}
+                className={`px-3 py-1 rounded-lg text-xs font-black transition-all ${
                   currencyMode === 'INR'
-                    ? 'bg-[#714B67] text-white shadow-xs'
-                    : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
+                    ? 'bg-[#714B67] dark:bg-[#7C3AED] text-white shadow-md border border-purple-400 scale-105'
+                    : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white border border-transparent'
                 }`}
               >
                 ₹ INR
               </button>
               <button
                 type="button"
-                onClick={() => setCurrencyMode('USD')}
-                className={`px-3 py-1 rounded-lg text-xs font-black transition ${
+                onClick={() => {
+                  setCurrencyMode('USD');
+                  showToast('✓ Currency switched to $ USD');
+                }}
+                className={`px-3 py-1 rounded-lg text-xs font-black transition-all ${
                   currencyMode === 'USD'
-                    ? 'bg-[#714B67] text-white shadow-xs'
-                    : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
+                    ? 'bg-[#714B67] dark:bg-[#7C3AED] text-white shadow-md border border-purple-400 scale-105'
+                    : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white border border-transparent'
                 }`}
               >
                 $ USD
@@ -605,7 +610,6 @@ export const Dashboard: React.FC = () => {
                   {formatMoney(budgetMetrics.totalAllocated)}
                 </div>
               </div>
-              {/* String Pluralization Glitch Fix (Request 1) */}
               <p className="text-[11px] text-slate-500 dark:text-slate-400 pt-2 border-t border-slate-100 dark:border-white/10">
                 Across {trips.length} planned trip{trips.length !== 1 ? 's' : ''}
               </p>
@@ -660,7 +664,7 @@ export const Dashboard: React.FC = () => {
             </div>
           </div>
 
-          {/* Financial Category Spend Card with Clean Legend Spacing & Percentage Format (Request 1 & 2) */}
+          {/* Financial Category Spend Card */}
           <div className="bg-white dark:bg-[#1E293B] p-5 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm flex flex-col justify-between h-full space-y-4">
             <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/10 pb-2">
               <span className="text-xs font-extrabold uppercase tracking-wider text-slate-700 dark:text-slate-300">
@@ -695,7 +699,7 @@ export const Dashboard: React.FC = () => {
               </div>
             </div>
 
-            {/* Combined Single 2x2 Grid Legend without Whitespace Bugs (Request 1) */}
+            {/* Combined Single 2x2 Grid Legend */}
             <div className="grid grid-cols-2 gap-2 text-xs font-bold pt-2 border-t border-slate-100 dark:border-white/10">
               <div className={`flex items-center justify-between p-2 rounded-xl bg-slate-50 dark:bg-[#0F172A]/60 border border-slate-100 dark:border-white/5 ${budgetMetrics.categoryTotals.STAY === 0 ? 'opacity-60' : ''}`}>
                 <div className="flex items-center space-x-1.5 text-purple-600 dark:text-purple-400">
@@ -741,7 +745,7 @@ export const Dashboard: React.FC = () => {
         </div>
       </section>
 
-      {/* "Travel by Vibe" Filter Section with Wired City Search Input (Request 5) */}
+      {/* "Travel by Vibe" Filter Section with Wired Search Input */}
       <div className="bg-white dark:bg-[#1E293B] p-6 sm:p-8 rounded-3xl shadow-sm border border-slate-200 dark:border-white/10 space-y-5">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 dark:border-white/10 pb-4">
           <div>
@@ -754,7 +758,6 @@ export const Dashboard: React.FC = () => {
             </p>
           </div>
 
-          {/* Wired Search Input (Request 5) */}
           <div className="relative w-full md:w-80 shrink-0">
             <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
             <input
@@ -790,15 +793,22 @@ export const Dashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* Regional / Vibe Selections Grid with Instant Search Filter (Request 5) */}
+      {/* Regional / Vibe Selections Grid with Real-Time Counter Feedback (Request 3) */}
       <section className="space-y-4">
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-xl font-black text-slate-900 dark:text-white flex items-center space-x-2">
               <Globe2 className="w-5 h-5 text-[#00A09D]" />
-              <span>Popular Destination Catalog ({filteredCities.length})</span>
+              <span>
+                Popular Destination Catalog ({filteredCities.length}
+                {selectedVibe !== 'ALL' ? ` ${vibeOptions.find((v) => v.id === selectedVibe)?.label}` : ''})
+              </span>
             </h2>
-            <p className="text-xs text-slate-500 dark:text-slate-400">Explore popular cities in India and top destinations worldwide</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              {selectedVibe !== 'ALL'
+                ? `Showing ${filteredCities.length} destinations matching "${vibeOptions.find((v) => v.id === selectedVibe)?.label}"`
+                : 'Explore popular cities in India and top destinations worldwide'}
+            </p>
           </div>
           <Link to="/search" className="text-xs font-bold text-[#7C3AED] dark:text-[#38BDF8] hover:underline flex items-center space-x-1">
             <span>View Full Catalog</span>
@@ -814,7 +824,7 @@ export const Dashboard: React.FC = () => {
           </div>
         ) : filteredCities.length === 0 ? (
           <div className="p-8 bg-white dark:bg-[#1E293B] rounded-3xl border border-slate-200 dark:border-white/10 text-center text-xs text-slate-400 space-y-2">
-            <p className="font-bold text-slate-700 dark:text-slate-300 text-sm">No matching destinations found for "{searchQuery}"</p>
+            <p className="font-bold text-slate-700 dark:text-slate-300 text-sm">No matching destinations found</p>
             <p>Try searching for popular Indian cities like <strong>Goa, Jaipur, Manali, Shimla, Varanasi, Kerala, Srinagar, Coorg, Ooty</strong>...</p>
           </div>
         ) : (
@@ -900,7 +910,7 @@ export const Dashboard: React.FC = () => {
         )}
       </section>
 
-      {/* Interactive Export Modal with Choices (Request 3) */}
+      {/* Interactive Export Modal with Options A, B, C (Request 4) */}
       {showExportModal && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white dark:bg-[#1E293B] max-w-md w-full p-6 rounded-3xl shadow-2xl border border-slate-200 dark:border-white/10 space-y-4 relative">
@@ -917,30 +927,32 @@ export const Dashboard: React.FC = () => {
               </div>
               <div>
                 <h3 className="text-base font-extrabold text-slate-900 dark:text-white">Export Itinerary & Reports</h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400">Select export format for business & travel reporting</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400">Data portability choices for presentation & business auditing</p>
               </div>
             </div>
 
             <div className="space-y-3 pt-2">
+              {/* Option A: PDF Download */}
               <button
                 type="button"
                 onClick={() => {
                   window.print();
                   setShowExportModal(false);
-                  showToast('✓ PDF Travel Summary triggered');
+                  showToast('✓ Option A: Formatted Travel Itinerary (PDF) triggered');
                 }}
                 className="w-full p-3.5 bg-slate-50 dark:bg-[#0F172A] hover:bg-slate-100 dark:hover:bg-[#334155] rounded-2xl border border-slate-200 dark:border-white/10 flex items-center justify-between text-xs font-bold text-slate-900 dark:text-white transition"
               >
                 <div className="flex items-center space-x-3">
                   <FileText className="w-5 h-5 text-[#7C3AED]" />
                   <div className="text-left">
-                    <span className="block font-black">📄 Download PDF Summary Voucher</span>
-                    <span className="text-[10px] text-slate-400">Printable travel itinerary report</span>
+                    <span className="block font-black">Option A: Formatted Travel Itinerary (PDF)</span>
+                    <span className="text-[10px] text-slate-400">Printable offline voucher & travel summary</span>
                   </div>
                 </div>
                 <Download className="w-4 h-4 text-slate-400" />
               </button>
 
+              {/* Option B: CSV Export */}
               <button
                 type="button"
                 onClick={() => {
@@ -952,28 +964,29 @@ export const Dashboard: React.FC = () => {
                 <div className="flex items-center space-x-3">
                   <FileSpreadsheet className="w-5 h-5 text-[#10B981]" />
                   <div className="text-left">
-                    <span className="block font-black">📊 Download CSV Budget Table</span>
-                    <span className="text-[10px] text-slate-400">Spreadsheet table for Excel / Google Sheets</span>
+                    <span className="block font-black">Option B: Export Budget Ledger (CSV / Excel)</span>
+                    <span className="text-[10px] text-slate-400">Structured spreadsheet report for Excel & Sheets</span>
                   </div>
                 </div>
                 <Download className="w-4 h-4 text-slate-400" />
               </button>
 
+              {/* Option C: Google Calendar Sync */}
               <a
                 href="https://calendar.google.com"
                 target="_blank"
                 rel="noreferrer"
                 onClick={() => {
                   setShowExportModal(false);
-                  showToast('✓ iCal Calendar Sync opened');
+                  showToast('✓ Option C: Google Calendar Sync (.ics) opened');
                 }}
                 className="w-full p-3.5 bg-slate-50 dark:bg-[#0F172A] hover:bg-slate-100 dark:hover:bg-[#334155] rounded-2xl border border-slate-200 dark:border-white/10 flex items-center justify-between text-xs font-bold text-slate-900 dark:text-white transition"
               >
                 <div className="flex items-center space-x-3">
                   <Calendar className="w-5 h-5 text-[#00A09D]" />
                   <div className="text-left">
-                    <span className="block font-black">📅 Sync to iCal / Google Calendar</span>
-                    <span className="text-[10px] text-slate-400">Add departure dates to calendar</span>
+                    <span className="block font-black">Option C: Sync with Google Calendar (.ics)</span>
+                    <span className="text-[10px] text-slate-400">Add trip departure dates to personal calendar</span>
                   </div>
                 </div>
                 <ExternalLink className="w-4 h-4 text-slate-400" />
