@@ -65,7 +65,7 @@ export const TripCard: React.FC<TripCardProps> = ({ trip, onDelete, onDuplicate 
 
   const destinationCount = trip.stops?.length || 0;
 
-  // Compute Multi-City Route String & Transit Time Estimates (Request 2)
+  // Compute Multi-City Route String & Transit Time Estimates
   let routeNames: string[] = [];
   if (trip.stops && trip.stops.length > 0) {
     routeNames = trip.stops.map((s: any) => s.city?.name || s.title.replace('Stop: ', ''));
@@ -99,7 +99,7 @@ export const TripCard: React.FC<TripCardProps> = ({ trip, onDelete, onDuplicate 
     activityCount = Math.max(3, destinationCount * 2);
   }
 
-  // Quick Alert Warning Pill (80%+ Budget Allocation used - Request 1)
+  // Quick Alert Warning Pill
   const spentRatio = trip.totalBudget > 0 ? totalRecordedSpent / trip.totalBudget : 0;
   const isOverBudget = spentRatio >= 1.0;
   const isNearBudgetLimit = spentRatio >= 0.8 && !isOverBudget;
@@ -141,7 +141,7 @@ export const TripCard: React.FC<TripCardProps> = ({ trip, onDelete, onDuplicate 
           <div className="absolute top-3 left-3 flex items-center space-x-1.5">
             <StatusBadge status={trip.status} />
 
-            {/* Quick Alert Warning Pill (Request 1) */}
+            {/* Quick Alert Warning Pill */}
             {isOverBudget && (
               <span className="px-2 py-0.5 bg-rose-600 text-white rounded-full text-[10px] font-black shadow-md flex items-center space-x-1 animate-pulse">
                 <AlertTriangle className="w-3 h-3 shrink-0" />
@@ -243,7 +243,7 @@ export const TripCard: React.FC<TripCardProps> = ({ trip, onDelete, onDuplicate 
             </p>
           </div>
 
-          {/* Interactive Multi-City Route Preview Snippet & Transit Time Estimates (Request 2) */}
+          {/* Interactive Multi-City Route Preview Snippet */}
           {routeNames.length > 0 && (
             <div className="p-2 bg-emerald-50/70 dark:bg-emerald-950/40 rounded-xl border border-emerald-200/60 dark:border-emerald-800/60 text-[11px] font-bold text-emerald-900 dark:text-emerald-300 space-y-1">
               <div className="flex items-center space-x-1.5">
@@ -292,7 +292,7 @@ export const TripCard: React.FC<TripCardProps> = ({ trip, onDelete, onDuplicate 
             )}
           </div>
 
-          {/* Card Metrics with Per-Person Split Selector */}
+          {/* Card Metrics with Crystal Clear High-Contrast Traveler Select Dropdown */}
           <div className="space-y-2.5 text-xs text-slate-600 dark:text-slate-300 pt-2.5 border-t border-slate-100 dark:border-[#1E2D42]">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
@@ -308,30 +308,30 @@ export const TripCard: React.FC<TripCardProps> = ({ trip, onDelete, onDuplicate 
               </div>
             </div>
 
-            {/* Per-Person vs Total Group Pricing Display */}
+            {/* Per-Person vs Total Group Pricing Display with Styled Dropdown */}
             {trip.totalBudget > 0 && (
-              <div className="bg-slate-50 dark:bg-[#162235] p-2.5 rounded-xl border border-slate-200 dark:border-[#1E2D42] space-y-1.5">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-1">
-                    <Users className="w-3.5 h-3.5 text-emerald-500" />
+              <div className="bg-slate-100 dark:bg-[#16243A] p-2.5 rounded-xl border border-slate-200 dark:border-[#1E293B] space-y-1.5">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center space-x-1.5">
+                    <Users className="w-4 h-4 text-emerald-500 shrink-0" />
                     <select
                       value={travelerCount}
                       onChange={(e) => setTravelerCount(parseInt(e.target.value))}
-                      className="bg-transparent text-[11px] font-extrabold text-slate-700 dark:text-slate-300 cursor-pointer focus:outline-none"
+                      className="bg-white dark:bg-[#111C2E] text-slate-900 dark:text-white text-xs font-black px-2.5 py-1 rounded-lg border border-slate-300 dark:border-[#1E293B] shadow-xs cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-500"
                     >
-                      <option value={1}>Solo (1 Person)</option>
-                      <option value={2}>Couple (2 People)</option>
-                      <option value={4}>Group (4 People)</option>
-                      <option value={6}>Family (6 People)</option>
+                      <option value={1} className="bg-white dark:bg-[#111C2E] text-slate-900 dark:text-white font-extrabold">Solo (1 Person)</option>
+                      <option value={2} className="bg-white dark:bg-[#111C2E] text-slate-900 dark:text-white font-extrabold">Couple (2 People)</option>
+                      <option value={4} className="bg-white dark:bg-[#111C2E] text-slate-900 dark:text-white font-extrabold">Group (4 People)</option>
+                      <option value={6} className="bg-white dark:bg-[#111C2E] text-slate-900 dark:text-white font-extrabold">Family (6 People)</option>
                     </select>
                   </div>
 
-                  <span className="text-[11px] font-black text-emerald-600 dark:text-emerald-400">
-                    ₹{perPersonCost.toLocaleString('en-IN')} <span className="text-[9px] font-bold text-slate-400">/ person</span>
+                  <span className="text-[11px] font-black text-emerald-600 dark:text-emerald-400 whitespace-nowrap">
+                    ₹{perPersonCost.toLocaleString('en-IN')} <span className="text-[9px] font-bold text-slate-500 dark:text-slate-400">/ person</span>
                   </span>
                 </div>
 
-                <div className="flex items-center justify-between text-[10px] text-slate-500 dark:text-slate-400 border-t border-slate-200/60 dark:border-[#1E2D42] pt-1">
+                <div className="flex items-center justify-between text-[10px] text-slate-500 dark:text-slate-400 border-t border-slate-200 dark:border-[#1E293B] pt-1">
                   <span>Total Group Budget ({travelerCount} pax):</span>
                   <span className="font-bold text-slate-900 dark:text-white">₹{trip.totalBudget.toLocaleString('en-IN')}</span>
                 </div>
@@ -360,7 +360,7 @@ export const TripCard: React.FC<TripCardProps> = ({ trip, onDelete, onDuplicate 
         </Link>
       </div>
 
-      {/* Share & Collaborate Modal (Request 4) */}
+      {/* Share & Collaborate Modal */}
       {showShareModal && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white dark:bg-[#111E2E] max-w-md w-full p-6 rounded-3xl shadow-2xl border border-slate-200 dark:border-[#1E2D42] space-y-4 relative">
@@ -406,7 +406,7 @@ export const TripCard: React.FC<TripCardProps> = ({ trip, onDelete, onDuplicate 
         </div>
       )}
 
-      {/* Export to PDF / Calendar Modal (Request 4) */}
+      {/* Export to PDF / Calendar Modal */}
       {showExportModal && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white dark:bg-[#111E2E] max-w-md w-full p-6 rounded-3xl shadow-2xl border border-slate-200 dark:border-[#1E2D42] space-y-4 relative">
