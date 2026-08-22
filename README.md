@@ -2,12 +2,15 @@
 
 <div align="center">
 
-![GlobeTrotter Banner](https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=1200&q=80)
+<img src="client/public/globetrotter-banner.jpg" alt="GlobeTrotter Banner" width="650" style="border-radius: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.2);" />
+
+<br />
+<br />
 
 [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactjs.org/)
 [![Node.js](https://img.shields.io/badge/Node.js-43853D?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org/)
-[![Express.js](https/img.shields.io/badge/Express.js-404D59?style=for-the-badge)](https://expressjs.com/)
+[![Express.js](https://img.shields.io/badge/Express.js-404D59?style=for-the-badge)](https://expressjs.com/)
 [![Prisma](https://img.shields.io/badge/Prisma-2D3748?style=for-the-badge&logo=prisma&logoColor=white)](https://www.prisma.io/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
 [![SQLite](https://img.shields.io/badge/SQLite-07405E?style=for-the-badge&logo=sqlite&logoColor=white)](https://www.sqlite.org/)
@@ -139,7 +142,7 @@ Use these pre-seeded credentials to explore the platform:
 | User Type | Email | Password | Role |
 | :--- | :--- | :--- | :--- |
 | **Administrator** | `admin@globetrotter.com` | `admin123` | ADMIN |
-| **Demo Traveler** | `john@example.com` | `password123` | USER |
+| **Demo Traveler** | `traveler@globetrotter.com` | `password123` | USER |
 
 ---
 
@@ -148,6 +151,7 @@ Use these pre-seeded credentials to explore the platform:
 ```
 Oddo-x-LDCE/
 ├── client/                     # React + Vite Frontend Application
+│   ├── public/                 # Static branding assets (globetrotter-logo.jpg, globetrotter-banner.jpg)
 │   ├── src/
 │   │   ├── components/         # Reusable UI components (CityCard, TripCard, ActivityCard, StatusBadge, Layout)
 │   │   ├── context/            # Global Auth & Theme contexts
@@ -160,7 +164,7 @@ Oddo-x-LDCE/
 │   │   │   ├── CreateTrip.tsx     # Trip initiation form
 │   │   │   ├── Dashboard.tsx      # Traveler home & regional selections
 │   │   │   ├── ItineraryBuilder.tsx # Day-wise stop manager
-│   │   │   ├── Login.tsx          # Authentication screen
+│   │   │   ├── Login.tsx          # Authentication screen (using globetrotter-banner.jpg)
 │   │   │   ├── MyTrips.tsx        # User trip listing (Ongoing, Upcoming, Completed)
 │   │   │   └── SearchPage.tsx     # Destination catalog & activity filters
 │   │   ├── App.tsx             # Route definitions & guards

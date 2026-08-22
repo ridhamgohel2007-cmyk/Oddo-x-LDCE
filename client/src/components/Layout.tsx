@@ -53,14 +53,18 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 gap-4">
             
-            {/* Brand Logo */}
+            {/* Brand Logo with Uploaded First Image Near Brand Name */}
             <Link to="/dashboard" className="flex items-center space-x-3 group shrink-0">
-              <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-[#714B67] via-[#7C3AED] to-[#00A09D] flex items-center justify-center shadow-md shadow-purple-500/20 group-hover:scale-105 transition-all duration-300">
-                <Globe className="w-5 h-5 text-white" />
+              <div className="w-10 h-10 rounded-2xl overflow-hidden ring-2 ring-[#7C3AED]/50 shadow-md shadow-purple-500/20 group-hover:scale-105 transition-all duration-300 bg-white shrink-0">
+                <img
+                  src="/globetrotter-logo.jpg"
+                  alt="GlobeTrotter Logo"
+                  className="w-full h-full object-cover"
+                />
               </div>
               <div className="flex flex-col whitespace-nowrap">
-                <span className="text-xl font-black tracking-tight text-slate-900 dark:text-white whitespace-nowrap">
-                  GlobeTrotter
+                <span className="text-xl font-black tracking-tight text-slate-900 dark:text-white whitespace-nowrap flex items-center space-x-1.5">
+                  <span>GlobeTrotter</span>
                 </span>
                 <span className="text-[10px] text-[#00A09D] dark:text-[#38BDF8] font-extrabold uppercase tracking-widest -mt-1 whitespace-nowrap">
                   Multi-City Travel Platform
@@ -106,7 +110,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
               </nav>
             )}
 
-            {/* Right Side User Profile & Actions (Theme Toggle Removed as Requested) */}
+            {/* Right Side User Profile & Actions */}
             {user ? (
               <div className="flex items-center space-x-2.5 shrink-0">
                 <Link
@@ -203,11 +207,11 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
         {children}
       </main>
 
-      {/* Footer */}
+      {/* Footer with First Image */}
       <footer className="bg-white dark:bg-[#0F172A] border-t border-slate-200 dark:border-white/10 py-6 text-center text-xs text-slate-500 dark:text-slate-400">
         <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center space-x-2">
-            <Globe className="w-4 h-4 text-[#7C3AED]" />
+            <img src="/globetrotter-logo.jpg" alt="GlobeTrotter Logo" className="w-5 h-5 rounded-full object-cover ring-1 ring-[#7C3AED]" />
             <span className="font-extrabold text-slate-800 dark:text-slate-200">GlobeTrotter Enterprise</span>
             <span>— Smart Travel Planning Platform</span>
           </div>
