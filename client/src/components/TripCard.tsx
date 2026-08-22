@@ -44,9 +44,10 @@ interface TripCardProps {
   trip: TripData;
   onDelete?: (id: string) => void;
   onDuplicate?: (id: string) => void;
+  currencyMode?: 'INR' | 'USD';
 }
 
-export const TripCard: React.FC<TripCardProps> = ({ trip, onDelete, onDuplicate }) => {
+export const TripCard: React.FC<TripCardProps> = ({ trip, onDelete, onDuplicate, currencyMode = 'INR' }) => {
   const [travelerCount, setTravelerCount] = useState<number>(2); // Default couple (2 people)
   const [showMenu, setShowMenu] = useState(false);
 
@@ -64,6 +65,14 @@ export const TripCard: React.FC<TripCardProps> = ({ trip, onDelete, onDuplicate 
 
   const [copiedLink, setCopiedLink] = useState(false);
   const [duplicateSuccess, setDuplicateSuccess] = useState('');
+
+  const formatMoney = (val: number) => {
+    if (currencyMode === 'USD') {
+      const usdVal = Math.round(val / 83);
+      return `$${usdVal.toLocaleString('en-US')}`;
+    }
+    return `₹${val.toLocaleString('en-IN')}`;
+  };
 
   const formattedStart = new Date(trip.startDate).toLocaleDateString('en-US', {
     month: 'short',
@@ -147,10 +156,13 @@ export const TripCard: React.FC<TripCardProps> = ({ trip, onDelete, onDuplicate 
     setExpenseSuccess('');
 
     try {
+      const numericAmount = parseFloat(expenseAmount) || 0;
+      const amountInINR = currencyMode === 'USD' ? numericAmount * 83 : numericAmount;
+
       await api.post('/expenses', {
         tripId: trip.id,
         category: expenseCategory,
-        amount: expenseAmount,
+        amount: amountInINR,
         notes: expenseNotes || 'Direct dashboard expense entry',
       });
       setExpenseSuccess('Expense logged successfully!');
@@ -362,8 +374,9 @@ export const TripCard: React.FC<TripCardProps> = ({ trip, onDelete, onDuplicate 
                     </select>
                   </div>
 
+                  {/* Dynamic Currency Format */}
                   <span className="text-[11px] font-black text-[#10B981] whitespace-nowrap">
-                    ₹{perPersonCost.toLocaleString('en-IN')} <span className="text-[9px] font-bold text-slate-500 dark:text-slate-400">/ person</span>
+                    {formatMoney(perPersonCost)} <span className="text-[9px] font-bold text-slate-500 dark:text-slate-400">/ person</span>
                   </span>
                 </div>
 
@@ -371,7 +384,7 @@ export const TripCard: React.FC<TripCardProps> = ({ trip, onDelete, onDuplicate 
                 <div className="flex items-center justify-between text-[10px] text-slate-500 dark:text-slate-400 border-t border-slate-200 dark:border-white/10 pt-1.5">
                   <div className="flex items-center space-x-1">
                     <span>Total Group Budget ({count} pax):</span>
-                    <span className="font-bold text-slate-900 dark:text-white">₹{trip.totalBudget.toLocaleString('en-IN')}</span>
+                    <span className="font-bold text-slate-900 dark:text-white">{formatMoney(trip.totalBudget)}</span>
                   </div>
 
                   <button
@@ -459,7 +472,9 @@ export const TripCard: React.FC<TripCardProps> = ({ trip, onDelete, onDuplicate 
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Amount (₹ INR)</label>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">
+                  Amount ({currencyMode === 'USD' ? '$ USD' : '₹ INR'})
+                </label>
                 <input
                   type="number"
                   required
@@ -467,7 +482,7 @@ export const TripCard: React.FC<TripCardProps> = ({ trip, onDelete, onDuplicate 
                   value={expenseAmount}
                   onChange={(e) => setExpenseAmount(e.target.value)}
                   className="w-full px-3 py-2 bg-slate-50 dark:bg-[#0F172A] border border-slate-200 dark:border-white/10 rounded-xl text-xs text-slate-900 dark:text-white font-semibold"
-                  placeholder="2500"
+                  placeholder={currencyMode === 'USD' ? '30' : '2500'}
                 />
               </div>
 

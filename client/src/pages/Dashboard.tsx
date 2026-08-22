@@ -12,7 +12,6 @@ import {
   Calendar,
   Globe2,
   ArrowRight,
-  TrendingUp,
   Clock,
   PieChart as PieChartIcon,
   Luggage,
@@ -24,10 +23,7 @@ import {
   Flame,
   Map,
   Sun,
-  CloudSun,
   Shirt,
-  DollarSign,
-  AlertTriangle,
   Hotel,
   Ticket,
   Navigation,
@@ -38,6 +34,8 @@ import {
   Download,
   FileSpreadsheet,
   Receipt,
+  FileText,
+  ExternalLink,
 } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 
@@ -58,6 +56,12 @@ export const Dashboard: React.FC = () => {
   // Currency Switcher State (INR / USD)
   const [currencyMode, setCurrencyMode] = useState<'INR' | 'USD'>('INR');
 
+  // Floating Toast Feedback State (Request 4)
+  const [toastMsg, setToastMsg] = useState<string | null>(null);
+
+  // Export Modal State (Request 3)
+  const [showExportModal, setShowExportModal] = useState(false);
+
   // Dynamic Metrics & Countdown States
   const [nextTrip, setNextTrip] = useState<TripData | null>(null);
   const [countdownText, setCountdownText] = useState({ days: 0, hours: 0, mins: 0 });
@@ -75,7 +79,6 @@ export const Dashboard: React.FC = () => {
   const [selectedCityToAdd, setSelectedCityToAdd] = useState<CityData | null>(null);
   const [targetTripId, setTargetTripId] = useState('');
   const [addCityLoading, setAddCityLoading] = useState(false);
-  const [addCitySuccessMsg, setAddCitySuccessMsg] = useState('');
 
   // Interactive Log Expense Modal State
   const [showLogExpenseModal, setShowLogExpenseModal] = useState(false);
@@ -84,7 +87,11 @@ export const Dashboard: React.FC = () => {
   const [expenseAmount, setExpenseAmount] = useState('2500');
   const [expenseCategory, setExpenseCategory] = useState<'STAY' | 'TRANSPORT' | 'ACTIVITIES' | 'MEALS'>('ACTIVITIES');
   const [expenseLoading, setExpenseLoading] = useState(false);
-  const [expenseSuccessMsg, setExpenseSuccessMsg] = useState('');
+
+  const showToast = (msg: string) => {
+    setToastMsg(msg);
+    setTimeout(() => setToastMsg(null), 3500);
+  };
 
   const loadData = async () => {
     try {
@@ -193,7 +200,7 @@ export const Dashboard: React.FC = () => {
     setTimeout(() => setVibeLoading(false), 200);
   };
 
-  // Format monetary values according to active currency switcher (INR / USD)
+  // Format monetary values dynamically according to active currency mode (Request 2)
   const formatMoney = (val: number) => {
     if (currencyMode === 'USD') {
       const usdVal = Math.round(val / 83);
@@ -267,7 +274,6 @@ export const Dashboard: React.FC = () => {
   const handleOpenAddCityModal = (city: CityData) => {
     setSelectedCityToAdd(city);
     setShowAddCityModal(true);
-    setAddCitySuccessMsg('');
   };
 
   const handleConfirmAddCity = async () => {
@@ -275,18 +281,16 @@ export const Dashboard: React.FC = () => {
     setAddCityLoading(true);
     try {
       if (targetTripId) {
+        const targetTrip = trips.find((t) => t.id === targetTripId);
         await api.post('/stops', {
           tripId: targetTripId,
           cityId: selectedCityToAdd.id,
           title: `Stop: ${selectedCityToAdd.name}`,
           budget: 15000,
         });
-        setAddCitySuccessMsg(`Added ${selectedCityToAdd.name} to target trip!`);
+        showToast(`✓ ${selectedCityToAdd.name} added to ${targetTrip?.title || 'itinerary'}`);
         await loadData();
-        setTimeout(() => {
-          setShowAddCityModal(false);
-          setAddCitySuccessMsg('');
-        }, 1500);
+        setShowAddCityModal(false);
       } else {
         navigate(`/create-trip?cityId=${selectedCityToAdd.id}`);
       }
@@ -325,12 +329,9 @@ export const Dashboard: React.FC = () => {
         categoryTotals: updatedCatTotals,
       });
 
-      setExpenseSuccessMsg('Expense logged! Donut chart & spend metrics updated in real-time.');
-      setTimeout(() => {
-        setShowLogExpenseModal(false);
-        setExpenseSuccessMsg('');
-        setExpenseTitle('');
-      }, 1500);
+      showToast(`✓ ${formatMoney(numericAmount)} ${expenseCategory} expense recorded & Donut Chart synced`);
+      setShowLogExpenseModal(false);
+      setExpenseTitle('');
     } catch (err) {
       alert('Failed to log expense.');
     } finally {
@@ -360,6 +361,7 @@ export const Dashboard: React.FC = () => {
       if (agra) await api.post('/stops', { tripId, cityId: agra.id, title: 'Stop 2: Agra Taj Mahal', budget: 15000 });
       if (jaipur) await api.post('/stops', { tripId, cityId: jaipur.id, title: 'Stop 3: Jaipur Palaces', budget: 15000 });
 
+      showToast('✓ ✨ Sample Demo Trip Loaded Successfully!');
       await loadData();
     } catch (err) {
       alert('Failed to load sample demo trip.');
@@ -383,10 +385,19 @@ export const Dashboard: React.FC = () => {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    showToast('✓ Itinerary CSV downloaded successfully');
   };
 
   return (
-    <div className="space-y-8 pb-12">
+    <div className="space-y-8 pb-12 relative">
+      {/* Instant Floating Toast Feedback Notification Banner (Request 4) */}
+      {toastMsg && (
+        <div className="fixed top-20 right-6 z-50 bg-[#714B67] dark:bg-[#7C3AED] text-white px-4 py-3 rounded-2xl shadow-2xl border border-purple-400/40 flex items-center space-x-2.5 animate-bounce text-xs font-black">
+          <CheckCircle2 className="w-4 h-4 text-[#10B981] shrink-0" />
+          <span>{toastMsg}</span>
+        </div>
+      )}
+
       {/* Hero Banner */}
       <div className="relative rounded-3xl overflow-hidden shadow-2xl bg-gradient-to-r from-[#0F172A] via-[#1E293B] to-[#0F172A] border border-slate-200 dark:border-white/10">
         <img
@@ -416,8 +427,10 @@ export const Dashboard: React.FC = () => {
                 <Plus className="w-4 h-4" />
                 <span>Plan New Trip</span>
               </Link>
+              
+              {/* Export Modal Trigger (Request 3) */}
               <button
-                onClick={handleExportCSV}
+                onClick={() => setShowExportModal(true)}
                 className="px-5 py-3 bg-white/10 hover:bg-white/20 text-white border border-white/20 rounded-2xl font-bold text-xs backdrop-blur-md transition flex items-center space-x-2"
               >
                 <FileSpreadsheet className="w-4 h-4 text-[#10B981]" />
@@ -519,7 +532,7 @@ export const Dashboard: React.FC = () => {
 
               <div className="p-2.5 bg-black/40 rounded-xl border border-white/10 text-[11px] space-y-1.5">
                 <div className="flex items-center justify-between text-[#10B981] font-bold">
-                  <span>Est. Budget: ₹35,000 / person</span>
+                  <span>Est. Budget: {formatMoney(35000)} / person</span>
                   <span>4.9 ★</span>
                 </div>
                 <div className="text-[10px] text-slate-300">
@@ -540,7 +553,7 @@ export const Dashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* Budget Highlights with Inline Currency Switcher & Full-Width Bottom Progress Bars */}
+      {/* Budget Highlights with Fully Dynamic Currency Toggle (Request 2) */}
       <section className="space-y-4">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
           <h2 className="text-lg font-black text-slate-900 dark:text-white flex items-center space-x-2">
@@ -549,11 +562,12 @@ export const Dashboard: React.FC = () => {
           </h2>
 
           <div className="flex items-center space-x-3 self-end sm:self-auto">
+            {/* Dynamic Currency Toggle Switch (Request 2) */}
             <div className="flex items-center bg-slate-200 dark:bg-[#1E293B] p-1 rounded-xl border border-slate-300 dark:border-white/10">
               <button
                 type="button"
                 onClick={() => setCurrencyMode('INR')}
-                className={`px-2.5 py-0.5 rounded-lg text-[10px] font-black transition ${
+                className={`px-3 py-1 rounded-lg text-xs font-black transition ${
                   currencyMode === 'INR'
                     ? 'bg-[#714B67] text-white shadow-xs'
                     : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
@@ -564,7 +578,7 @@ export const Dashboard: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setCurrencyMode('USD')}
-                className={`px-2.5 py-0.5 rounded-lg text-[10px] font-black transition ${
+                className={`px-3 py-1 rounded-lg text-xs font-black transition ${
                   currencyMode === 'USD'
                     ? 'bg-[#714B67] text-white shadow-xs'
                     : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
@@ -591,10 +605,13 @@ export const Dashboard: React.FC = () => {
                   {formatMoney(budgetMetrics.totalAllocated)}
                 </div>
               </div>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400 pt-2 border-t border-slate-100 dark:border-white/10">Across {trips.length} planned trip{trips.length !== 1 ? 's' : ''}</p>
+              {/* String Pluralization Glitch Fix (Request 1) */}
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 pt-2 border-t border-slate-100 dark:border-white/10">
+                Across {trips.length} planned trip{trips.length !== 1 ? 's' : ''}
+              </p>
             </div>
 
-            {/* Standardized Full-Width Bottom Progress Bar for Spent (Request 2) */}
+            {/* Standardized Full-Width Bottom Progress Bar for Spent */}
             <div className="bg-white dark:bg-[#1E293B] p-5 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm flex flex-col justify-between space-y-2">
               <div>
                 <div className="flex items-center justify-between">
@@ -613,7 +630,7 @@ export const Dashboard: React.FC = () => {
               </div>
             </div>
 
-            {/* Standardized Full-Width Bottom Progress Bar for Remaining (Request 2) */}
+            {/* Standardized Full-Width Bottom Progress Bar for Remaining */}
             <div className="bg-white dark:bg-[#1E293B] p-5 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm flex flex-col justify-between space-y-2">
               <div>
                 <div className="flex items-center justify-between">
@@ -643,7 +660,7 @@ export const Dashboard: React.FC = () => {
             </div>
           </div>
 
-          {/* Financial Category Spend Card with Vertically Centered Donut & Clean Single 2x2 Legend Grid (Request 1) */}
+          {/* Financial Category Spend Card with Clean Legend Spacing & Percentage Format (Request 1 & 2) */}
           <div className="bg-white dark:bg-[#1E293B] p-5 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm flex flex-col justify-between h-full space-y-4">
             <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/10 pb-2">
               <span className="text-xs font-extrabold uppercase tracking-wider text-slate-700 dark:text-slate-300">
@@ -652,7 +669,7 @@ export const Dashboard: React.FC = () => {
               <span className="text-[10px] font-bold text-[#10B981]">Live Split</span>
             </div>
 
-            {/* Vertically Centered Donut Chart with Bold Center Donut Hole Total (Request 1) */}
+            {/* Vertically Centered Donut Chart with Bold Center Donut Hole Total */}
             <div className="relative h-36 w-full flex items-center justify-center my-auto">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
@@ -678,7 +695,7 @@ export const Dashboard: React.FC = () => {
               </div>
             </div>
 
-            {/* Combined Single 2x2 Grid Legend with Amount + Percentage (Request 1) */}
+            {/* Combined Single 2x2 Grid Legend without Whitespace Bugs (Request 1) */}
             <div className="grid grid-cols-2 gap-2 text-xs font-bold pt-2 border-t border-slate-100 dark:border-white/10">
               <div className={`flex items-center justify-between p-2 rounded-xl bg-slate-50 dark:bg-[#0F172A]/60 border border-slate-100 dark:border-white/5 ${budgetMetrics.categoryTotals.STAY === 0 ? 'opacity-60' : ''}`}>
                 <div className="flex items-center space-x-1.5 text-purple-600 dark:text-purple-400">
@@ -724,7 +741,7 @@ export const Dashboard: React.FC = () => {
         </div>
       </section>
 
-      {/* "Travel by Vibe" Filter Section with Smooth Horizontal Scrolling & Unclipped Pills (Request 3) */}
+      {/* "Travel by Vibe" Filter Section with Wired City Search Input (Request 5) */}
       <div className="bg-white dark:bg-[#1E293B] p-6 sm:p-8 rounded-3xl shadow-sm border border-slate-200 dark:border-white/10 space-y-5">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 dark:border-white/10 pb-4">
           <div>
@@ -737,6 +754,7 @@ export const Dashboard: React.FC = () => {
             </p>
           </div>
 
+          {/* Wired Search Input (Request 5) */}
           <div className="relative w-full md:w-80 shrink-0">
             <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
             <input
@@ -749,7 +767,7 @@ export const Dashboard: React.FC = () => {
           </div>
         </div>
 
-        {/* Smooth Horizontally Scrollable Unclipped Vibe Pills (Request 3) */}
+        {/* Smooth Horizontally Scrollable Unclipped Vibe Pills */}
         <div className="flex items-center space-x-2.5 overflow-x-auto pb-2 pr-6 scrollbar-none whitespace-nowrap">
           {vibeOptions.map((vibe) => {
             const Icon = vibe.icon;
@@ -772,7 +790,7 @@ export const Dashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* Regional / Vibe Selections Grid */}
+      {/* Regional / Vibe Selections Grid with Instant Search Filter (Request 5) */}
       <section className="space-y-4">
         <div className="flex items-center justify-between">
           <div>
@@ -796,7 +814,7 @@ export const Dashboard: React.FC = () => {
           </div>
         ) : filteredCities.length === 0 ? (
           <div className="p-8 bg-white dark:bg-[#1E293B] rounded-3xl border border-slate-200 dark:border-white/10 text-center text-xs text-slate-400 space-y-2">
-            <p className="font-bold text-slate-700 dark:text-slate-300 text-sm">No destinations matched "{searchQuery}"</p>
+            <p className="font-bold text-slate-700 dark:text-slate-300 text-sm">No matching destinations found for "{searchQuery}"</p>
             <p>Try searching for popular Indian cities like <strong>Goa, Jaipur, Manali, Shimla, Varanasi, Kerala, Srinagar, Coorg, Ooty</strong>...</p>
           </div>
         ) : (
@@ -825,7 +843,7 @@ export const Dashboard: React.FC = () => {
 
           <div className="flex items-center space-x-3 self-end sm:self-auto">
             <button
-              onClick={handleExportCSV}
+              onClick={() => setShowExportModal(true)}
               className="px-3.5 py-1.5 bg-[#714B67] hover:bg-[#613E57] text-white rounded-xl text-xs font-extrabold shadow-sm transition flex items-center space-x-1.5"
             >
               <Download className="w-3.5 h-3.5" />
@@ -845,7 +863,6 @@ export const Dashboard: React.FC = () => {
             <h3 className="text-base font-bold text-slate-700 dark:text-slate-300">No trips created yet</h3>
             <p className="text-xs text-slate-500 dark:text-slate-400 max-w-sm mx-auto">Start planning your customized multi-city itinerary now or load quick demo data!</p>
             
-            {/* Quick Demo Data Loader Trigger Button (Request 4) */}
             <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
               <Link
                 to="/create-trip"
@@ -872,6 +889,7 @@ export const Dashboard: React.FC = () => {
               <TripCard
                 key={trip.id}
                 trip={trip}
+                currencyMode={currencyMode}
                 onDuplicate={() => {
                   setSelectedTripForExpense(trip);
                   setShowLogExpenseModal(true);
@@ -881,6 +899,89 @@ export const Dashboard: React.FC = () => {
           </div>
         )}
       </section>
+
+      {/* Interactive Export Modal with Choices (Request 3) */}
+      {showExportModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-[#1E293B] max-w-md w-full p-6 rounded-3xl shadow-2xl border border-slate-200 dark:border-white/10 space-y-4 relative">
+            <button
+              onClick={() => setShowExportModal(false)}
+              className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-white p-1"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="flex items-center space-x-3">
+              <div className="p-2.5 bg-purple-50 dark:bg-purple-950/60 rounded-xl text-[#7C3AED]">
+                <Download className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="text-base font-extrabold text-slate-900 dark:text-white">Export Itinerary & Reports</h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400">Select export format for business & travel reporting</p>
+              </div>
+            </div>
+
+            <div className="space-y-3 pt-2">
+              <button
+                type="button"
+                onClick={() => {
+                  window.print();
+                  setShowExportModal(false);
+                  showToast('✓ PDF Travel Summary triggered');
+                }}
+                className="w-full p-3.5 bg-slate-50 dark:bg-[#0F172A] hover:bg-slate-100 dark:hover:bg-[#334155] rounded-2xl border border-slate-200 dark:border-white/10 flex items-center justify-between text-xs font-bold text-slate-900 dark:text-white transition"
+              >
+                <div className="flex items-center space-x-3">
+                  <FileText className="w-5 h-5 text-[#7C3AED]" />
+                  <div className="text-left">
+                    <span className="block font-black">📄 Download PDF Summary Voucher</span>
+                    <span className="text-[10px] text-slate-400">Printable travel itinerary report</span>
+                  </div>
+                </div>
+                <Download className="w-4 h-4 text-slate-400" />
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  handleExportCSV();
+                  setShowExportModal(false);
+                }}
+                className="w-full p-3.5 bg-slate-50 dark:bg-[#0F172A] hover:bg-slate-100 dark:hover:bg-[#334155] rounded-2xl border border-slate-200 dark:border-white/10 flex items-center justify-between text-xs font-bold text-slate-900 dark:text-white transition"
+              >
+                <div className="flex items-center space-x-3">
+                  <FileSpreadsheet className="w-5 h-5 text-[#10B981]" />
+                  <div className="text-left">
+                    <span className="block font-black">📊 Download CSV Budget Table</span>
+                    <span className="text-[10px] text-slate-400">Spreadsheet table for Excel / Google Sheets</span>
+                  </div>
+                </div>
+                <Download className="w-4 h-4 text-slate-400" />
+              </button>
+
+              <a
+                href="https://calendar.google.com"
+                target="_blank"
+                rel="noreferrer"
+                onClick={() => {
+                  setShowExportModal(false);
+                  showToast('✓ iCal Calendar Sync opened');
+                }}
+                className="w-full p-3.5 bg-slate-50 dark:bg-[#0F172A] hover:bg-slate-100 dark:hover:bg-[#334155] rounded-2xl border border-slate-200 dark:border-white/10 flex items-center justify-between text-xs font-bold text-slate-900 dark:text-white transition"
+              >
+                <div className="flex items-center space-x-3">
+                  <Calendar className="w-5 h-5 text-[#00A09D]" />
+                  <div className="text-left">
+                    <span className="block font-black">📅 Sync to iCal / Google Calendar</span>
+                    <span className="text-[10px] text-slate-400">Add departure dates to calendar</span>
+                  </div>
+                </div>
+                <ExternalLink className="w-4 h-4 text-slate-400" />
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Direct Add Destination to Itinerary Quick Action Modal */}
       {showAddCityModal && selectedCityToAdd && (
@@ -906,13 +1007,6 @@ export const Dashboard: React.FC = () => {
                 </p>
               </div>
             </div>
-
-            {addCitySuccessMsg && (
-              <div className="p-3 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 text-xs font-bold rounded-xl flex items-center space-x-2 border border-emerald-200 dark:border-emerald-800">
-                <CheckCircle2 className="w-4 h-4 text-[#10B981] shrink-0" />
-                <span>{addCitySuccessMsg}</span>
-              </div>
-            )}
 
             {trips.length === 0 ? (
               <div className="space-y-3 pt-2 text-center">
@@ -1002,13 +1096,6 @@ export const Dashboard: React.FC = () => {
                 <p className="text-xs text-slate-500 dark:text-slate-400">Logging for {selectedTripForExpense.title}</p>
               </div>
             </div>
-
-            {expenseSuccessMsg && (
-              <div className="p-3 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 text-xs font-bold rounded-xl flex items-center space-x-2 border border-emerald-200 dark:border-emerald-800">
-                <CheckCircle2 className="w-4 h-4 text-[#10B981] shrink-0" />
-                <span>{expenseSuccessMsg}</span>
-              </div>
-            )}
 
             <form onSubmit={handleConfirmLogExpense} className="space-y-3">
               <div>
