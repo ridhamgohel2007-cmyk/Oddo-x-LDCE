@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { MapPin, Plus, Star, Heart } from 'lucide-react';
+import { MapPin, Plus, Star, Heart, Sun } from 'lucide-react';
 
 export interface CityData {
   id: string;
@@ -88,6 +88,12 @@ export const CityCard: React.FC<CityCardProps> = ({ city, onSelect }) => {
           <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed pt-1">
             {city.description}
           </p>
+
+          {/* Time to Visit Tag (Request 4) */}
+          <div className="flex items-center space-x-1.5 pt-1 text-[10px] font-extrabold text-[#00A09D] dark:text-[#38BDF8]">
+            <Sun className="w-3.5 h-3.5 text-[#E2A03F] shrink-0" />
+            <span>Best Time to Visit: Oct–Mar</span>
+          </div>
         </div>
       </div>
 

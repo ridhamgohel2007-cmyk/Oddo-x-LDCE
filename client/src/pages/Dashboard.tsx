@@ -32,6 +32,9 @@ import {
   Ticket,
   Navigation,
   Utensils,
+  X,
+  MapPin,
+  CheckCircle2,
 } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 
@@ -63,6 +66,13 @@ export const Dashboard: React.FC = () => {
     categoryTotals: { STAY: 0, TRANSPORT: 0, ACTIVITIES: 0, MEALS: 0 } as any,
   });
 
+  // Direct "Add City to Itinerary" Modal State (Request 4)
+  const [showAddCityModal, setShowAddCityModal] = useState(false);
+  const [selectedCityToAdd, setSelectedCityToAdd] = useState<CityData | null>(null);
+  const [targetTripId, setTargetTripId] = useState('');
+  const [addCityLoading, setAddCityLoading] = useState(false);
+  const [addCitySuccessMsg, setAddCitySuccessMsg] = useState('');
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -74,6 +84,9 @@ export const Dashboard: React.FC = () => {
         const allTrips: TripData[] = tripsRes.data;
         setCities(citiesRes.data);
         setTrips(allTrips);
+        if (allTrips.length > 0) {
+          setTargetTripId(allTrips[0].id);
+        }
 
         let totalAllocated = 0;
         let totalSpent = 0;
@@ -132,6 +145,8 @@ export const Dashboard: React.FC = () => {
         } else if (allTrips.length > 0) {
           setNextTrip(allTrips[0]);
           calculateCountdown(allTrips[0].startDate);
+        } else {
+          setNextTrip(null);
         }
       } catch (err) {
         console.error('Error loading dashboard data:', err);
@@ -224,6 +239,38 @@ export const Dashboard: React.FC = () => {
   const actPct = Math.round((budgetMetrics.categoryTotals.ACTIVITIES / totalCatSum) * 100);
   const mealPct = Math.round((budgetMetrics.categoryTotals.MEALS / totalCatSum) * 100);
 
+  const handleOpenAddCityModal = (city: CityData) => {
+    setSelectedCityToAdd(city);
+    setShowAddCityModal(true);
+    setAddCitySuccessMsg('');
+  };
+
+  const handleConfirmAddCity = async () => {
+    if (!selectedCityToAdd) return;
+    setAddCityLoading(true);
+    try {
+      if (targetTripId) {
+        await api.post('/stops', {
+          tripId: targetTripId,
+          cityId: selectedCityToAdd.id,
+          title: `Stop: ${selectedCityToAdd.name}`,
+          budget: 15000,
+        });
+        setAddCitySuccessMsg(`Added ${selectedCityToAdd.name} to target trip!`);
+        setTimeout(() => {
+          setShowAddCityModal(false);
+          setAddCitySuccessMsg('');
+        }, 1500);
+      } else {
+        navigate(`/create-trip?cityId=${selectedCityToAdd.id}`);
+      }
+    } catch (err) {
+      alert('Failed to add destination stop to trip.');
+    } finally {
+      setAddCityLoading(false);
+    }
+  };
+
   return (
     <div className="space-y-8 pb-12">
       {/* Hero Banner */}
@@ -240,7 +287,6 @@ export const Dashboard: React.FC = () => {
               <Sparkles className="w-4 h-4 text-[#E2A03F]" />
               <span>Odoo Enterprise Edition</span>
             </div>
-            {/* Clean Greeting Header without Rogue Punctuation Spaces (Request 1) */}
             <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight leading-snug">
               Welcome back, <span className="text-[#38BDF8]">{user?.name}</span>!
             </h1>
@@ -264,7 +310,7 @@ export const Dashboard: React.FC = () => {
               </Link>
             </div>
 
-            {/* Clean 3-Column Hero Quick Metrics Grid (Request 3) */}
+            {/* Clean 3-Column Hero Quick Metrics Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-4 border-t border-white/10 w-full text-xs font-bold text-slate-300">
               <div className="flex items-center space-x-2 bg-white/5 px-3 py-2 rounded-xl border border-white/10">
                 <Map className="w-4 h-4 text-[#10B981] shrink-0" />
@@ -281,8 +327,8 @@ export const Dashboard: React.FC = () => {
             </div>
           </div>
 
-          {/* Dynamic Countdown Widget with Compact Horizontal Chips & Trailing Arrow (Request 3) */}
-          {nextTrip && (
+          {/* Right Hero Card: Countdown OR Featured Recommended Route (Request 1) */}
+          {nextTrip ? (
             <div className="w-full lg:w-80 bg-white/10 dark:bg-[#1E293B]/90 backdrop-blur-xl border border-white/20 dark:border-white/10 p-5 rounded-2xl text-white space-y-3 shadow-xl">
               <div className="flex items-center justify-between">
                 <span className="text-[10px] font-extrabold uppercase tracking-wider text-[#38BDF8] flex items-center space-x-1">
@@ -302,7 +348,7 @@ export const Dashboard: React.FC = () => {
                 </p>
               </div>
 
-              {/* Compact Weather & Packing Chip Tags (Request 3) */}
+              {/* Compact Weather & Packing Chip Tags */}
               <div className="flex flex-wrap gap-2 pt-1">
                 <div className="flex items-center space-x-1.5 px-2.5 py-1 bg-black/40 rounded-xl border border-white/10 text-[11px] font-bold text-[#E2A03F]">
                   <Sun className="w-3.5 h-3.5 text-[#E2A03F] shrink-0" />
@@ -329,7 +375,6 @@ export const Dashboard: React.FC = () => {
                 </div>
               </div>
 
-              {/* Polished CTA Button with Trailing Arrow (Request 3) */}
               <Link
                 to={`/trips/${nextTrip.id}`}
                 className="w-full py-2 bg-[#714B67] hover:bg-[#613E57] text-white rounded-xl text-xs font-bold flex items-center justify-center space-x-1.5 transition shadow-md group"
@@ -338,12 +383,50 @@ export const Dashboard: React.FC = () => {
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
               </Link>
             </div>
+          ) : (
+            /* Featured Recommended Route Widget for 0 Active Trips (Request 1) */
+            <div className="w-full lg:w-80 bg-white/10 dark:bg-[#1E293B]/90 backdrop-blur-xl border border-white/20 dark:border-white/10 p-5 rounded-2xl text-white space-y-3 shadow-xl">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-extrabold uppercase tracking-wider text-[#38BDF8] flex items-center space-x-1">
+                  <Compass className="w-3.5 h-3.5" />
+                  <span>Featured Recommended Route</span>
+                </span>
+                <span className="px-2.5 py-0.5 bg-[#714B67] text-white rounded-full text-[10px] font-extrabold">
+                  Popular
+                </span>
+              </div>
+
+              <div>
+                <h4 className="text-sm font-extrabold text-white">Golden Triangle Circuit</h4>
+                <p className="text-[11px] text-slate-300 mt-0.5">
+                  Delhi ➔ Agra ➔ Jaipur (4 Days / 3 Cities)
+                </p>
+              </div>
+
+              <div className="p-2.5 bg-black/40 rounded-xl border border-white/10 text-[11px] space-y-1.5">
+                <div className="flex items-center justify-between text-[#10B981] font-bold">
+                  <span>Est. Budget: ₹35,000 / person</span>
+                  <span>4.9 ★</span>
+                </div>
+                <div className="text-[10px] text-slate-300">
+                  Includes Taj Mahal sunrise entry, Amer Fort palace tour, and Old Delhi street food trail.
+                </div>
+              </div>
+
+              <Link
+                to="/create-trip"
+                className="w-full py-2.5 bg-[#714B67] hover:bg-[#613E57] text-white rounded-xl text-xs font-bold flex items-center justify-center space-x-1.5 transition shadow-md group"
+              >
+                <span>Start This Circuit</span>
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+              </Link>
+            </div>
           )}
 
         </div>
       </div>
 
-      {/* Budget Highlights with Inline Currency Switcher & Stacked Category Spend Progress Bar (Request 4) */}
+      {/* Budget Highlights with Inline Currency Switcher & Stacked Category Spend Progress Bar */}
       <section className="space-y-4">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
           <h2 className="text-lg font-black text-slate-900 dark:text-white flex items-center space-x-2">
@@ -351,7 +434,6 @@ export const Dashboard: React.FC = () => {
             <span>Financial Budget Summary & Category Spend</span>
           </h2>
 
-          {/* Inline Currency Switcher & Manage All Budgets link (Request 4) */}
           <div className="flex items-center space-x-3 self-end sm:self-auto">
             <div className="flex items-center bg-slate-200 dark:bg-[#1E293B] p-1 rounded-xl border border-slate-300 dark:border-white/10">
               <button
@@ -439,8 +521,8 @@ export const Dashboard: React.FC = () => {
             </div>
           </div>
 
-          {/* Financial Category Spend Card with Multi-Colored Stacked Progress Bar (Request 4) */}
-          <div className="bg-white dark:bg-[#1E293B] p-5 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm flex flex-col justify-between space-y-3">
+          {/* Financial Category Spend Card aligned in height & zero-state legend (Request 2) */}
+          <div className="bg-white dark:bg-[#1E293B] p-5 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm flex flex-col justify-between h-full space-y-3">
             <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/10 pb-2">
               <span className="text-xs font-extrabold uppercase tracking-wider text-slate-700 dark:text-slate-300">
                 Spend by Category
@@ -448,7 +530,7 @@ export const Dashboard: React.FC = () => {
               <span className="text-[10px] font-bold text-[#10B981]">Live Split</span>
             </div>
 
-            {/* Multi-Colored Horizontal Stacked Progress Bar (Request 4) */}
+            {/* Multi-Colored Horizontal Stacked Progress Bar */}
             <div className="space-y-1.5">
               <div className="w-full h-3 bg-slate-100 dark:bg-[#0F172A] rounded-full overflow-hidden flex">
                 <div className="bg-[#7C3AED] h-full transition-all duration-500" style={{ width: `${stayPct}%` }} title={`Stays: ${stayPct}%`} />
@@ -485,7 +567,7 @@ export const Dashboard: React.FC = () => {
               </ResponsiveContainer>
             </div>
 
-            {/* Dimmed Text Handling for ₹0 Empty Categories (Request 4) */}
+            {/* Dimmed Text Handling for ₹0 Empty Categories */}
             <div className="grid grid-cols-2 gap-2 text-[10px] font-extrabold pt-1">
               <div className={`flex items-center space-x-1.5 text-purple-600 dark:text-purple-400 ${budgetMetrics.categoryTotals.STAY === 0 ? 'opacity-40' : ''}`}>
                 <Hotel className="w-3 h-3 shrink-0" />
@@ -508,7 +590,7 @@ export const Dashboard: React.FC = () => {
         </div>
       </section>
 
-      {/* "Travel by Vibe" / Theme-Based Filtering Section */}
+      {/* "Travel by Vibe" Filter Section with Horizontally Scrollable Tags & Filled Active Pill (Request 3) */}
       <div className="bg-white dark:bg-[#1E293B] p-6 sm:p-8 rounded-3xl shadow-sm border border-slate-200 dark:border-white/10 space-y-5">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-slate-100 dark:border-white/10 pb-4">
           <div>
@@ -521,7 +603,6 @@ export const Dashboard: React.FC = () => {
             </p>
           </div>
 
-          {/* Quick Search Bar for Every Popular City in India */}
           <div className="relative w-full md:w-80">
             <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
             <input
@@ -534,8 +615,8 @@ export const Dashboard: React.FC = () => {
           </div>
         </div>
 
-        {/* Travel Vibe Selector Buttons */}
-        <div className="flex items-center space-x-2.5 overflow-x-auto pb-2 scrollbar-none">
+        {/* Travel Vibe Selector Buttons - Horizontally Scrollable on Mobile/Tablet (Request 3) */}
+        <div className="flex items-center space-x-2.5 overflow-x-auto pb-2 scrollbar-none whitespace-nowrap">
           {vibeOptions.map((vibe) => {
             const Icon = vibe.icon;
             const isSelected = selectedVibe === vibe.id;
@@ -543,7 +624,7 @@ export const Dashboard: React.FC = () => {
               <button
                 key={vibe.id}
                 onClick={() => handleVibeClick(vibe.id)}
-                className={`flex items-center space-x-2 px-4 py-2.5 rounded-2xl text-xs font-extrabold whitespace-nowrap transition-all duration-200 border ${
+                className={`flex items-center space-x-2 px-4 py-2.5 rounded-2xl text-xs font-extrabold whitespace-nowrap transition-all duration-200 border shrink-0 ${
                   isSelected
                     ? 'bg-[#714B67] dark:bg-[#7C3AED] text-white border-purple-400 shadow-md shadow-purple-500/25 scale-105'
                     : 'bg-slate-100 dark:bg-[#0F172A] text-slate-700 dark:text-slate-300 border-slate-200 dark:border-white/10 hover:bg-slate-200 dark:hover:bg-[#334155]'
@@ -557,7 +638,7 @@ export const Dashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* Regional / Vibe Selections Grid */}
+      {/* Regional / Vibe Selections Grid with Direct "Add Destination" Trigger (Request 4) */}
       <section className="space-y-4">
         <div className="flex items-center justify-between">
           <div>
@@ -590,9 +671,7 @@ export const Dashboard: React.FC = () => {
               <CityCard
                 key={city.id}
                 city={city}
-                onSelect={(selectedCity) => {
-                  navigate(`/create-trip?cityId=${selectedCity.id}`);
-                }}
+                onSelect={handleOpenAddCityModal}
               />
             ))}
           </div>
@@ -636,6 +715,106 @@ export const Dashboard: React.FC = () => {
           </div>
         )}
       </section>
+
+      {/* Direct Add Destination to Itinerary Quick Action Modal (Request 4) */}
+      {showAddCityModal && selectedCityToAdd && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-[#1E293B] max-w-md w-full p-6 rounded-3xl shadow-2xl border border-slate-200 dark:border-white/10 space-y-4 relative">
+            <button
+              onClick={() => setShowAddCityModal(false)}
+              className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-white p-1"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="flex items-center space-x-3">
+              <div className="p-2.5 bg-purple-50 dark:bg-purple-950/60 rounded-xl text-[#7C3AED]">
+                <MapPin className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="text-base font-extrabold text-slate-900 dark:text-white">
+                  Add {selectedCityToAdd.name} to Travel Plan
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  Select existing itinerary or create new custom trip
+                </p>
+              </div>
+            </div>
+
+            {addCitySuccessMsg && (
+              <div className="p-3 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 text-xs font-bold rounded-xl flex items-center space-x-2 border border-emerald-200 dark:border-emerald-800">
+                <CheckCircle2 className="w-4 h-4 text-[#10B981] shrink-0" />
+                <span>{addCitySuccessMsg}</span>
+              </div>
+            )}
+
+            {trips.length === 0 ? (
+              <div className="space-y-3 pt-2 text-center">
+                <p className="text-xs text-slate-500 dark:text-slate-400">You don't have any active travel plans yet!</p>
+                <button
+                  onClick={() => {
+                    setShowAddCityModal(false);
+                    navigate(`/create-trip?cityId=${selectedCityToAdd.id}`);
+                  }}
+                  className="w-full py-2.5 bg-[#714B67] hover:bg-[#613E57] text-white text-xs font-bold rounded-xl shadow-md"
+                >
+                  Create New Trip with {selectedCityToAdd.name}
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-3 pt-2">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">
+                    Select Target Itinerary
+                  </label>
+                  <select
+                    value={targetTripId}
+                    onChange={(e) => setTargetTripId(e.target.value)}
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-[#0F172A] border border-slate-200 dark:border-white/10 rounded-xl text-xs font-bold text-slate-900 dark:text-[#E2E8F0]"
+                  >
+                    {trips.map((t) => (
+                      <option key={t.id} value={t.id} className="bg-white dark:bg-[#0F172A]">
+                        {t.title}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="flex justify-between items-center pt-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowAddCityModal(false);
+                      navigate(`/create-trip?cityId=${selectedCityToAdd.id}`);
+                    }}
+                    className="text-xs font-bold text-[#7C3AED] dark:text-[#38BDF8] hover:underline"
+                  >
+                    + Create New Trip Instead
+                  </button>
+
+                  <div className="flex space-x-2">
+                    <button
+                      type="button"
+                      onClick={() => setShowAddCityModal(false)}
+                      className="px-4 py-2 bg-slate-100 dark:bg-[#0F172A] text-slate-700 dark:text-slate-300 rounded-xl text-xs font-semibold"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="button"
+                      disabled={addCityLoading}
+                      onClick={handleConfirmAddCity}
+                      className="px-5 py-2 bg-[#714B67] hover:bg-[#613E57] text-white rounded-xl text-xs font-bold shadow-md"
+                    >
+                      {addCityLoading ? 'Adding...' : 'Add Stop'}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
