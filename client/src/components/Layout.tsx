@@ -11,17 +11,14 @@ import {
   ChevronDown,
   Shield,
   User as UserIcon,
-  Sparkles,
-  CheckCircle2,
 } from 'lucide-react';
 
 export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { user, logout, toggleDemoRole } = useAuth();
+  const { user, logout } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [globalSearch, setGlobalSearch] = useState('');
-  const [roleToast, setRoleToast] = useState<string | null>(null);
 
   // Ensure dark mode is active across HTML root
   useEffect(() => {
@@ -39,7 +36,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
 
   const isAdmin = user?.role === 'ADMIN';
 
-  // Role-Based Navigation Tabs (Request Item 2)
+  // Role-Based Navigation Tabs
   const travelerNavLinks = [
     { name: 'Dashboard', path: '/dashboard' },
     { name: 'My Trips', path: '/my-trips' },
@@ -69,26 +66,11 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
     navigate(`/search?q=${encodeURIComponent(globalSearch.trim())}`);
   };
 
-  const handleToggleRoleClick = () => {
-    toggleDemoRole();
-    const nextRoleText = user?.role === 'ADMIN' ? 'Traveler Persona' : 'Administrator Persona';
-    setRoleToast(`✓ Switched Persona Role to ${nextRoleText}`);
-    setTimeout(() => setRoleToast(null), 3000);
-  };
-
   const isCreateTripActive = location.pathname === '/create-trip';
 
   return (
     <div className="min-h-screen flex flex-col bg-[#F8FAFC] dark:bg-[#0F172A] text-slate-900 dark:text-slate-100 transition-colors duration-300 antialiased font-sans relative">
       
-      {/* Toast Feedback for Instant Hackathon Role Switching */}
-      {roleToast && (
-        <div className="fixed top-20 right-6 z-50 bg-[#714B67] dark:bg-[#7C3AED] text-white px-4 py-3 rounded-2xl shadow-2xl border border-purple-400/40 flex items-center space-x-2 animate-bounce text-xs font-black">
-          <CheckCircle2 className="w-4 h-4 text-[#10B981] shrink-0" />
-          <span>{roleToast}</span>
-        </div>
-      )}
-
       {/* Top Header Navigation Bar */}
       <header className="sticky top-0 z-40 bg-white/95 dark:bg-[#0F172A]/95 backdrop-blur-xl border-b border-slate-200 dark:border-white/10 shadow-xs">
         <div className="max-w-[1500px] mx-auto px-4 sm:px-6 lg:px-8">
@@ -113,7 +95,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
               </div>
             </Link>
 
-            {/* 2. Desktop Navigation Bar with Dynamic Role-Based Tabs (Request Item 2) */}
+            {/* 2. Desktop Navigation Bar */}
             {user && (
               <div className="hidden lg:flex flex-1 items-center justify-center px-2">
                 <nav className="flex items-center space-x-1 bg-slate-100/90 dark:bg-[#1E293B] p-1.5 rounded-2xl border border-slate-200 dark:border-white/10 shrink-0 shadow-xs">
@@ -137,27 +119,12 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
               </div>
             )}
 
-            {/* 3. Right Side User Controls, Quick Role Switcher & Admin Badge (Request Items 2 & 3) */}
+            {/* 3. Right Side User Controls */}
             {user ? (
               <div className="flex items-center space-x-2.5 sm:space-x-3 shrink-0">
                 
-                {/* Quick Role Switcher Pill for Hackathon Demos (Request Item 3) */}
-                <button
-                  onClick={handleToggleRoleClick}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-black transition shadow-xs flex items-center space-x-1.5 border hover:scale-105 ${
-                    isAdmin
-                      ? 'bg-purple-50 dark:bg-purple-950/80 text-[#7C3AED] border-purple-300 dark:border-purple-800'
-                      : 'bg-emerald-50 dark:bg-emerald-950/80 text-[#10B981] border-emerald-300 dark:border-emerald-800'
-                  }`}
-                  title="Click to toggle persona between Traveler & Administrator for Hackathon Demonstration"
-                >
-                  <Sparkles className="w-3.5 h-3.5 text-amber-400 animate-spin" />
-                  <span>Role: {isAdmin ? '🛡️ Admin' : '🎒 Traveler'}</span>
-                  <span className="text-[9px] opacity-60">(Switch)</span>
-                </button>
-
                 {/* Header Global Search */}
-                <form onSubmit={handleGlobalSearch} className="hidden xl:flex items-center relative">
+                <form onSubmit={handleGlobalSearch} className="hidden md:flex items-center relative">
                   <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3.5 top-2.5 pointer-events-none" />
                   <input
                     id="header-global-search"
@@ -165,7 +132,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                     value={globalSearch}
                     onChange={(e) => setGlobalSearch(e.target.value)}
                     placeholder="Search (Ctrl + K)..."
-                    className="w-36 lg:w-44 pl-9 pr-3 py-1.5 bg-slate-100 dark:bg-[#1E293B] border border-slate-200 dark:border-white/10 rounded-xl text-xs font-semibold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#7C3AED] transition-all whitespace-nowrap"
+                    className="w-36 lg:w-48 pl-9 pr-3 py-1.5 bg-slate-100 dark:bg-[#1E293B] border border-slate-200 dark:border-white/10 rounded-xl text-xs font-semibold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#7C3AED] transition-all whitespace-nowrap"
                   />
                 </form>
 
@@ -182,7 +149,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                   <span className="whitespace-nowrap">{isCreateTripActive ? 'Planning New Trip...' : 'Plan New Trip'}</span>
                 </Link>
 
-                {/* Profile Pill with Admin Badge (Request Item 2) */}
+                {/* Profile Pill with Admin Badge */}
                 <Link
                   to="/profile"
                   className="flex items-center space-x-2 px-3 py-1.5 rounded-2xl bg-slate-100 dark:bg-[#1E293B] hover:bg-slate-200 dark:hover:bg-slate-700 transition border border-slate-200 dark:border-white/10 shrink-0 min-w-max group"
