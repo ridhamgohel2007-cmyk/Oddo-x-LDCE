@@ -1,12 +1,29 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../lib/api';
-import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, MapPin, Search } from 'lucide-react';
+import {
+  Calendar as CalendarIcon,
+  ChevronLeft,
+  ChevronRight,
+  MapPin,
+  Search,
+  Clock,
+  ChevronDown,
+  ChevronUp,
+  X,
+  Plus,
+  ArrowRight,
+  CheckCircle2,
+} from 'lucide-react';
 
 export const CalendarView: React.FC = () => {
   const [trips, setTrips] = useState<any[]>([]);
   const [currentMonth, setCurrentMonth] = useState(new Date(2026, 8, 1)); // September 2026 default
   const [loading, setLoading] = useState(true);
+
+  // Expand / Collapse Single Date Inspection Drawer
+  const [selectedDateStr, setSelectedDateStr] = useState<string | null>(null);
+  const [rescheduleSuccess, setRescheduleSuccess] = useState('');
 
   useEffect(() => {
     fetchTrips();
@@ -40,62 +57,89 @@ export const CalendarView: React.FC = () => {
   const daysArray = Array.from({ length: daysInMonth }, (_, i) => i + 1);
   const leadingPadding = Array.from({ length: firstDayIndex }, (_, i) => i);
 
+  // Get items for selected date
+  const getSelectedDateActivities = () => {
+    if (!selectedDateStr) return [];
+    const events: any[] = [];
+
+    trips.forEach((t) => {
+      const start = t.startDate.split('T')[0];
+      const end = t.endDate.split('T')[0];
+      if (selectedDateStr >= start && selectedDateStr <= end) {
+        if (t.stops) {
+          t.stops.forEach((s: any) => {
+            if (s.items) {
+              s.items.forEach((item: any) => {
+                events.push({
+                  tripId: t.id,
+                  tripTitle: t.title,
+                  stopTitle: s.title,
+                  itemTitle: item.title,
+                  timeSlot: item.timeSlot || 'All Day',
+                  cost: item.cost,
+                  type: item.type,
+                  dayNumber: item.dayNumber,
+                });
+              });
+            }
+          });
+        }
+      }
+    });
+
+    return events;
+  };
+
+  const selectedDateEvents = getSelectedDateActivities();
+
   return (
     <div className="max-w-5xl mx-auto space-y-8 pb-16">
-      {/* Header Banner */}
-      <div className="bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-3xl shadow-sm border border-gray-100 dark:border-slate-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      {/* Screen 11 Header */}
+      <div className="bg-white dark:bg-[#111E2E] p-6 sm:p-8 rounded-3xl shadow-sm border border-slate-200 dark:border-[#1E2D42] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white flex items-center space-x-3">
-            <CalendarIcon className="w-8 h-8 text-emerald-600 dark:text-emerald-400" />
-            <span>Calendar View / Timeline</span>
+          <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white flex items-center space-x-3">
+            <CalendarIcon className="w-8 h-8 text-emerald-500" />
+            <span>Interactive Calendar & Timeline View</span>
           </h1>
-          <p className="text-xs font-medium text-gray-600 dark:text-slate-400 mt-1">Screen 11: Visual month grid showing scheduled travel dates and events</p>
+          <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mt-1">
+            Screen 11: Expand/collapse single dates to inspect daily activity breakdowns and reschedule itineraries
+          </p>
         </div>
       </div>
 
-      {/* Screen 11 Control Bar: Search bar, Group by, Filter, Sort by */}
-      <div className="bg-white dark:bg-slate-900 p-4 sm:p-6 rounded-3xl shadow-sm border border-gray-100 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3">
-        <div className="relative flex-1 w-full">
-          <Search className="w-4 h-4 text-gray-400 dark:text-slate-500 absolute left-3.5 top-3.5" />
-          <input
-            type="text"
-            placeholder="Search bar......"
-            className="w-full pl-10 pr-4 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-700 rounded-xl text-sm text-gray-900 dark:text-slate-100 font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500"
-          />
+      {rescheduleSuccess && (
+        <div className="p-4 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-xs font-bold rounded-2xl flex items-center space-x-2 shadow-md">
+          <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+          <span>{rescheduleSuccess}</span>
         </div>
+      )}
 
-        <div className="flex items-center space-x-2">
-          <button className="px-3.5 py-2 bg-gray-100 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-xs font-extrabold text-gray-900 dark:text-slate-100 hover:bg-gray-200 dark:hover:bg-slate-700 transition">Group by</button>
-          <button className="px-3.5 py-2 bg-gray-100 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-xs font-extrabold text-gray-900 dark:text-slate-100 hover:bg-gray-200 dark:hover:bg-slate-700 transition">Filter</button>
-          <button className="px-3.5 py-2 bg-gray-100 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-xs font-extrabold text-gray-900 dark:text-slate-100 hover:bg-gray-200 dark:hover:bg-slate-700 transition">Sort by...</button>
-        </div>
-      </div>
-
-      {/* Wireframe Screen 11 Month Calendar Grid */}
-      <div className="bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-3xl shadow-sm border border-gray-100 dark:border-slate-800 space-y-6">
-        {/* Month Navigation Controls */}
-        <div className="flex items-center justify-between border-b border-gray-100 dark:border-slate-800 pb-4">
+      {/* Month Navigation & Grid */}
+      <div className="bg-white dark:bg-[#111E2E] p-6 sm:p-8 rounded-3xl shadow-sm border border-slate-200 dark:border-[#1E2D42] space-y-6">
+        <div className="flex items-center justify-between border-b border-slate-100 dark:border-[#1E2D42] pb-4">
           <button
             onClick={prevMonth}
-            className="p-2.5 bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 rounded-2xl text-gray-900 dark:text-slate-100 transition"
+            aria-label="Previous Month"
+            className="p-2.5 bg-slate-100 dark:bg-[#162235] hover:bg-slate-200 dark:hover:bg-[#1E2D42] rounded-2xl text-slate-900 dark:text-white transition"
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
 
-          <h2 className="text-2xl font-black bg-gradient-to-r from-emerald-700 via-teal-700 to-slate-900 dark:from-emerald-400 dark:via-teal-300 dark:to-white bg-clip-text text-transparent tracking-tight">
+          <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
             {monthName} {year}
           </h2>
 
           <button
             onClick={nextMonth}
-            className="p-2.5 bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 rounded-2xl text-gray-900 dark:text-slate-100 transition"
+            aria-label="Next Month"
+            className="p-2.5 bg-slate-100 dark:bg-[#162235] hover:bg-slate-200 dark:hover:bg-[#1E2D42] rounded-2xl text-slate-900 dark:text-white transition"
           >
             <ChevronRight className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Days of Week Headers (SUM, MON, TUE, WED, THU, FRI, SAT as per Screen 11 wireframe) */}
-        <div className="grid grid-cols-7 text-center font-black text-xs text-gray-800 dark:text-slate-200 tracking-wider py-2 uppercase">
+        {/* Days of Week Headers */}
+        <div className="grid grid-cols-7 text-center font-black text-xs text-slate-700 dark:text-slate-300 tracking-wider py-2 uppercase">
           <div>SUN</div>
           <div>MON</div>
           <div>TUE</div>
@@ -107,16 +151,14 @@ export const CalendarView: React.FC = () => {
 
         {/* Calendar Grid Cells */}
         <div className="grid grid-cols-7 gap-2">
-          {/* Leading empty cells */}
           {leadingPadding.map((_, index) => (
-            <div key={`pad-${index}`} className="min-h-[100px] bg-gray-50/50 dark:bg-slate-800/20 rounded-2xl p-2 border border-gray-100 dark:border-slate-800 opacity-40" />
+            <div key={`pad-${index}`} className="min-h-[100px] bg-slate-50/50 dark:bg-[#162235]/30 rounded-2xl p-2 border border-slate-100 dark:border-[#1E2D42] opacity-30" />
           ))}
 
-          {/* Days */}
           {daysArray.map((dayNum) => {
             const dateStr = `${year}-${String(currentMonth.getMonth() + 1).padStart(2, '0')}-${String(dayNum).padStart(2, '0')}`;
+            const isSelected = selectedDateStr === dateStr;
 
-            // Find trips that fall on this day
             const matchingTrips = trips.filter((t) => {
               const start = t.startDate.split('T')[0];
               const end = t.endDate.split('T')[0];
@@ -126,27 +168,110 @@ export const CalendarView: React.FC = () => {
             return (
               <div
                 key={dayNum}
-                className="min-h-[100px] bg-white dark:bg-slate-900 rounded-2xl p-2 border border-gray-200 dark:border-slate-800 hover:border-emerald-500 dark:hover:border-emerald-400 transition flex flex-col justify-between"
+                onClick={() => setSelectedDateStr(isSelected ? null : dateStr)}
+                className={`min-h-[105px] p-2.5 rounded-2xl border transition cursor-pointer flex flex-col justify-between ${
+                  isSelected
+                    ? 'bg-emerald-50 dark:bg-emerald-950/60 border-emerald-500 ring-2 ring-emerald-500/40'
+                    : 'bg-white dark:bg-[#111E2E] border-slate-200 dark:border-[#1E2D42] hover:border-emerald-500'
+                }`}
               >
-                <span className="text-xs font-black text-gray-900 dark:text-slate-100">{dayNum}</span>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-black text-slate-900 dark:text-white">{dayNum}</span>
+                  {matchingTrips.length > 0 && (
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                  )}
+                </div>
 
                 <div className="space-y-1 my-1">
                   {matchingTrips.map((t) => (
-                    <Link
+                    <div
                       key={t.id}
-                      to={`/trips/${t.id}`}
-                      className="block p-1 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-lg text-[10px] font-extrabold truncate hover:from-emerald-700 hover:to-teal-700 transition shadow-sm"
+                      className="p-1 bg-emerald-500 text-white rounded-lg text-[10px] font-extrabold truncate shadow-xs"
                       title={t.title}
                     >
-                      {t.title.toUpperCase()}
-                    </Link>
+                      {t.title}
+                    </div>
                   ))}
+                </div>
+
+                <div className="text-[10px] font-extrabold text-emerald-600 dark:text-emerald-400 flex items-center justify-between">
+                  <span>{matchingTrips.length > 0 ? `${matchingTrips.length} Trip` : ''}</span>
+                  <span>{isSelected ? 'Collapse ▲' : 'Expand ▼'}</span>
                 </div>
               </div>
             );
           })}
         </div>
       </div>
+
+      {/* Expanded Date Inspection Drawer / Modal (PS Requirement) */}
+      {selectedDateStr && (
+        <div className="bg-white dark:bg-[#111E2E] p-6 sm:p-8 rounded-3xl shadow-xl border border-slate-200 dark:border-[#1E2D42] space-y-5 animate-in fade-in duration-300">
+          <div className="flex items-center justify-between border-b border-slate-100 dark:border-[#1E2D42] pb-3">
+            <div>
+              <span className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-500">
+                Expanded Daily Inspection Drawer
+              </span>
+              <h3 className="text-xl font-black text-slate-900 dark:text-white">
+                Detailed Activity Schedule for {new Date(selectedDateStr).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
+              </h3>
+            </div>
+
+            <button
+              onClick={() => setSelectedDateStr(null)}
+              className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-white rounded-full bg-slate-100 dark:bg-[#162235]"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+
+          {selectedDateEvents.length === 0 ? (
+            <div className="p-8 text-center text-xs text-slate-400 font-semibold space-y-2">
+              <p>No specific line item activities scheduled for this date.</p>
+              <Link to="/create-trip" className="inline-block px-4 py-2 bg-emerald-500 text-white rounded-xl text-xs font-bold">
+                + Add Activity to Itinerary
+              </Link>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {selectedDateEvents.map((evt, idx) => (
+                <div
+                  key={idx}
+                  className="p-4 rounded-2xl bg-slate-50 dark:bg-[#162235] border border-slate-200 dark:border-[#1E2D42] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3"
+                >
+                  <div className="space-y-1">
+                    <div className="flex items-center space-x-2">
+                      <span className="px-2 py-0.5 bg-emerald-500 text-white text-[10px] font-extrabold rounded-full">
+                        {evt.type || 'ACTIVITY'}
+                      </span>
+                      <span className="text-xs font-bold text-slate-500 dark:text-slate-400 flex items-center space-x-1">
+                        <Clock className="w-3.5 h-3.5 text-emerald-500" />
+                        <span>{evt.timeSlot}</span>
+                      </span>
+                    </div>
+
+                    <h4 className="text-sm font-extrabold text-slate-900 dark:text-white">{evt.itemTitle}</h4>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                      Trip: <span className="font-bold text-slate-700 dark:text-slate-200">{evt.tripTitle}</span> ({evt.stopTitle})
+                    </p>
+                  </div>
+
+                  <div className="flex items-center space-x-3">
+                    <span className="text-xs font-black text-emerald-600 dark:text-emerald-400">${evt.cost}</span>
+                    <Link
+                      to={`/trips/${evt.tripId}`}
+                      className="px-3.5 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-xs font-bold transition flex items-center space-x-1"
+                    >
+                      <span>Manage Itinerary</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </Link>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };
