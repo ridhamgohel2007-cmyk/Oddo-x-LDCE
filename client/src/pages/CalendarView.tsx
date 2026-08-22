@@ -144,16 +144,16 @@ export const CalendarView: React.FC = () => {
   const selectedDateEvents = getSelectedDateActivities();
 
   return (
-    <div className="max-w-5xl mx-auto space-y-8 pb-16">
-      {/* Screen 11 Header */}
+    <div className="max-w-6xl mx-auto space-y-8 pb-16">
+      {/* Header Banner */}
       <div className="bg-white dark:bg-[#111E2E] p-6 sm:p-8 rounded-3xl shadow-sm border border-slate-200 dark:border-[#1E2D42] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white flex items-center space-x-3">
             <CalendarIcon className="w-8 h-8 text-emerald-500" />
-            <span>Interactive Calendar & Reschedule Timeline</span>
+            <span>Interactive Calendar & Timeline View</span>
           </h1>
           <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mt-1">
-            Screen 11: Expand single dates to inspect daily activity breakdowns and drag to reschedule activities across days
+            Screen 11: High-legibility calendar grid with prominent date numbers and drag-and-drop rescheduling
           </p>
         </div>
       </div>
@@ -171,26 +171,26 @@ export const CalendarView: React.FC = () => {
           <button
             onClick={prevMonth}
             aria-label="Previous Month"
-            className="p-2.5 bg-slate-100 dark:bg-[#162235] hover:bg-slate-200 dark:hover:bg-[#1E2D42] rounded-2xl text-slate-900 dark:text-white transition"
+            className="p-3 bg-slate-100 dark:bg-[#162235] hover:bg-slate-200 dark:hover:bg-[#1E2D42] rounded-2xl text-slate-900 dark:text-white transition"
           >
-            <ChevronLeft className="w-5 h-5" />
+            <ChevronLeft className="w-6 h-6" />
           </button>
 
-          <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+          <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
             {monthName} {year}
           </h2>
 
           <button
             onClick={nextMonth}
             aria-label="Next Month"
-            className="p-2.5 bg-slate-100 dark:bg-[#162235] hover:bg-slate-200 dark:hover:bg-[#1E2D42] rounded-2xl text-slate-900 dark:text-white transition"
+            className="p-3 bg-slate-100 dark:bg-[#162235] hover:bg-slate-200 dark:hover:bg-[#1E2D42] rounded-2xl text-slate-900 dark:text-white transition"
           >
-            <ChevronRight className="w-5 h-5" />
+            <ChevronRight className="w-6 h-6" />
           </button>
         </div>
 
-        {/* Days of Week Headers */}
-        <div className="grid grid-cols-7 text-center font-black text-xs text-slate-700 dark:text-slate-300 tracking-wider py-2 uppercase">
+        {/* Days of Week Headers (Increased Font Size) */}
+        <div className="grid grid-cols-7 text-center font-black text-xs sm:text-sm text-slate-800 dark:text-slate-200 tracking-wider py-3 uppercase border-b border-slate-100 dark:border-[#1E2D42]">
           <div>SUN</div>
           <div>MON</div>
           <div>TUE</div>
@@ -201,9 +201,9 @@ export const CalendarView: React.FC = () => {
         </div>
 
         {/* Calendar Grid Cells */}
-        <div className="grid grid-cols-7 gap-2">
+        <div className="grid grid-cols-7 gap-2.5 sm:gap-3">
           {leadingPadding.map((_, index) => (
-            <div key={`pad-${index}`} className="min-h-[100px] bg-slate-50/50 dark:bg-[#162235]/30 rounded-2xl p-2 border border-slate-100 dark:border-[#1E2D42] opacity-30" />
+            <div key={`pad-${index}`} className="min-h-[110px] sm:min-h-[130px] bg-slate-50/50 dark:bg-[#162235]/30 rounded-2xl p-2 border border-slate-100 dark:border-[#1E2D42] opacity-25" />
           ))}
 
           {daysArray.map((dayNum) => {
@@ -222,37 +222,40 @@ export const CalendarView: React.FC = () => {
                 onClick={() => setSelectedDateStr(isSelected ? null : dateStr)}
                 onDragOver={handleDragOver}
                 onDrop={(e) => handleDropOnDate(e, dateStr)}
-                className={`min-h-[105px] p-2.5 rounded-2xl border transition cursor-pointer flex flex-col justify-between ${
+                className={`min-h-[110px] sm:min-h-[130px] p-3 rounded-2xl border transition cursor-pointer flex flex-col justify-between ${
                   isSelected
-                    ? 'bg-emerald-50 dark:bg-emerald-950/60 border-emerald-500 ring-2 ring-emerald-500/40'
-                    : 'bg-white dark:bg-[#111E2E] border-slate-200 dark:border-[#1E2D42] hover:border-emerald-500'
+                    ? 'bg-emerald-50 dark:bg-emerald-950/70 border-emerald-500 ring-2 ring-emerald-500/50 shadow-md'
+                    : 'bg-white dark:bg-[#111E2E] border-slate-200 dark:border-[#1E2D42] hover:border-emerald-500 hover:shadow-md'
                 }`}
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-black text-slate-900 dark:text-white">{dayNum}</span>
+                  {/* Significantly Increased Date Number Font Size (text-base sm:text-xl) */}
+                  <span className="text-base sm:text-xl font-black text-slate-900 dark:text-white">
+                    {dayNum}
+                  </span>
                   {matchingTrips.length > 0 && (
-                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
                   )}
                 </div>
 
-                <div className="space-y-1 my-1">
+                <div className="space-y-1 my-1.5">
                   {matchingTrips.map((t) => (
                     <div
                       key={t.id}
                       draggable
                       onDragStart={(e) => handleDragStart(e, { tripId: t.id, itemTitle: t.title })}
-                      className="p-1 bg-emerald-500 text-white rounded-lg text-[10px] font-extrabold truncate shadow-xs flex items-center space-x-1"
+                      className="p-1.5 bg-emerald-500 text-white rounded-xl text-[11px] sm:text-xs font-extrabold truncate shadow-xs flex items-center space-x-1"
                       title={`${t.title} (Drag to reschedule)`}
                     >
-                      <Move className="w-2.5 h-2.5 shrink-0 opacity-80" />
+                      <Move className="w-3 h-3 shrink-0 opacity-80" />
                       <span className="truncate">{t.title}</span>
                     </div>
                   ))}
                 </div>
 
-                <div className="text-[10px] font-extrabold text-emerald-600 dark:text-emerald-400 flex items-center justify-between">
-                  <span>{matchingTrips.length > 0 ? `${matchingTrips.length} Trip` : ''}</span>
-                  <span>{isSelected ? 'Collapse ▲' : 'Expand ▼'}</span>
+                <div className="text-[10px] sm:text-[11px] font-extrabold text-emerald-600 dark:text-emerald-400 flex items-center justify-between pt-1 border-t border-slate-100 dark:border-[#1E2D42]">
+                  <span>{matchingTrips.length > 0 ? `${matchingTrips.length} Active` : ''}</span>
+                  <span>{isSelected ? 'Collapse ▲' : 'Inspect ▼'}</span>
                 </div>
               </div>
             );
@@ -265,10 +268,10 @@ export const CalendarView: React.FC = () => {
         <div className="bg-white dark:bg-[#111E2E] p-6 sm:p-8 rounded-3xl shadow-xl border border-slate-200 dark:border-[#1E2D42] space-y-5 animate-in fade-in duration-300">
           <div className="flex items-center justify-between border-b border-slate-100 dark:border-[#1E2D42] pb-3">
             <div>
-              <span className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-500">
+              <span className="text-[11px] font-extrabold uppercase tracking-wider text-emerald-500">
                 Expanded Daily Inspection Drawer
               </span>
-              <h3 className="text-xl font-black text-slate-900 dark:text-white">
+              <h3 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">
                 Detailed Activity Schedule for {new Date(selectedDateStr).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
               </h3>
             </div>
@@ -299,31 +302,27 @@ export const CalendarView: React.FC = () => {
                 >
                   <div className="space-y-1">
                     <div className="flex items-center space-x-2">
-                      <span className="px-2 py-0.5 bg-emerald-500 text-white text-[10px] font-extrabold rounded-full">
+                      <span className="px-2.5 py-0.5 bg-emerald-500 text-white text-xs font-extrabold rounded-full">
                         {evt.type || 'ACTIVITY'}
                       </span>
                       <span className="text-xs font-bold text-slate-500 dark:text-slate-400 flex items-center space-x-1">
                         <Clock className="w-3.5 h-3.5 text-emerald-500" />
                         <span>{evt.timeSlot}</span>
                       </span>
-                      <span className="text-[10px] font-bold text-slate-400 flex items-center space-x-1">
-                        <Move className="w-3 h-3 text-slate-400" />
-                        <span>Drag to Reschedule</span>
-                      </span>
                     </div>
 
-                    <h4 className="text-sm font-extrabold text-slate-900 dark:text-white">{evt.itemTitle}</h4>
+                    <h4 className="text-base font-extrabold text-slate-900 dark:text-white">{evt.itemTitle}</h4>
                     <p className="text-xs text-slate-500 dark:text-slate-400">
                       Trip: <span className="font-bold text-slate-700 dark:text-slate-200">{evt.tripTitle}</span> ({evt.stopTitle})
                     </p>
                   </div>
 
                   <div className="flex items-center space-x-2">
-                    <span className="text-xs font-black text-emerald-600 dark:text-emerald-400 mr-2">${evt.cost}</span>
+                    <span className="text-sm font-black text-emerald-600 dark:text-emerald-400 mr-2">${evt.cost}</span>
 
                     <button
                       onClick={() => handleOpenRescheduleModal(evt)}
-                      className="px-3 py-1.5 bg-slate-200 dark:bg-[#1E2D42] hover:bg-slate-300 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-bold transition flex items-center space-x-1"
+                      className="px-3.5 py-2 bg-slate-200 dark:bg-[#1E2D42] hover:bg-slate-300 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-bold transition flex items-center space-x-1"
                     >
                       <CalendarRange className="w-3.5 h-3.5 text-emerald-500" />
                       <span>Reschedule</span>
@@ -331,7 +330,7 @@ export const CalendarView: React.FC = () => {
 
                     <Link
                       to={`/trips/${evt.tripId}`}
-                      className="px-3.5 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-xs font-bold transition flex items-center space-x-1"
+                      className="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-xs font-bold transition flex items-center space-x-1"
                     >
                       <span>Builder</span>
                       <ArrowRight className="w-3.5 h-3.5" />
