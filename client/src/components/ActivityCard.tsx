@@ -17,13 +17,19 @@ export interface ActivityData {
 interface ActivityCardProps {
   activity: ActivityData;
   onAdd?: (activity: ActivityData) => void;
+  onSelect?: (activity: ActivityData) => void;
 }
 
-export const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onAdd }) => {
+export const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onAdd, onSelect }) => {
+  const handleAdd = () => {
+    if (onAdd) onAdd(activity);
+    if (onSelect) onSelect(activity);
+  };
+
   return (
-    <div className="bg-white dark:bg-[#111E2E] rounded-2xl border border-slate-200 dark:border-[#1E2D42] overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col justify-between group">
+    <div className="bg-white dark:bg-[#1E293B] dark:hover:bg-[#334155] rounded-2xl border border-slate-200 dark:border-white/10 overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col justify-between group">
       <div>
-        <div className="relative h-40 w-full overflow-hidden bg-slate-100 dark:bg-[#162235]">
+        <div className="relative h-40 w-full overflow-hidden bg-slate-100 dark:bg-[#0F172A]">
           <img
             src={activity.imageUrl || 'https://images.unsplash.com/photo-1533105079780-92b9be482077?auto=format&fit=crop&w=600&q=80'}
             alt={activity.title}
@@ -35,7 +41,7 @@ export const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onAdd }) =
         </div>
 
         <div className="p-4 space-y-2">
-          <h4 className="text-sm font-bold text-slate-900 dark:text-white line-clamp-1 group-hover:text-emerald-500 transition">
+          <h4 className="text-sm font-bold text-slate-900 dark:text-white line-clamp-1 group-hover:text-[#7C3AED] transition">
             {activity.title}
           </h4>
           <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed">
@@ -44,29 +50,29 @@ export const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onAdd }) =
 
           {activity.city && (
             <div className="flex items-center space-x-1 text-xs text-slate-400 font-semibold pt-1">
-              <MapPin className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+              <MapPin className="w-3.5 h-3.5 text-[#00A09D] shrink-0" />
               <span>{activity.city.name}</span>
             </div>
           )}
         </div>
       </div>
 
-      <div className="px-4 py-3 bg-slate-50 dark:bg-[#162235]/60 border-t border-slate-100 dark:border-[#1E2D42] flex items-center justify-between">
+      <div className="px-4 py-3 bg-slate-50 dark:bg-[#0F172A]/80 border-t border-slate-100 dark:border-white/10 flex items-center justify-between">
         <div className="flex items-center space-x-3 text-xs">
           <div className="flex items-center space-x-1 text-slate-500 dark:text-slate-400 font-semibold">
-            <Clock className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+            <Clock className="w-3.5 h-3.5 text-[#00A09D] shrink-0" />
             <span>{activity.durationHours} hrs</span>
           </div>
-          <div className="font-black text-emerald-600 dark:text-emerald-400">
+          <div className="font-black text-[#10B981]">
             <span>₹{activity.estimatedCost.toLocaleString('en-IN')}</span>
           </div>
         </div>
 
-        {onAdd && (
+        {(onAdd || onSelect) && (
           <button
-            onClick={() => onAdd(activity)}
+            onClick={handleAdd}
             aria-label={`Add activity ${activity.title}`}
-            className="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-xs font-bold shadow-sm transition flex items-center space-x-1"
+            className="px-3 py-1.5 bg-[#714B67] hover:bg-[#613E57] text-white rounded-xl text-xs font-bold shadow-sm transition flex items-center space-x-1"
           >
             <Plus className="w-3.5 h-3.5" />
             <span>Add to Trip</span>
