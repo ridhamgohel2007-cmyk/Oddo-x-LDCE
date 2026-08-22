@@ -9,6 +9,9 @@ import {
   Trash2,
   ArrowLeft,
   Receipt,
+  Users,
+  User,
+  Calculator,
 } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
 
@@ -18,6 +21,9 @@ export const BudgetPage: React.FC = () => {
   const [expenseData, setExpenseData] = useState<any>(null);
   const [trip, setTrip] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+
+  // Traveler Count Selector State (Tarzan Way Feature)
+  const [travelerCount, setTravelerCount] = useState<number>(2); // Default Couple (2 travelers)
 
   // Form states for adding actual expense
   const [showAddExpenseModal, setShowAddExpenseModal] = useState(false);
@@ -75,6 +81,15 @@ export const BudgetPage: React.FC = () => {
   }
 
   const categoryTotals = expenseData?.categoryTotals || {};
+  const totalBudget = expenseData?.totalBudget || 0;
+  const totalSpent = expenseData?.totalSpent || 0;
+  const remainingBudget = expenseData?.remainingBudget || 0;
+
+  // Per-Person Calculations (The Tarzan Way Feature)
+  const count = Math.max(1, travelerCount);
+  const perPersonBudget = Math.round(totalBudget / count);
+  const perPersonSpent = Math.round(totalSpent / count);
+  const perPersonRemaining = Math.round(remainingBudget / count);
 
   const pieChartData = [
     { name: 'Stay / Accommodation', value: categoryTotals.STAY || 0, color: '#10B981' },
@@ -85,11 +100,11 @@ export const BudgetPage: React.FC = () => {
   ].filter((item) => item.value > 0);
 
   const barChartData = [
-    { category: 'Stay', amount: categoryTotals.STAY || 0 },
-    { category: 'Transport', amount: categoryTotals.TRANSPORT || 0 },
-    { category: 'Activities', amount: categoryTotals.ACTIVITIES || 0 },
-    { category: 'Meals', amount: categoryTotals.MEALS || 0 },
-    { category: 'Other', amount: categoryTotals.OTHER || 0 },
+    { category: 'Stay', amount: categoryTotals.STAY || 0, perPerson: Math.round((categoryTotals.STAY || 0) / count) },
+    { category: 'Transport', amount: categoryTotals.TRANSPORT || 0, perPerson: Math.round((categoryTotals.TRANSPORT || 0) / count) },
+    { category: 'Activities', amount: categoryTotals.ACTIVITIES || 0, perPerson: Math.round((categoryTotals.ACTIVITIES || 0) / count) },
+    { category: 'Meals', amount: categoryTotals.MEALS || 0, perPerson: Math.round((categoryTotals.MEALS || 0) / count) },
+    { category: 'Other', amount: categoryTotals.OTHER || 0, perPerson: Math.round((categoryTotals.OTHER || 0) / count) },
   ];
 
   return (
@@ -135,28 +150,86 @@ export const BudgetPage: React.FC = () => {
         </div>
       )}
 
+      {/* Tarzan-Style Traveler Count & Per-Person Pricing Split Selector Control */}
+      <div className="bg-white dark:bg-[#111E2E] p-6 sm:p-8 rounded-3xl shadow-sm border border-slate-200 dark:border-[#1E2D42] space-y-4">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-100 dark:border-[#1E2D42] pb-4">
+          <div>
+            <h2 className="text-lg font-black text-slate-900 dark:text-white flex items-center space-x-2">
+              <Calculator className="w-5 h-5 text-emerald-500" />
+              <span>Per-Person vs. Total Group Pricing Calculator</span>
+            </h2>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              Select traveler count to automatically calculate individual split costs
+            </p>
+          </div>
+
+          <div className="flex items-center space-x-2 bg-slate-100 dark:bg-[#162235] p-1.5 rounded-2xl border border-slate-200 dark:border-[#1E2D42]">
+            <Users className="w-4 h-4 text-emerald-500 ml-2" />
+            <select
+              value={travelerCount}
+              onChange={(e) => setTravelerCount(parseInt(e.target.value))}
+              className="bg-transparent text-xs font-extrabold text-slate-900 dark:text-white px-3 py-1.5 focus:outline-none cursor-pointer"
+            >
+              <option value={1}>Solo Traveler (1 Person)</option>
+              <option value={2}>Couple (2 Travelers)</option>
+              <option value={3}>Group of 3</option>
+              <option value={4}>Group of 4 Travelers</option>
+              <option value={6}>Group of 6 Travelers</option>
+              <option value={8}>Group of 8 Travelers</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Pricing Comparison Bar */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
+          <div className="p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 space-y-1">
+            <span className="text-xs font-extrabold text-emerald-700 dark:text-emerald-300 uppercase tracking-wider block">
+              Per-Person Split Cost ({count} Traveler{count !== 1 ? 's' : ''})
+            </span>
+            <div className="text-3xl font-black text-emerald-600 dark:text-emerald-400">
+              ₹{perPersonBudget.toLocaleString('en-IN')} <span className="text-xs font-bold text-emerald-700 dark:text-emerald-300">/ person</span>
+            </div>
+            <p className="text-[11px] text-emerald-800 dark:text-emerald-300 font-semibold">
+              Per-person recorded spend: ₹{perPersonSpent.toLocaleString('en-IN')}
+            </p>
+          </div>
+
+          <div className="p-4 rounded-2xl bg-slate-50 dark:bg-[#162235] border border-slate-200 dark:border-[#1E2D42] space-y-1">
+            <span className="text-xs font-extrabold text-slate-400 uppercase tracking-wider block">
+              Total Group Package Price ({count} Traveler{count !== 1 ? 's' : ''})
+            </span>
+            <div className="text-3xl font-black text-slate-900 dark:text-white">
+              ₹{totalBudget.toLocaleString('en-IN')} <span className="text-xs font-bold text-slate-400">total</span>
+            </div>
+            <p className="text-[11px] text-slate-500 dark:text-slate-400 font-semibold">
+              Total group recorded spend: ₹{totalSpent.toLocaleString('en-IN')}
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* Financial Metric Cards with INR */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
         <div className="bg-white dark:bg-[#111E2E] p-6 rounded-3xl border border-slate-200 dark:border-[#1E2D42] shadow-sm space-y-1">
           <span className="text-xs font-extrabold text-slate-400 uppercase tracking-wider">Allocated Budget</span>
-          <div className="text-3xl font-black text-slate-900 dark:text-white">₹{expenseData?.totalBudget?.toLocaleString('en-IN') || 0}</div>
-          <span className="text-[11px] text-slate-500 dark:text-slate-400">Set during trip initiation</span>
+          <div className="text-3xl font-black text-slate-900 dark:text-white">₹{totalBudget?.toLocaleString('en-IN') || 0}</div>
+          <span className="text-[11px] text-slate-500 dark:text-slate-400">₹{perPersonBudget.toLocaleString('en-IN')} / person</span>
         </div>
 
         <div className="bg-white dark:bg-[#111E2E] p-6 rounded-3xl border border-slate-200 dark:border-[#1E2D42] shadow-sm space-y-1">
           <span className="text-xs font-extrabold text-slate-400 uppercase tracking-wider">Total Recorded Spent</span>
           <div className={`text-3xl font-black ${expenseData?.isOverBudget ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-500'}`}>
-            ₹{expenseData?.totalSpent?.toLocaleString('en-IN') || 0}
+            ₹{totalSpent?.toLocaleString('en-IN') || 0}
           </div>
-          <span className="text-[11px] text-slate-500 dark:text-slate-400">Sum of logged expenses</span>
+          <span className="text-[11px] text-slate-500 dark:text-slate-400">₹{perPersonSpent.toLocaleString('en-IN')} / person</span>
         </div>
 
         <div className="bg-white dark:bg-[#111E2E] p-6 rounded-3xl border border-slate-200 dark:border-[#1E2D42] shadow-sm space-y-1">
           <span className="text-xs font-extrabold text-slate-400 uppercase tracking-wider">Remaining Balance</span>
-          <div className={`text-3xl font-black ${expenseData?.remainingBudget < 0 ? 'text-rose-600 dark:text-rose-400' : 'text-cyan-500'}`}>
-            ₹{expenseData?.remainingBudget?.toLocaleString('en-IN') || 0}
+          <div className={`text-3xl font-black ${remainingBudget < 0 ? 'text-rose-600 dark:text-rose-400' : 'text-cyan-500'}`}>
+            ₹{remainingBudget?.toLocaleString('en-IN') || 0}
           </div>
-          <span className="text-[11px] text-slate-500 dark:text-slate-400">Available funds</span>
+          <span className="text-[11px] text-slate-500 dark:text-slate-400">₹{perPersonRemaining.toLocaleString('en-IN')} / person</span>
         </div>
       </div>
 
@@ -213,7 +286,7 @@ export const BudgetPage: React.FC = () => {
                 <CartesianGrid strokeDasharray="3 3" opacity={0.1} />
                 <XAxis dataKey="category" stroke="#888888" fontSize={11} />
                 <YAxis stroke="#888888" fontSize={11} />
-                <Tooltip formatter={(val: any) => [`₹${Number(val).toLocaleString('en-IN')}`, 'Spent']} />
+                <Tooltip formatter={(val: any) => [`₹${Number(val).toLocaleString('en-IN')}`, 'Total Spent']} />
                 <Bar dataKey="amount" fill="#10B981" radius={[8, 8, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
@@ -246,7 +319,8 @@ export const BudgetPage: React.FC = () => {
                   <th className="p-3">Category</th>
                   <th className="p-3">Notes / Description</th>
                   <th className="p-3">Date</th>
-                  <th className="p-3">Amount (₹ INR)</th>
+                  <th className="p-3">Total Cost (₹ INR)</th>
+                  <th className="p-3">Per Person ({count} pax)</th>
                   <th className="p-3 text-right">Action</th>
                 </tr>
               </thead>
@@ -257,6 +331,7 @@ export const BudgetPage: React.FC = () => {
                     <td className="p-3">{exp.notes || '—'}</td>
                     <td className="p-3">{new Date(exp.date).toLocaleDateString()}</td>
                     <td className="p-3 font-black text-emerald-600 dark:text-emerald-400">₹{exp.amount?.toLocaleString('en-IN')}</td>
+                    <td className="p-3 font-bold text-slate-700 dark:text-slate-300">₹{Math.round((exp.amount || 0) / count).toLocaleString('en-IN')}</td>
                     <td className="p-3 text-right">
                       <button
                         onClick={() => handleDeleteExpense(exp.id)}
@@ -295,7 +370,7 @@ export const BudgetPage: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Amount (₹ INR)</label>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Total Amount (₹ INR)</label>
                 <input
                   type="number"
                   required

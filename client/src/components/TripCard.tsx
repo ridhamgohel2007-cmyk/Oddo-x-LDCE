@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Calendar, MapPin, Trash2, Eye, PieChart, Hotel, Ticket, Utensils, Navigation } from 'lucide-react';
+import { Calendar, MapPin, Trash2, Eye, PieChart, Hotel, Ticket, Utensils, Navigation, Users, User } from 'lucide-react';
 import { StatusBadge } from './StatusBadge';
 
 export interface TripData {
@@ -22,6 +22,8 @@ interface TripCardProps {
 }
 
 export const TripCard: React.FC<TripCardProps> = ({ trip, onDelete }) => {
+  const [travelerCount, setTravelerCount] = useState<number>(2); // Default couple (2 people)
+
   const formattedStart = new Date(trip.startDate).toLocaleDateString('en-US', {
     month: 'short',
     day: 'numeric',
@@ -54,12 +56,14 @@ export const TripCard: React.FC<TripCardProps> = ({ trip, onDelete }) => {
     });
   }
 
-  // Fallback defaults if trip items aren't populated yet
   if (stayCount === 0 && transportCount === 0 && activityCount === 0 && mealCount === 0) {
     stayCount = Math.max(1, destinationCount);
     transportCount = Math.max(1, destinationCount);
     activityCount = Math.max(3, destinationCount * 2);
   }
+
+  // Per-Person Split Math
+  const perPersonCost = Math.round(trip.totalBudget / Math.max(1, travelerCount));
 
   return (
     <div className="bg-white dark:bg-[#111E2E] dark:hover:bg-[#162235] rounded-2xl shadow-sm hover:shadow-xl border border-slate-200 dark:border-[#1E2D42] overflow-hidden transition-all duration-300 group flex flex-col justify-between">
@@ -135,26 +139,51 @@ export const TripCard: React.FC<TripCardProps> = ({ trip, onDelete }) => {
             )}
           </div>
 
-          {/* Card Metrics with INR Currency Symbol */}
-          <div className="space-y-2 text-xs text-slate-600 dark:text-slate-300 pt-2.5 border-t border-slate-100 dark:border-[#1E2D42]">
-            <div className="flex items-center space-x-2">
-              <Calendar className="w-4 h-4 text-emerald-500 shrink-0" />
-              <span className="font-semibold">{formattedStart} - {formattedEnd}</span>
-            </div>
-
+          {/* Card Metrics with Per-Person Split Selector */}
+          <div className="space-y-2.5 text-xs text-slate-600 dark:text-slate-300 pt-2.5 border-t border-slate-100 dark:border-[#1E2D42]">
             <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <Calendar className="w-4 h-4 text-emerald-500 shrink-0" />
+                <span className="font-semibold">{formattedStart} - {formattedEnd}</span>
+              </div>
+
               <div className="flex items-center space-x-2">
                 <MapPin className="w-4 h-4 text-emerald-500 shrink-0" />
                 <span className="font-bold text-slate-800 dark:text-slate-200">
                   {destinationCount} City Stop{destinationCount !== 1 ? 's' : ''}
                 </span>
               </div>
-              {trip.totalBudget > 0 && (
-                <div className="flex items-center space-x-1 text-emerald-600 dark:text-emerald-400 font-extrabold">
-                  <span>₹{trip.totalBudget.toLocaleString('en-IN')}</span>
-                </div>
-              )}
             </div>
+
+            {/* Per-Person vs Total Group Pricing Display */}
+            {trip.totalBudget > 0 && (
+              <div className="bg-slate-50 dark:bg-[#162235] p-2.5 rounded-xl border border-slate-200 dark:border-[#1E2D42] space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-1">
+                    <Users className="w-3.5 h-3.5 text-emerald-500" />
+                    <select
+                      value={travelerCount}
+                      onChange={(e) => setTravelerCount(parseInt(e.target.value))}
+                      className="bg-transparent text-[11px] font-extrabold text-slate-700 dark:text-slate-300 cursor-pointer focus:outline-none"
+                    >
+                      <option value={1}>Solo (1 Person)</option>
+                      <option value={2}>Couple (2 People)</option>
+                      <option value={4}>Group (4 People)</option>
+                      <option value={6}>Family (6 People)</option>
+                    </select>
+                  </div>
+
+                  <span className="text-[11px] font-black text-emerald-600 dark:text-emerald-400">
+                    ₹{perPersonCost.toLocaleString('en-IN')} <span className="text-[9px] font-bold text-slate-400">/ person</span>
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between text-[10px] text-slate-500 dark:text-slate-400 border-t border-slate-200/60 dark:border-[#1E2D42] pt-1">
+                  <span>Total Group Budget ({travelerCount} pax):</span>
+                  <span className="font-bold text-slate-900 dark:text-white">₹{trip.totalBudget.toLocaleString('en-IN')}</span>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
