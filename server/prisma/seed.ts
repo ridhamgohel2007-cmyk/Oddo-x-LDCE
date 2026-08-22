@@ -14,7 +14,7 @@ async function main() {
   await prisma.city.deleteMany();
   await prisma.user.deleteMany();
 
-  console.log('Seeding Diverse Community Authors & Users...');
+  console.log('Seeding Diverse Global Community Authors...');
   const passwordHash = await bcrypt.hash('password123', 10);
 
   const adminUser = await prisma.user.create({
@@ -32,7 +32,7 @@ async function main() {
     },
   });
 
-  const demoUser = await prisma.user.create({
+  const jiyanUser = await prisma.user.create({
     data: {
       email: 'traveler@globetrotter.com',
       passwordHash,
@@ -47,7 +47,6 @@ async function main() {
     },
   });
 
-  // Author Diversity: User 3 (Elena Rostova - European Travel Specialist)
   const elenaUser = await prisma.user.create({
     data: {
       email: 'elena@globetrotter.com',
@@ -63,7 +62,6 @@ async function main() {
     },
   });
 
-  // Author Diversity: User 4 (Aarav Sharma - Himalayan Expedition Guide)
   const aaravUser = await prisma.user.create({
     data: {
       email: 'aarav@globetrotter.com',
@@ -79,7 +77,67 @@ async function main() {
     },
   });
 
-  console.log('Seeding Destinations...');
+  const sophiaUser = await prisma.user.create({
+    data: {
+      email: 'sophia@globetrotter.com',
+      passwordHash,
+      name: 'Sophia Chen',
+      role: 'USER',
+      phone: '+65 6789 1234',
+      city: 'Singapore',
+      country: 'Singapore',
+      bio: 'Southeast Asia food & tropical island wellness seeker',
+      profilePic: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=400&q=80',
+      language: 'English & Mandarin',
+    },
+  });
+
+  const marcusUser = await prisma.user.create({
+    data: {
+      email: 'marcus@globetrotter.com',
+      passwordHash,
+      name: 'Marcus Vance',
+      role: 'USER',
+      phone: '+1 310 555 0199',
+      city: 'Los Angeles',
+      country: 'United States',
+      bio: 'Pacific coast road tripper & national park explorer',
+      profilePic: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=400&q=80',
+      language: 'English',
+    },
+  });
+
+  const tariqUser = await prisma.user.create({
+    data: {
+      email: 'tariq@globetrotter.com',
+      passwordHash,
+      name: 'Tariq Al-Mansoor',
+      role: 'USER',
+      phone: '+20 2 2794 0000',
+      city: 'Cairo',
+      country: 'Egypt',
+      bio: 'Nile heritage guide & Egyptology scholar',
+      profilePic: 'https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&w=400&q=80',
+      language: 'Arabic & English',
+    },
+  });
+
+  const camilaUser = await prisma.user.create({
+    data: {
+      email: 'camila@globetrotter.com',
+      passwordHash,
+      name: 'Camila Silva',
+      role: 'USER',
+      phone: '+55 21 99876 5432',
+      city: 'Rio de Janeiro',
+      country: 'Brazil',
+      bio: 'South American trekker & samba culture enthusiast',
+      profilePic: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=400&q=80',
+      language: 'Portuguese & Spanish',
+    },
+  });
+
+  console.log('Seeding Global Destinations...');
 
   const agra = await prisma.city.create({
     data: { name: 'Agra', country: 'India', region: 'Asia', imageUrl: 'https://images.unsplash.com/photo-1564507592333-c60657eea523?auto=format&fit=crop&w=800&q=80', description: 'Home to Taj Mahal, Agra Fort & Mehtab Bagh.', costIndex: 'MEDIUM', popularityScore: 99 },
@@ -113,32 +171,29 @@ async function main() {
     data: { name: 'Barcelona', country: 'Spain', region: 'Europe', imageUrl: 'https://images.unsplash.com/photo-1539037116277-4db20889f2d4?auto=format&fit=crop&w=800&q=80', description: 'Gaudí Sagrada Família & Gothic Quarter.', costIndex: 'MEDIUM', popularityScore: 96 },
   });
 
-  console.log('Seeding Sample Multi-City Trips...');
-
-  // 1. Golden Triangle Trip (Authored by Jiyan Mansuri)
-  const indiaTrip = await prisma.trip.create({
-    data: {
-      userId: demoUser.id,
-      title: 'Incredible India: Golden Triangle & Royal Rajasthan',
-      description: 'A 9-day epic journey across Delhi, Agra, and Jaipur discovering majestic forts, Taj Mahal sunrise, and royal palaces.',
-      coverImage: 'https://images.unsplash.com/photo-1564507592333-c60657eea523?auto=format&fit=crop&w=1000&q=80',
-      startDate: new Date('2026-10-05'),
-      endDate: new Date('2026-10-14'),
-      status: 'UPCOMING',
-      isPublic: true,
-      totalBudget: 150000,
-    },
+  const bali = await prisma.city.create({
+    data: { name: 'Bali', country: 'Indonesia', region: 'Asia', imageUrl: 'https://images.unsplash.com/photo-1537996194471-e657df975ab4?auto=format&fit=crop&w=800&q=80', description: 'Tropical island paradise with rice terraces & Hindu sea temples.', costIndex: 'LOW', popularityScore: 95 },
   });
 
-  await prisma.tripStop.createMany({
-    data: [
-      { tripId: indiaTrip.id, cityId: delhi.id, title: 'Stop 1: Historic New Delhi', stopOrder: 1, startDate: new Date('2026-10-05'), endDate: new Date('2026-10-07'), budget: 35000 },
-      { tripId: indiaTrip.id, cityId: agra.id, title: 'Stop 2: Taj Mahal & Agra Heritage', stopOrder: 2, startDate: new Date('2026-10-07'), endDate: new Date('2026-10-09'), budget: 35000 },
-      { tripId: indiaTrip.id, cityId: jaipur.id, title: 'Stop 3: Pink City Jaipur Palaces', stopOrder: 3, startDate: new Date('2026-10-09'), endDate: new Date('2026-10-14'), budget: 80000 },
-    ],
+  const losangeles = await prisma.city.create({
+    data: { name: 'Los Angeles', country: 'United States', region: 'North America', imageUrl: 'https://images.unsplash.com/photo-1580655653885-65763b2597d0?auto=format&fit=crop&w=800&q=80', description: 'Hollywood, Pacific coast & Santa Monica pier.', costIndex: 'HIGH', popularityScore: 96 },
   });
 
-  // 2. European Trip (Authored by Elena Rostova from Paris)
+  const cairo = await prisma.city.create({
+    data: { name: 'Cairo', country: 'Egypt', region: 'Africa', imageUrl: 'https://images.unsplash.com/photo-1503177119275-0aa32b3a9368?auto=format&fit=crop&w=800&q=80', description: 'Giza Pyramids, Sphinx & Khan el-Khalili bazaar.', costIndex: 'LOW', popularityScore: 98 },
+  });
+
+  const riodejaneiro = await prisma.city.create({
+    data: { name: 'Rio de Janeiro', country: 'Brazil', region: 'South America', imageUrl: 'https://images.unsplash.com/photo-1483729558449-99ef09a8c325?auto=format&fit=crop&w=800&q=80', description: 'Christ the Redeemer statue, Copacabana & Sugarloaf mountain.', costIndex: 'MEDIUM', popularityScore: 97 },
+  });
+
+  const cusco = await prisma.city.create({
+    data: { name: 'Cusco (Machu Picchu)', country: 'Peru', region: 'South America', imageUrl: 'https://images.unsplash.com/photo-1526392060635-9d6019884377?auto=format&fit=crop&w=800&q=80', description: 'Inca Empire citadel in the Andes mountains.', costIndex: 'LOW', popularityScore: 98 },
+  });
+
+  console.log('Seeding Sample Multi-City Trips for Community Feed...');
+
+  // 1. European Romance (Authored by Elena Rostova from Paris)
   const euroTrip = await prisma.trip.create({
     data: {
       userId: elenaUser.id,
@@ -152,7 +207,6 @@ async function main() {
       totalBudget: 220000,
     },
   });
-
   await prisma.tripStop.createMany({
     data: [
       { tripId: euroTrip.id, cityId: paris.id, title: 'Stop 1: Paris Light & Romance', stopOrder: 1, startDate: new Date('2026-09-10'), endDate: new Date('2026-09-14'), budget: 100000 },
@@ -161,11 +215,33 @@ async function main() {
     ],
   });
 
-  // 3. Himalayan Motorbike Overland Trip (Authored by Aarav Sharma from Manali)
+  // 2. Golden Triangle (Authored by Jiyan Mansuri)
+  const indiaTrip = await prisma.trip.create({
+    data: {
+      userId: jiyanUser.id,
+      title: 'Incredible India: Golden Triangle & Royal Rajasthan',
+      description: 'A 9-day epic journey across Delhi, Agra, and Jaipur discovering majestic forts, Taj Mahal sunrise, and royal palaces.',
+      coverImage: 'https://images.unsplash.com/photo-1564507592333-c60657eea523?auto=format&fit=crop&w=1000&q=80',
+      startDate: new Date('2026-10-05'),
+      endDate: new Date('2026-10-14'),
+      status: 'UPCOMING',
+      isPublic: true,
+      totalBudget: 150000,
+    },
+  });
+  await prisma.tripStop.createMany({
+    data: [
+      { tripId: indiaTrip.id, cityId: delhi.id, title: 'Stop 1: Historic New Delhi', stopOrder: 1, startDate: new Date('2026-10-05'), endDate: new Date('2026-10-07'), budget: 35000 },
+      { tripId: indiaTrip.id, cityId: agra.id, title: 'Stop 2: Taj Mahal & Agra Heritage', stopOrder: 2, startDate: new Date('2026-10-07'), endDate: new Date('2026-10-09'), budget: 35000 },
+      { tripId: indiaTrip.id, cityId: jaipur.id, title: 'Stop 3: Pink City Jaipur Palaces', stopOrder: 3, startDate: new Date('2026-10-09'), endDate: new Date('2026-10-14'), budget: 80000 },
+    ],
+  });
+
+  // 3. Himalayan Motorbike (Authored by Aarav Sharma from Manali)
   const himalayanTrip = await prisma.trip.create({
     data: {
       userId: aaravUser.id,
-      title: 'Ultimate Himalayan Overland Expedition (Manali to Ladakh)',
+      title: 'Ultimate Himalayan Overland Expedition (Manali to Leh Ladakh)',
       description: 'A 7-day high-altitude adventure across Rohtang Pass, Keylong, Nubra Valley, and Pangong Tso Lake.',
       coverImage: 'https://images.unsplash.com/photo-1581793745862-99fde7fa73d2?auto=format&fit=crop&w=1000&q=80',
       startDate: new Date('2026-07-15'),
@@ -175,7 +251,6 @@ async function main() {
       totalBudget: 85000,
     },
   });
-
   await prisma.tripStop.createMany({
     data: [
       { tripId: himalayanTrip.id, cityId: manali.id, title: 'Stop 1: Manali Base Camp', stopOrder: 1, startDate: new Date('2026-07-15'), endDate: new Date('2026-07-17'), budget: 25000 },
@@ -183,7 +258,82 @@ async function main() {
     ],
   });
 
-  console.log('Seeding Diverse Community Posts...');
+  // 4. Bali Tropical Retreat (Authored by Sophia Chen from Singapore)
+  const baliTrip = await prisma.trip.create({
+    data: {
+      userId: sophiaUser.id,
+      title: 'Tropical Island Paradise & Wellness Retreat in Bali',
+      description: '7 days in Ubud rice terraces, Uluwatu sea temples, and Seminyak sunset beach clubs.',
+      coverImage: 'https://images.unsplash.com/photo-1537996194471-e657df975ab4?auto=format&fit=crop&w=1000&q=80',
+      startDate: new Date('2026-11-01'),
+      endDate: new Date('2026-11-08'),
+      status: 'UPCOMING',
+      isPublic: true,
+      totalBudget: 95000,
+    },
+  });
+  await prisma.tripStop.create({
+    data: { tripId: baliTrip.id, cityId: bali.id, title: 'Stop 1: Ubud & Seminyak', stopOrder: 1, startDate: new Date('2026-11-01'), endDate: new Date('2026-11-08'), budget: 95000 },
+  });
+
+  // 5. US West Coast Road Trip (Authored by Marcus Vance from LA)
+  const usRoadTrip = await prisma.trip.create({
+    data: {
+      userId: marcusUser.id,
+      title: 'Pacific Coast Highway 1 Scenic Road Trip',
+      description: 'Coastal drive from Los Angeles through Big Sur to Northern California and Vancouver.',
+      coverImage: 'https://images.unsplash.com/photo-1580655653885-65763b2597d0?auto=format&fit=crop&w=1000&q=80',
+      startDate: new Date('2026-08-10'),
+      endDate: new Date('2026-08-18'),
+      status: 'UPCOMING',
+      isPublic: true,
+      totalBudget: 180000,
+    },
+  });
+  await prisma.tripStop.create({
+    data: { tripId: usRoadTrip.id, cityId: losangeles.id, title: 'Stop 1: Los Angeles & Highway 1', stopOrder: 1, startDate: new Date('2026-08-10'), endDate: new Date('2026-08-18'), budget: 180000 },
+  });
+
+  // 6. Wonders of Egypt & Nile (Authored by Tariq Al-Mansoor from Cairo)
+  const egyptTrip = await prisma.trip.create({
+    data: {
+      userId: tariqUser.id,
+      title: 'Pyramids of Giza & Ancient Nile River Cruise',
+      description: 'Explore the Great Pyramids, Sphinx, Egyptian Museum, and Nile luxury felucca sailing.',
+      coverImage: 'https://images.unsplash.com/photo-1503177119275-0aa32b3a9368?auto=format&fit=crop&w=1000&q=80',
+      startDate: new Date('2026-12-05'),
+      endDate: new Date('2026-12-12'),
+      status: 'UPCOMING',
+      isPublic: true,
+      totalBudget: 120000,
+    },
+  });
+  await prisma.tripStop.create({
+    data: { tripId: egyptTrip.id, cityId: cairo.id, title: 'Stop 1: Cairo & Giza Citadel', stopOrder: 1, startDate: new Date('2026-12-05'), endDate: new Date('2026-12-12'), budget: 120000 },
+  });
+
+  // 7. South American Expedition (Authored by Camila Silva from Rio)
+  const southAmericaTrip = await prisma.trip.create({
+    data: {
+      userId: camilaUser.id,
+      title: 'South American Wonders: Rio Beaches to Machu Picchu Citadel',
+      description: 'A 12-day epic itinerary across Rio de Janeiro samba beaches and Andean mountain trails to Machu Picchu.',
+      coverImage: 'https://images.unsplash.com/photo-1483729558449-99ef09a8c325?auto=format&fit=crop&w=1000&q=80',
+      startDate: new Date('2026-11-15'),
+      endDate: new Date('2026-11-27'),
+      status: 'UPCOMING',
+      isPublic: true,
+      totalBudget: 240000,
+    },
+  });
+  await prisma.tripStop.createMany({
+    data: [
+      { tripId: southAmericaTrip.id, cityId: riodejaneiro.id, title: 'Stop 1: Rio Coastal Samba', stopOrder: 1, startDate: new Date('2026-11-15'), endDate: new Date('2026-11-20'), budget: 110000 },
+      { tripId: southAmericaTrip.id, cityId: cusco.id, title: 'Stop 2: Machu Picchu Inca Citadel', stopOrder: 2, startDate: new Date('2026-11-20'), endDate: new Date('2026-11-27'), budget: 130000 },
+    ],
+  });
+
+  console.log('Seeding Rich Community Posts...');
 
   await prisma.communityPost.create({
     data: {
@@ -199,7 +349,7 @@ async function main() {
   await prisma.communityPost.create({
     data: {
       tripId: indiaTrip.id,
-      authorId: demoUser.id,
+      authorId: jiyanUser.id,
       title: 'Golden Triangle India (Delhi, Agra, Jaipur) Complete 9-Day Itinerary',
       description: 'Complete travel plan created by Jiyan Mansuri with sunrise Taj Mahal entry tips, private car hiring advice, and authentic Rajasthani food spots!',
       likesCount: 289,
@@ -218,7 +368,51 @@ async function main() {
     },
   });
 
-  console.log('Database seeding finished with diverse community authors and multi-city stops!');
+  await prisma.communityPost.create({
+    data: {
+      tripId: baliTrip.id,
+      authorId: sophiaUser.id,
+      title: '7 Days Tropical Bali Wellness & Waterfall Trail',
+      description: 'Ubud sacred monkey forest, Tegalalang rice terrace sunrise photography, and Seminyak sunset beach club itinerary curated by Sophia Chen!',
+      likesCount: 518,
+      clonesCount: 176,
+    },
+  });
+
+  await prisma.communityPost.create({
+    data: {
+      tripId: usRoadTrip.id,
+      authorId: marcusUser.id,
+      title: 'Pacific Coast Highway 1 Scenic Road Trip Guide',
+      description: 'California coastal drives from Los Angeles to Big Sur & San Francisco with scenic viewpoint pull-outs and seafood dining stops.',
+      likesCount: 275,
+      clonesCount: 64,
+    },
+  });
+
+  await prisma.communityPost.create({
+    data: {
+      tripId: egyptTrip.id,
+      authorId: tariqUser.id,
+      title: 'Ancient Wonders of Egypt: Giza Pyramids & Nile Felucca Sailing',
+      description: 'Authentic 7-day archaeological tour curated by Cairo native Tariq Al-Mansoor with Sphinx entry passes and Khan el-Khalili bazaar tips!',
+      likesCount: 388,
+      clonesCount: 110,
+    },
+  });
+
+  await prisma.communityPost.create({
+    data: {
+      tripId: southAmericaTrip.id,
+      authorId: camilaUser.id,
+      title: 'South American Dreams: Rio De Janeiro to Machu Picchu Inca Trail',
+      description: 'Epic 12-day journey linking Christ the Redeemer in Rio to high Andes mountain clouds in Peru!',
+      likesCount: 460,
+      clonesCount: 142,
+    },
+  });
+
+  console.log('Database seeding completed with 7 rich community posts across diverse authors!');
 }
 
 main()
